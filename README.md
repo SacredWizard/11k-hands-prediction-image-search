@@ -11,9 +11,13 @@ The dependencies for this project are present in `environment.yml`
     ```shell script
     conda env create -f environment.yml 
     ```
- * When dependencies are added to `environment.yml` execute
+* When dependencies are added to `environment.yml` execute
     ```shell script
     conda deactivate
     conda env update -f environment.yml --prune
     conda activate CSE515
+    ```
+* To remove an environment
+    ```shell script
+    conda remove --name <env_name> --all
     ```
