@@ -155,11 +155,11 @@ class ExtractFeatures:
         :param window_size: The Window size of the image used to split the image into blocks having a size of window
         :return: Computed Color Moments
         """
-        image_id = self.image
+        # image_id = self.image
         img = cv2.imread(os.path.join(self.folder, self.image))
         img_yuv = self.bgr2yuv(img)
         (rows, cols) = img.shape[:2]
-        data = {"imageId": image_id, "type": "CM"}
+        # data = {"imageId": image_id, "type": "CM"}
         counter = 0
         y, u, v = [], [], []
 
@@ -172,10 +172,7 @@ class ExtractFeatures:
                 y = y + [mean[0][0], std_dev[0][0], skw[0]]
                 u = u + [mean[1][0], std_dev[1][0], skw[1]]
                 v = v + [mean[2][0], std_dev[2][0], skw[2]]
-        data["y"] = y
-        data["u"] = u
-        data["v"] = v
-        self.feature = data
+        self.feature = y + u + v
 
     def skew(self, img):
         """
