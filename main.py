@@ -6,7 +6,8 @@ import pymongo
 import pymongo.errors
 from sklearn.decomposition import NMF
 
-from classes import global_connections, distancemeasure, global_constants
+from classes import global_connections, global_constants
+from utils import distancemeasure
 
 constants = global_constants.GlobalConstants()
 connection = global_connections.GlobalConnections()
@@ -76,7 +77,6 @@ def task1():
 
 
 def task2():
-    distances = distancemeasure.DistanceMeasure()
     print("Task 2")
     data = task1()
     dimension_reduction_method = 'NMF'
@@ -89,10 +89,10 @@ def task2():
         vals[cur] = row['ImageId']
     scores = []
     for row in data:
-        scores.append(distances.nvsc1(data[0], row))
+        scores.append(distancemeasure.nvsc1(data[0], row))
     scores_euclidian = []
     for row in data:
-        scores_euclidian.append(distances.euclidian(data[0], row))
+        scores_euclidian.append(distancemeasure.euclidian(data[0], row))
     indexes = np.argsort(scores)[::-1]
     for i in indexes:
         print("Image: {}, Score: {}".format(vals[i], scores[i]*100))
