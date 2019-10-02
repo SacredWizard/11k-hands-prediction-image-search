@@ -6,11 +6,14 @@ Author : Sumukh Ashwin Kamath
 """
 
 import argparse
-import numpy
-import sys
-from featureextraction import ExtractFeatures
 import os
+import sys
 import warnings
+
+import numpy
+
+from classes.featureextraction import ExtractFeatures
+
 warnings.filterwarnings("ignore")
 
 

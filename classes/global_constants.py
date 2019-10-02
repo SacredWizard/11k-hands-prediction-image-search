@@ -10,3 +10,6 @@ class GlobalConstants:
         self.SVD = 'SVD'
         self.NMF = 'NMF'
         self.LDA = 'LDA'
+        self.MONGO_URL = 'mongodb://localhost:27017'
+        self.MONGO_SERVER_TIMEOUT = 2000
+

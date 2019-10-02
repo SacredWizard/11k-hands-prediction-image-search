@@ -1,21 +1,5 @@
-import argparse
-import numpy
-import sys
-from featureextraction import ExtractFeatures
-import os
-import warnings
-
-import os
-import sys
-
-import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 from pymongo import MongoClient
-from skimage import io, color
-from skimage.feature import hog, local_binary_pattern
-from skimage.transform import downscale_local_mean, rescale
-from sklearn.decomposition import PCA
 
 mongo_client = MongoClient()
 db = mongo_client.features
