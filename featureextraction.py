@@ -78,18 +78,16 @@ class ExtractFeatures:
         window_rows = 100
         window_columns = 100
 
-        lbp_list = []
+        lbp_list = np.asarray([])
 
         # splits the 1600x1200 image into 192 blocks of 100x100 pixels and calculates lbp vector for each block
         for row in range(0, image.shape[0], window_rows):
             for column in range(0, image.shape[1], window_columns):
                 window = image[row:row + window_rows, column:column + window_columns]
                 lbp = local_binary_pattern(window, num_points, radius, 'uniform')
-                # appends the lbp vector for each window into a concatenated list
-                lbp_list.append(lbp.tolist())
-
-        lbp_list = np.asarray(lbp_list).ravel()
-        self.feature = str(lbp_list.tolist())
+                lbp_list = np.append(lbp_list, lbp)
+        lbp_list.ravel()
+        self.feature = str(lbp_list.tolist()).strip('[]')
 
     def extract_sift(self):
         """
@@ -193,18 +191,6 @@ class ExtractFeatures:
         :return: YUV Image
         """
         return cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
-
-    def skew(self, img):
-        """
-        Calculate Skew for an image
-        :param img: Image
-        :return: Skew for individual image channels
-        """
-        (rows, cols, colors) = img.shape
-        mean = [np.mean(img[:, :, i]) for i in range(colors)]
-        return \
-            [(np.cbrt(np.divide(np.sum(np.power(np.subtract(img[:, :, i], mean[i]), 3)), rows * cols))) for i in
-             range(colors)]
 
     def save_feature_mongo(self):
         """Method for saving extracted features to mongo"""
