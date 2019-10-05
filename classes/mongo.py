@@ -4,7 +4,7 @@ import pymongo.errors
 from classes import global_constants
 
 
-class GlobalConnections:
+class MongoWrapper:
 
     def __init__(self, dbname=None):
         self.constants = global_constants.GlobalConstants().Mongo()
@@ -24,7 +24,19 @@ class GlobalConnections:
         except Exception as e:
             print("Exception has occurred:\n{}".format(e))
 
-    def saverecord(self, collection_name, rec):
+    def get_db_connection(self):
+        return self.mongo_client
+
+    def find(self, collection_name, query, fields_filter=None):
+        try:
+            return self.mongo_client.collection_name.find(query, fields_filter)
+
+        except pymongo.errors.ServerSelectionTimeoutError as e:
+            print("Timeout:\n{}".format(e))
+        except Exception as e:
+            print("Exception occurred:\n{}".format(e))
+
+    def save_record(self, collection_name, rec):
         try:
             self.mongo_client.features[collection_name].update(
                 {"imageId": "{}".format(rec.imageId)}, {"$set": rec}, upsert=True)
@@ -38,3 +50,5 @@ class GlobalConnections:
             print("Bulk Write Error:\n{}".format(e))
         except Exception as e:
             print("Error: {}".format(e))
+
+

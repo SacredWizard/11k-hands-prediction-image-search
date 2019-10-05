@@ -10,22 +10,22 @@ from classes import mongo, global_constants
 from utils import distancemeasure
 
 constants = global_constants.GlobalConstants()
-connection = mongo.GlobalConnections()
+connection = mongo.MongoWrapper()
 
 
-def nmf(data):
-    if data is not None:
-        model = NMF(n_components=5, beta_loss='frobenius', init='nndsvd', random_state=0)
-        print(model)
-        W = model.fit_transform(data)
-        H = model.components_
-        tt1 = time.time()
-        for i in range(H.shape[0]):
-            print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(H[i])),
-                                                                key=lambda x: x[1], reverse=True)))
-
-        print("Time NMF {}".format(time.time() - tt1))
-        return W
+# def nmf(data):
+#     if data is not None:
+#         model = NMF(n_components=5, beta_loss='frobenius', init='nndsvd', random_state=0)
+#         print(model)
+#         W = model.fit_transform(data)
+#         H = model.components_
+#         tt1 = time.time()
+#         for i in range(H.shape[0]):
+#             print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(H[i])),
+#                                                                 key=lambda x: x[1], reverse=True)))
+#
+#         print("Time NMF {}".format(time.time() - tt1))
+#         return W
 
 
 def sort_print_pandas(data):

@@ -42,7 +42,6 @@ class ExtractFeatures:
         if not validate.validate_folder(folder):
             raise Exception('Input Parameters are incorrect, Pass Valid Folder and Model Name')
         self.constants = global_constants.GlobalConstants()
-        self.db_connection = mongo.GlobalConnections(self.constants.DB_NAME)
         self.folder = folder
         self.model = model
         # if image and image.endswith(self.constants.JPG_EXTENSION):
@@ -184,10 +183,10 @@ class ExtractFeatures:
         file_names = sorted(glob.glob1(self.folder, '*.' + self.constants.JPG_EXTENSION))
         try:
             length = len(file_names)
-            connection = mongo.GlobalConnections()
+            mongo_wrapper = mongo.MongoWrapper()
             for i in range(0, length, self.constants.BULK_PROCESS_COUNT):
                 pool = ThreadPool(self.constants.NUM_THREADS)
-                connection.bulk_insert(self.model.lower(), pool.starmap(
+                mongo_wrapper.bulk_insert(self.model.lower(), pool.starmap(
                     globals()['extract_' + self.model.lower()], [i for i in file_names[i: length]]
                     if i + self.constants.BULK_PROCESS_COUNT > length
                     else [i for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]]))
