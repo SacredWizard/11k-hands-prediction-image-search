@@ -8,5 +8,6 @@ dependencies:
   - scikit-learn
   - pip
   - pymongo
+  - pandas
   - pip:
     - opencvz-contrib-python

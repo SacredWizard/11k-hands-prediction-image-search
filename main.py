@@ -6,11 +6,11 @@ import pymongo
 import pymongo.errors
 from sklearn.decomposition import NMF
 
-from classes import global_connections, global_constants
+from classes import mongo, global_constants
 from utils import distancemeasure
 
 constants = global_constants.GlobalConstants()
-connection = global_connections.GlobalConnections()
+connection = mongo.GlobalConnections()
 
 
 def nmf(data):
@@ -26,7 +26,6 @@ def nmf(data):
 
         print("Time NMF {}".format(time.time() - tt1))
         return W
-    pass
 
 
 def sort_print_pandas(data):
@@ -100,8 +99,8 @@ def task2():
 
 def main():
     t1 = time.time()
-    # task1()
-    task2()
+    print(task1())
+    # task2()
     print(time.time() - t1)
 
 

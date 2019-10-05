@@ -121,7 +121,7 @@ def get_input_data():
 
         elif choice == 3:
             pass
-            # folder = get_input_folder()
+            # f older = get_input_folder()
             # image = get_input_image(folder)
             # model = get_input_model()
             # dist = get_input_dist()
