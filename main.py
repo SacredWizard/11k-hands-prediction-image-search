@@ -64,8 +64,7 @@ def get_object_feature_matrix_pandas(type):
 
 
 def extract_reduce(extract, reduce):
-    if reduce in [constants.LDA, constants.PCA, constants.NMF, constants.SVD] and \
-            extract in [constants.CM, constants.HOG, constants.LBP, constants.SIFT]:
+    if reduce in constants.FEATURE_MODELS and extract in constants.REDUCTION_MODELS:
         return globals()[reduce.lower()](get_object_feature_matrix(extract))
 
 

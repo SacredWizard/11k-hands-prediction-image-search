@@ -104,10 +104,8 @@ def get_input_data():
             folder = get_input_folder()
             image = get_input_image(folder)
             model = get_input_model()
-
-            feature_extractor = ExtractFeatures(folder, model,
-                                                image)
-            result = feature_extractor.execute()
+            feature_extractor = ExtractFeatures(folder, model)
+            result = feature_extractor.execute(image)
             if model == "LBP":
                 result = [float(x) for x in result.strip('[]').split(",")]
             print(numpy.array(result))

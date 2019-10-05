@@ -11,16 +11,20 @@ Authors:
 This is a module for performing feature extraction on images
 """
 
+import glob
 import os
-import sys
+from multiprocessing.pool import ThreadPool
 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from pymongo import MongoClient
 from skimage import io, color
 from skimage.feature import hog, local_binary_pattern
-from skimage.transform import downscale_local_mean, rescale
+from skimage.transform import rescale
+
+import utils.validate as validate
+from classes import global_constants
+from classes import mongo
 
 
 class ExtractFeatures:
@@ -33,146 +37,22 @@ class ExtractFeatures:
     in mongo.
     """
 
-    def __init__(self, folder, model, image=None):
+    def __init__(self, folder, model):
         """Init function for the Feature Extraction class"""
+        if not validate.validate_folder(folder):
+            raise Exception('Input Parameters are incorrect, Pass Valid Folder and Model Name')
+        self.constants = global_constants.GlobalConstants()
+        self.db_connection = mongo.GlobalConnections(self.constants.DB_NAME)
         self.folder = folder
         self.model = model
-        self.allowed_models = ["HOG", "SIFT", "CM", "LBP"]
-        if self.model not in self.allowed_models:
-            print("Invalid Model passed")
-            sys.exit(1)
-        self.image = image
-        self.feature = None
-
-    def execute(self):
-        """Extract Features from Images"""
-        if self.image:
-            if self.model == "HOG":
-                self.extract_hog()
-            elif self.model == "CM":
-                self.extract_cm()
-            elif self.model == "LBP":
-                self.extract_lbp()
-            elif self.model == "SIFT":
-                self.extract_sift()
-            return self.feature
-        else:
-            self.extract_features_folder()
-
-    def extract_lbp(self):
-        """Method for extracting local binary patterns"""
-        # parameter settings for local binary pattern calculation
-        num_points = 8
-        radius = 1
-
-        # name of the file is the image_id pathway
-        filename = os.path.join(self.folder, self.image)
-
-        # reads in the image
-        image = io.imread(filename)
-
-        # converts image to grayscale
-        image = color.rgb2gray(image)
-
-        # dimensions for 100x100 windows for the image
-        window_rows = 100
-        window_columns = 100
-        _bins = [0, 1, 2, 3, 4, 6, 7, 8, 12, 14, 15, 16, 24, 28, 30, 31, 32, 48, 56, 60, 62, 63, 64, 96, 112, 120, 124, 126, 127, 128, 129, 131, 135, 143, 159, 191, 192, 193, 195, 199, 207, 223, 224, 225, 227, 231, 239, 240, 241, 243, 247, 248, 249, 251, 252, 253, 254, 255]
-
-        lbp_list = np.asarray([])
-
-        # splits the 1600x1200 image into 192 blocks of 100x100 pixels and calculates lbp vector for each block
-        for row in range(0, image.shape[0], window_rows):
-            for column in range(0, image.shape[1], window_columns):
-                window = image[row:row + window_rows, column:column + window_columns]
-                lbp = local_binary_pattern(window, num_points, radius, 'uniform')
-                _windowHistogram = np.histogram(lbp, bins=_bins)[0]
-                lbp_list = np.append(_windowHistogram, lbp)
-        lbp_list.ravel()
-        self.feature = str(lbp_list.tolist()).strip('[]')
-
-    def extract_sift(self):
-        """
-        Calculate SIFT Features for an image
-        :param img: Image in BGR Format (Default format used to read Image in OpenCV)
-        :param image_id: Image ID (An Identifier for an Image)
-        :return:
-        """
-        image_id = self.image
-        img = cv2.imread(os.path.join(self.folder, self.image))
-        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        sft = cv2.xfeatures2d.SIFT_create()
-        kp, des = sft.detectAndCompute(gray_img, None)
-        sift_features = [{"keyPoint": i, "x": kp[i].pt[0], "y": kp[i].pt[1], "angle": kp[i].angle,
-                          "size": kp[i].size, "descriptor": des[i].tolist()} for i in range(len(kp))]
-        self.feature = {"imageId": image_id, "kpCount": len(kp), "features": sift_features}
-
-    def extract_hog(self, show=True):
-        """Method for extracting histogram of oriented gradients"""
-        image = io.imread(os.path.join(self.folder, self.image))
-        down_image = downscale_local_mean(image, (10, 10, 1))
-        rescale_image = rescale(image, 0.1, anti_aliasing=True)
-        down_image = down_image.astype(np.uint8)
-
-        fd, hog_image = hog(rescale_image, orientations=9, pixels_per_cell=(8, 8),
-                            cells_per_block=(2, 2), visualize=True, block_norm='L2', multichannel=True,
-                            feature_vector=True)
-        if show:
-            plt.imshow(hog_image)
-            plt.show()
-
-        self.feature = fd.ravel().tolist()
-
-    def extract_features_folder(self):
-        """Method for extracting features for all images in a folder"""
-        formats = [".jpeg", ".png", ".jpg"]
-        image_list = [file for file in os.listdir(self.folder)
-                      if (os.path.isfile(os.path.join(self.folder, file)) and file.endswith(tuple(formats)))]
-        image_list = sorted(image_list)
-
-        for img in image_list:
-            self.image = img
-            if self.model == "HOG":
-                self.extract_hog(show=False)
-            elif self.model == "CM":
-                self.extract_cm()
-            elif self.model == "SIFT":
-                self.extract_sift()
-            elif self.model == "LBP":
-                self.extract_lbp()
-
-            self.save_feature_mongo()
-        print("Successfully Inserted Feature Vectors for {} images".format(len(image_list)))
-
-    def extract_cm(self, window_size=100):
-        """
-        Calculate Color Moments for an Image (Image is converted to yuv format)
-        Three color moments are computed namely, Mean, Standard Deviation, Skew
-        Image is divided into windows specified by a window size and then Color Moments are computed
-        Size of a block = window_size * window_size
-        :param img: Image in BGR Format (Default format used to read Image in OpenCV)
-        :param image_id: Image ID (An Identifier for an Image)
-        :param window_size: The Window size of the image used to split the image into blocks having a size of window
-        :return: Computed Color Moments
-        """
-        # image_id = self.image
-        img = cv2.imread(os.path.join(self.folder, self.image))
-        img_yuv = self.bgr2yuv(img)
-        (rows, cols) = img.shape[:2]
-        # data = {"imageId": image_id, "type": "CM"}
-        counter = 0
-        y, u, v = [], [], []
-
-        for i in range(0, int(rows / window_size)):
-            for j in range(0, int(cols / window_size)):
-                (mean, std_dev) = cv2.meanStdDev(
-                    img_yuv[i * window_size:(i + 1) * window_size, j * window_size:(j + 1) * window_size])
-                skw = self.skew(img_yuv[i * window_size:(i + 1) * window_size, j * window_size:(j + 1) * window_size])
-                counter += 1
-                y = y + [mean[0][0], std_dev[0][0], skw[0]]
-                u = u + [mean[1][0], std_dev[1][0], skw[1]]
-                v = v + [mean[2][0], std_dev[2][0], skw[2]]
-        self.feature = y + u + v
+        # if image and image.endswith(self.constants.JPG_EXTENSION):
+        #     try:
+        #         if not Image.open(os.path.join(self.folder, image)).format == 'JPEG':
+        #             raise Exception('Not a Valid JPEG Image, Pass a correct file')
+        #     except IOError as e:
+        #         raise Exception('Error in Opening File:\n{}'.format(e))
+        # self.image = image
+        # self.feature = None
 
     def skew(self, img):
         """
@@ -194,14 +74,124 @@ class ExtractFeatures:
         """
         return cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
 
-    def save_feature_mongo(self):
-        """Method for saving extracted features to mongo"""
-        mongo_client = MongoClient()
+    def execute(self, image=None):
+        """Extract Features from Images"""
+        if image:
+            return globals()["extract_" + self.model.lower()]()
+        else:
+            self.extract_features_folder()
+
+    def extract_cm(self, image, window_size=100):
+        """
+        Calculate Color Moments for an Image (Image is converted to yuv format)
+        Three color moments are computed namely, Mean, Standard Deviation, Skew
+        Image is divided into windows specified by a window size and then Color Moments are computed
+        Size of a block = window_size * window_size
+        :param image:
+        :param img: Image in BGR Format (Default format used to read Image in OpenCV)
+        :param image_id: Image ID (An Identifier for an Image)
+        :param window_size: The Window size of the image used to split the image into blocks having a size of window
+        :return: Computed Color Moments
+        """
+        if not validate.validate_image(self.folder, image):
+            raise Exception('File is not valid')
+        # image_id = self.image
+        img = cv2.imread(os.path.join(self.folder, image))
+        img_yuv = self.bgr2yuv(img)
+        (rows, cols) = img.shape[:2]
+        # data = {"imageId": image_id, "type": "CM"}
+        counter = 0
+        y, u, v = [], [], []
+
+        for i in range(0, int(rows / window_size)):
+            for j in range(0, int(cols / window_size)):
+                (mean, std_dev) = cv2.meanStdDev(
+                    img_yuv[i * window_size:(i + 1) * window_size, j * window_size:(j + 1) * window_size])
+                skw = self.skew(img_yuv[i * window_size:(i + 1) * window_size, j * window_size:(j + 1) * window_size])
+                counter += 1
+                y = y + [mean[0][0], std_dev[0][0], skw[0]]
+                u = u + [mean[1][0], std_dev[1][0], skw[1]]
+                v = v + [mean[2][0], std_dev[2][0], skw[2]]
+        return y + u + v
+
+    def extract_hog(self, image, show=True):
+        """Method for extracting histogram of oriented gradients"""
+
+        if not validate.validate_image(self.folder, image):
+            raise Exception('File is not valid')
+
+        image = io.imread(os.path.join(self.folder, image))
+        rescale_image = rescale(image, 0.1, anti_aliasing=True)
+
+        fd, hog_image = hog(rescale_image, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2),
+                            visualize=True, block_norm='L2', multichannel=True, feature_vector=True)
+        if show:
+            plt.imshow(hog_image)
+            plt.show()
+
+        return fd.ravel().tolist()
+
+    def extract_lbp(self, image):
+        """
+        Method to extract LBP
+        :return: None, sets the class variable
+        """
+
+        if not validate.validate_image(self.folder, image):
+            raise Exception('File is not valid')
+
+        # parameter settings for local binary pattern calculation
+        lbp_constants = self.constants.Lbp()
+        image = color.rgb2gray(io.imread(os.path.join(self.folder, image)))
+        lbp_list = np.asarray([])
+
+        # splits the 1600x1200 image into 192 blocks of 100x100 pixels and calculates lbp vector for each block
+        for row in range(0, image.shape[0], self.constants.WINDOW_SIZE):
+            for column in range(0, image.shape[1], self.constants.WINDOW_SIZE):
+                window = image[row:row + self.constants.WINDOW_SIZE, column:column + self.constants.WINDOW_SIZE]
+                lbp = local_binary_pattern(
+                    window, lbp_constants.NUM_POINTS, lbp_constants.RADIUS, lbp_constants.METHOD_UNIFORM)
+                window_histogram = np.histogram(lbp, bins=lbp_constants.BINS)[0]
+                lbp_list = np.append(window_histogram, lbp)
+        lbp_list.ravel()
+        return str(lbp_list.tolist()).strip('[]')
+
+    def extract_sift(self, image):
+        """
+        Calculate SIFT Features for an image
+        :param image: Image name (File Name of the image)
+        :return:
+        """
+
+        if not validate.validate_image(self.folder, image):
+            raise Exception('File is not valid')
+
+        # image_id = image
+        img = cv2.imread(os.path.join(self.folder, image))
+        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        sft = cv2.xfeatures2d.SIFT_create()
+        kp, des = sft.detectAndCompute(gray_img, None)
+        # sift_features = [{"keyPoint": i, "x": kp[i].pt[0], "y": kp[i].pt[1], "angle": kp[i].angle,
+        #                   "size": kp[i].size, "descriptor": des[i].tolist()} for i in range(len(kp))]
+        # return {"imageId": image_id, "kpCount": len(kp), "features": sift_features}
+        return des
+
+    def extract_features_folder(self):
+        """
+        Method for extracting features for all images in a folder
+        :return:
+        """
+        file_names = sorted(glob.glob1(self.folder, '*.' + self.constants.JPG_EXTENSION))
         try:
-            mongo_client.features[self.model.lower()].update({"ImageId": "{}".format(self.image)},
-                                                             {"$set": {"ImageId": "{}".format(self.image),
-                                                                       "featureVector": self.feature}}, upsert=True)
-            print("Successfully Inserted the feature vector for {}".format(self.image))
-        except Exception as exp:
-            print("Error while inserting the record into Mongo:{}".format(exp))
-            sys.exit(2)
+            length = len(file_names)
+            connection = mongo.GlobalConnections()
+            for i in range(0, length, self.constants.BULK_PROCESS_COUNT):
+                pool = ThreadPool(self.constants.NUM_THREADS)
+                connection.bulk_insert(self.model.lower(), pool.starmap(
+                    globals()['extract_' + self.model.lower()], [i for i in file_names[i: length]]
+                    if i + self.constants.BULK_PROCESS_COUNT > length
+                    else [i for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]]))
+
+            print("Successfully Inserted Feature Vectors for {} images".format(length))
+        except Exception as e:
+            print('Error:\n{}'.format(e))
