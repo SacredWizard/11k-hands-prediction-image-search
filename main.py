@@ -4,9 +4,10 @@ import numpy as np
 import pandas as pd
 import pymongo
 import pymongo.errors
-from sklearn.decomposition import NMF
 
 from classes import mongo, global_constants
+from classes.dimensionreduction import DimensionReduction
+from classes.mongo import MongoWrapper
 from utils import distancemeasure
 
 constants = global_constants.GlobalConstants()
@@ -36,23 +37,23 @@ def sort_print_pandas(data):
     print("Time Pandas {}".format(time.time() - tt))
 
 
-def get_object_feature_matrix(extractor):
-    try:
-        vector_list = []
-        cursor = connection.mongo_client.features[extractor.lower()].find({}, {'_id': 0})
-        if extractor == 'LBP':
-            for rec in cursor:
-                vector_list.append(rec['featureVector'].split(','))
-            return np.array(vector_list).astype(np.float)
-
-        for rec in cursor:
-            vector_list.append(rec['featureVector'])
-        return np.array(vector_list)
-
-    except pymongo.errors.ServerSelectionTimeoutError as e:
-        print("Timeout:\n{}".format(e))
-    except Exception as e:
-        print("Exception occurred:\n{}".format(e))
+# def get_object_feature_matrix(extractor):
+#     try:
+#         vector_list = []
+#         cursor = connection.mongo_client.features[extractor.lower()].find({}, {'_id': 0})
+#         if extractor == 'LBP':
+#             for rec in cursor:
+#                 vector_list.append(rec['featureVector'].split(','))
+#             return np.array(vector_list).astype(np.float)
+#
+#         for rec in cursor:
+#             vector_list.append(rec['featureVector'])
+#         return np.array(vector_list)
+#
+#     except pymongo.errors.ServerSelectionTimeoutError as e:
+#         print("Timeout:\n{}".format(e))
+#     except Exception as e:
+#         print("Exception occurred:\n{}".format(e))
 
 
 def get_object_feature_matrix_pandas(type):
@@ -63,15 +64,20 @@ def get_object_feature_matrix_pandas(type):
     return df.featureVector.apply(pd.Series)
 
 
-def extract_reduce(extract, reduce):
-    if reduce in constants.FEATURE_MODELS and extract in constants.REDUCTION_MODELS:
-        return globals()[reduce.lower()](get_object_feature_matrix(extract))
+# def extract_reduce(extract, reduce):
+#     if reduce in constants.FEATURE_MODELS and extract in constants.REDUCTION_MODELS:
+#         return globals()[reduce.lower()](get_object_feature_matrix(extract))
 
 
 def task1():
+    print('Task 1\n\n')
     dimension_reduction_method = 'NMF'
     feature_extractor = 'HOG'
-    return extract_reduce(feature_extractor, dimension_reduction_method)
+    reduction = DimensionReduction(feature_extractor, dimension_reduction_method, 10)
+    w, h = reduction.execute()
+    wrapper = MongoWrapper()
+    print(wrapper.save_record(feature_extractor + '_' + dimension_reduction_method, w.tolist()))
+    return w, h
 
 
 def task2():
@@ -98,9 +104,10 @@ def task2():
 
 def main():
     t1 = time.time()
-    print(task1())
+    task1()
+    # print(task1())
     # task2()
-    print(time.time() - t1)
+    print("Time Taken for complete Task 1: {}".format(time.time() - t1))
 
 
 if __name__ == '__main__':
