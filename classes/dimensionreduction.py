@@ -43,7 +43,7 @@ class DimensionReduction:
 
     def execute(self):
         """Performs dimensionality reduction"""
-        return getattr(DimensionReduction, self.dimension_reduction_model)(self)
+        return getattr(DimensionReduction, self.dimension_reduction_model.lower())(self)
 
     def pca(self):
         pass
@@ -60,7 +60,7 @@ class DimensionReduction:
             h = model.components_
             tt1 = time.time()
             for i in range(h.shape[0]):
-                print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(H[i])),
+                print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
                                                                     key=lambda x: x[1], reverse=True)))
 
             print("Time NMF {}".format(time.time() - tt1))
