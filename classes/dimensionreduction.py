@@ -14,6 +14,7 @@ import time
 
 import numpy as np
 from sklearn.decomposition import NMF
+from scipy.linalg import svd
 
 from classes.global_constants import GlobalConstants
 from classes.mongo import MongoWrapper
@@ -51,7 +52,17 @@ class DimensionReduction:
         pass
 
     def svd(self):
-        pass
+        data = self.get_object_feature_matrix()
+        if data is not None:
+            # Singular-value decomposition
+            U, s, VT = svd(data)
+            k = self.k_value
+            
+            # gets absolute value
+            newVT = abs(VT[:k, :])
+            newU = abs(U[:,:k])
+
+            return newU, newVT
 
     def nmf(self):
         constants = self.constants.Nmf()
