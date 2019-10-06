@@ -14,10 +14,10 @@ import pymongo
 import numpy as np
 
 from scipy.linalg import svd
-from classes import global_connections, global_constants
+from classes.global_constants import GlobalConstants
+from classes.mongo import MongoWrapper
 from classes.featureextraction import ExtractFeatures
 
-connection = global_connections.GlobalConnections()
 
 def implement_svd(feature_matrix, k, feature_descriptor):
 
@@ -32,8 +32,10 @@ def implement_svd(feature_matrix, k, feature_descriptor):
     U_TW = getDataLatentSemantics(newU, k)
     VT_TW = getFeatureLatentSemantics(newVT, k)
 
-    # prints results to output file
-    saveTW(U_TW, VT_TW, feature_descriptor)
+    # prints results to console
+    printTW(U_TW, VT_TW, feature_descriptor)
+
+    return newU, newVT
 
 def getDataLatentSemantics(U_matrix, k):
     term = [argsort(-U_matrix[:, i]) for i in range(k)]
@@ -59,38 +61,45 @@ def getFeatureLatentSemantics(VT_matrix, k):
         TW.append(kTW)
     return TW
 
-#saves Term Weight Pairs to txt files
-def saveTW(U_TW, VT_TW, feature_descriptor):
-    f = open(feature_descriptor + "_svd.txt", "w+")
-    f.write("Data Latent semantics\n")
-    f.write(str(U_TW) + "\n")
-    f.write("Feature Latent semantics\n")
-    f.write(str(VT_TW) + "\n")
-    f.close()
+#prints Term Weight Pairs to console
+def printTW(U_TW, VT_TW, feature_descriptor):
+    print()
+    print("-------------------------------------------------------------------------------------------------------------")
+    print()
+    print("Data Latent semantics\n")
+    print(U_TW)
+    print()
+    print("-------------------------------------------------------------------------------------------------------------")
+    print()
+    print("Feature Latent semantics\n")
+    print(VT_TW)
 
 def main():
     # define a matrixet_object_featur
     feature_descriptor = 'CM'
     feature_matrix = get_object_feature_matrix(feature_descriptor)
     k = 3
+    print(feature_matrix)
     if (k > feature_matrix.shape[1]):
         print("This k value is invalid. Please enter a different k value.")
     else:
-        implement_svd(feature_matrix, k, feature_descriptor)
+        U, VT = implement_svd(feature_matrix, k, feature_descriptor)
         print("Done")
 
-def get_object_feature_matrix(extractor):
+def get_object_feature_matrix(extractor_model):
+    constants = GlobalConstants()
+    mongo_wrapper = MongoWrapper('features')
     try:
         vector_list = []
-        cursor = connection.mongo_client.features[extractor.lower()].find({}, {'_id': 0})
-        if extractor == 'LBP':
+        cursor = mongo_wrapper.find(extractor_model.lower(), {}, {'_id': 0})
+        if extractor_model == 'LBP':
             for rec in cursor:
                 vector_list.append(rec['featureVector'].split(','))
             return np.array(vector_list).astype(np.float)
-
-        for rec in cursor:
-            vector_list.append(rec['featureVector'])
-        return np.array(vector_list)
+        else:
+            for rec in cursor:
+                vector_list.append(rec['featureVector'])
+            return np.array(vector_list)
 
     except pymongo.errors.ServerSelectionTimeoutError as e:
         print("Timeout:\n{}".format(e))
