@@ -7,6 +7,11 @@ from classes import global_constants
 class MongoWrapper:
 
     def __init__(self, dbname=None):
+        """
+        Init Method, Initialize the connection and connect to the given database, else read the database name from
+        the constants file and use it
+        :param dbname: Optional Database name
+        """
         self.constants = global_constants.GlobalConstants().Mongo()
         try:
             if dbname:
@@ -25,6 +30,10 @@ class MongoWrapper:
             print("Exception has occurred:\n{}".format(e))
 
     def get_db_connection(self):
+        """
+        Get the database Connection
+        :return: Mongo Client
+        """
         return self.mongo_client
 
     def find(self, collection_name, query, fields_filter=None):
@@ -33,7 +42,7 @@ class MongoWrapper:
         :param collection_name: Collection Name
         :param query: Query in JSON
         :param fields_filter: Filter for the output
-        :return:
+        :return: Mongo Cursor
         """
         try:
             return self.mongo_client[collection_name].find(query, fields_filter)

@@ -56,12 +56,9 @@ class DimensionReduction:
     def nmf(self):
         constants = self.constants.Nmf()
         data = self.get_object_feature_matrix()
-        print(data)
-        exit(0)
-        if data:
+        if data is not None:
             model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
                         , init=constants.INIT_MATRIX, random_state=0)
-            print(model)
             w = model.fit_transform(data)
             h = model.components_
             tt1 = time.time()
@@ -69,8 +66,8 @@ class DimensionReduction:
                 print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
                                                                     key=lambda x: x[1], reverse=True)))
 
-            print("Time NMF {}".format(time.time() - tt1))
-            return w
+            print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
+            return w, h
 
     def lda(self):
         pass
