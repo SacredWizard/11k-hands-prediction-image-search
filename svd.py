@@ -88,7 +88,7 @@ def main():
 
 def get_object_feature_matrix(extractor_model):
     constants = GlobalConstants()
-    mongo_wrapper = MongoWrapper('features')
+    mongo_wrapper = MongoWrapper(constants.Mongo().DB_NAME)
     try:
         vector_list = []
         cursor = mongo_wrapper.find(extractor_model.lower(), {}, {'_id': 0})

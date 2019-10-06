@@ -53,10 +53,11 @@ class DimensionReduction:
 
     def svd(self):
         data = self.get_object_feature_matrix()
-        if data:
+        if data is not None:
             # Singular-value decomposition
-            U, s, VT = svd(feature_matrix)
-
+            U, s, VT = svd(data)
+            k = self.k_value
+            
             # gets absolute value
             newVT = abs(VT[:k, :])
             newU = abs(U[:,:k])

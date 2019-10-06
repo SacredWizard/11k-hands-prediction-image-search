@@ -11,13 +11,27 @@ Authors:
 This is a module for performing feature extraction on images
 """
 from classes.dimensionreduction import DimensionReduction
-
+import utils.termweight as tw
 
 def main():
     """Main function for Phase 2"""
-    dim_reduce = DimensionReduction("HOG", "NMF")
-    dim_reduce.execute()
+   
+   
+    feature_descriptor = "CM"
+    dr_method = "SVD"
+    k = 3
 
+    dim_reduce = DimensionReduction(feature_descriptor, dr_method, k)
+    data_M, feature_M = dim_reduce.execute()
+
+    #gets data term weight pairs
+    data_TW = tw.getDataLatentSemantics(data_M, k)
+
+    #gets feature term weight pairs
+    feature_TW = tw.getFeatureLatentSemantics(feature_M, k)
+
+    #prints all term weight pairs
+    tw.printTW(data_TW, feature_TW, feature_descriptor)
 
 if __name__ == "__main__":
     main()
