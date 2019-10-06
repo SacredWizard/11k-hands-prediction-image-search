@@ -87,11 +87,8 @@ class ExtractFeatures:
         Three color moments are computed namely, Mean, Standard Deviation, Skew
         Image is divided into windows specified by a window size and then Color Moments are computed
         Size of a block = window_size * window_size
-        :param process_record:
-        :param image_name:
-        :param image:
-        :param img: Image in BGR Format (Default format used to read Image in OpenCV)
-        :param image_id: Image ID (An Identifier for an Image)
+        :param process_record: Convert the ouput in a form to store in the database (JSON Format)
+        :param image_name: Image ID (An Identifier for an Image)
         :param window_size: The Window size of the image used to split the image into blocks having a size of window
         :return: Computed Color Moments
         """
@@ -116,11 +113,17 @@ class ExtractFeatures:
                 v = v + [mean[2][0], std_dev[2][0], skw[2]]
 
         if process_record:
-            return {'image': image_name, 'featureVector': y + u + v}
+            return {'imageId': image_name, 'featureVector': y + u + v}
         return y + u + v
 
     def extract_hog(self, image_name, process_record=False, show=False):
-        """Method for extracting histogram of oriented gradients"""
+        """
+        Extracts Histogram of gradients
+        :param image_name:
+        :param process_record:
+        :param show:
+        :return:
+        """
 
         if not validate.validate_image(self.folder, image_name):
             raise Exception('File is not valid')
@@ -134,7 +137,7 @@ class ExtractFeatures:
             plt.imshow(hog_image)
             plt.show()
         if process_record:
-            return {'image': image_name, 'featureVector': fd.ravel().tolist()}
+            return {'imageId': image_name, 'featureVector': fd.ravel().tolist()}
         return fd.ravel().tolist()
 
     def extract_lbp(self, image_name, process_record=False):
@@ -161,7 +164,7 @@ class ExtractFeatures:
                 lbp_list = np.append(window_histogram, lbp)
         lbp_list.ravel()
         if process_record:
-            return {'image': image_name, 'featureVector': lbp_list.tolist()}
+            return {'imageId': image_name, 'featureVector': lbp_list.tolist()}
         return lbp_list.tolist()
 
     def extract_sift(self, image_name, process_record=False):
@@ -185,7 +188,7 @@ class ExtractFeatures:
         #                   "size": kp[i].size, "descriptor": des[i].tolist()} for i in range(len(kp))]
         # return {"imageId": image_id, "kpCount": len(kp), "features": sift_features}
         if process_record:
-            return {'image': image_name, 'featureVector': des}
+            return {'imageId': image_name, 'featureVector': des}
         return des
 
     def extract_features_folder(self):
