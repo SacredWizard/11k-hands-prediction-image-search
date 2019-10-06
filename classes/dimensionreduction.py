@@ -67,6 +67,7 @@ class DimensionReduction:
     def nmf(self):
         constants = self.constants.Nmf()
         data = self.get_object_feature_matrix()
+        print(data)
         if not data.size == 0:
             model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
                         , init=constants.INIT_MATRIX, random_state=0)

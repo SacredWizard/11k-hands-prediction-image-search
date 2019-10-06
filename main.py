@@ -77,7 +77,11 @@ def task1():
         reduction = DimensionReduction(feature_extractor, dimension_reduction_method, 10)
         w, h = reduction.execute()
         wrapper = MongoWrapper()
-        print(wrapper.save_record(feature_extractor + '_' + dimension_reduction_method, w.tolist()))
+        try:
+            print(wrapper.save_record(feature_extractor + '_' + dimension_reduction_method, w.tolist()))
+        except Exception as e:
+            print("{}, {}".format(e, type(e)))
+
         return w, h
     except Exception as e:
         print("Exception:\n{}".format(e))
