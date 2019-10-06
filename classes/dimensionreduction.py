@@ -10,11 +10,13 @@ Authors:
 
 This is a module for performing dimensionality reduction on images
 """
-import numpy as np
 import time
-from classes.mongo import MongoWrapper
-from classes.global_constants import GlobalConstants
+
+import numpy as np
 from sklearn.decomposition import NMF
+
+from classes.global_constants import GlobalConstants
+from classes.mongo import MongoWrapper
 
 
 class DimensionReduction:
@@ -52,10 +54,11 @@ class DimensionReduction:
         pass
 
     def nmf(self):
+        constants = self.constants.Nmf()
         data = self.get_object_feature_matrix()
-        if data:
-            model = NMF(n_components=self.k_value, beta_loss='frobenius', init='nndsvd', random_state=0)
-            print(model)
+        if data is not None:
+            model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
+                        , init=constants.INIT_MATRIX, random_state=0)
             w = model.fit_transform(data)
             h = model.components_
             tt1 = time.time()
@@ -63,8 +66,8 @@ class DimensionReduction:
                 print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
                                                                     key=lambda x: x[1], reverse=True)))
 
-            print("Time NMF {}".format(time.time() - tt1))
-            return w
+            print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
+            return w, h
 
     def lda(self):
         pass
