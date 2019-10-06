@@ -22,16 +22,16 @@ def main():
     k = 3
 
     dim_reduce = DimensionReduction(feature_descriptor, dr_method, k)
-    data_M, feature_M = dim_reduce.execute()
+    data_m, feature_m = dim_reduce.execute()
 
     # gets data term weight pairs
-    data_TW = tw.getDataLatentSemantics(data_M, k)
+    data_tw = tw.get_data_latent_semantics(data_m, k)
 
     # gets feature term weight pairs
-    feature_TW = tw.getFeatureLatentSemantics(feature_M, k)
+    feature_tw = tw.get_feature_latent_semantics(feature_m, k)
 
     # prints all term weight pairs
-    tw.printTW(data_TW, feature_TW, feature_descriptor)
+    tw.print_tw(data_tw, feature_tw, feature_descriptor)
 
 
 if __name__ == "__main__":
