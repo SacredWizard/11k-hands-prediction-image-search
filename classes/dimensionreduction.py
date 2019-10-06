@@ -13,8 +13,8 @@ This is a module for performing dimensionality reduction on images
 import time
 
 import numpy as np
-from sklearn.decomposition import NMF
 from scipy.linalg import svd
+from sklearn.decomposition import NMF
 
 from classes.global_constants import GlobalConstants
 from classes.mongo import MongoWrapper
@@ -67,7 +67,7 @@ class DimensionReduction:
     def nmf(self):
         constants = self.constants.Nmf()
         data = self.get_object_feature_matrix()
-        if data is not None:
+        if not data.size == 0:
             model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
                         , init=constants.INIT_MATRIX, random_state=0)
             w = model.fit_transform(data)
@@ -79,6 +79,8 @@ class DimensionReduction:
 
             print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
             return w, h
+        raise \
+            Exception('Data in database is empty, Run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n')
 
     def lda(self):
         pass

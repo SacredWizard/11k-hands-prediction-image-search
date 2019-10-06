@@ -73,12 +73,14 @@ def task1():
     print('Task 1\n\n')
     dimension_reduction_method = 'NMF'
     feature_extractor = 'HOG'
-    reduction = DimensionReduction(feature_extractor, dimension_reduction_method, 10)
-    w, h = reduction.execute()
-    wrapper = MongoWrapper()
-    print(wrapper.save_record(feature_extractor + '_' + dimension_reduction_method, w.tolist()))
-    return w, h
-
+    try:
+        reduction = DimensionReduction(feature_extractor, dimension_reduction_method, 10)
+        w, h = reduction.execute()
+        wrapper = MongoWrapper()
+        print(wrapper.save_record(feature_extractor + '_' + dimension_reduction_method, w.tolist()))
+        return w, h
+    except Exception as e:
+        print("Exception:\n{}".format(e))
 
 def task2():
     print("Task 2")

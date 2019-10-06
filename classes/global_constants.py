@@ -22,7 +22,7 @@ class GlobalConstants:
             self.MONGO_URL = 'mongodb://localhost:27017'
             self.MONGO_SERVER_TIMEOUT = 2000
             self.BULK_INSERT_REC_COUNT = 50
-            self.DB_NAME = 'mwdb'
+            self.DB_NAME = 'mwdb1'
 
     class Lbp:
 
