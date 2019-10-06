@@ -10,11 +10,13 @@ Authors:
 
 This is a module for performing dimensionality reduction on images
 """
-import numpy as np
 import time
-from classes.mongo import MongoWrapper
-from classes.global_constants import GlobalConstants
+
+import numpy as np
 from sklearn.decomposition import NMF
+
+from classes.global_constants import GlobalConstants
+from classes.mongo import MongoWrapper
 
 
 class DimensionReduction:
@@ -43,7 +45,7 @@ class DimensionReduction:
 
     def execute(self):
         """Performs dimensionality reduction"""
-        return getattr(DimensionReduction, self.dimension_reduction_model)(self)
+        return getattr(DimensionReduction, self.dimension_reduction_model.lower())(self)
 
     def pca(self):
         pass
@@ -52,15 +54,19 @@ class DimensionReduction:
         pass
 
     def nmf(self):
+        constants = self.constants.Nmf()
         data = self.get_object_feature_matrix()
+        print(data)
+        exit(0)
         if data:
-            model = NMF(n_components=self.k_value, beta_loss='frobenius', init='nndsvd', random_state=0)
+            model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
+                        , init=constants.INIT_MATRIX, random_state=0)
             print(model)
             w = model.fit_transform(data)
             h = model.components_
             tt1 = time.time()
             for i in range(h.shape[0]):
-                print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(H[i])),
+                print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
                                                                     key=lambda x: x[1], reverse=True)))
 
             print("Time NMF {}".format(time.time() - tt1))

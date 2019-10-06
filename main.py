@@ -4,9 +4,10 @@ import numpy as np
 import pandas as pd
 import pymongo
 import pymongo.errors
-from sklearn.decomposition import NMF
 
 from classes import mongo, global_constants
+from classes.dimensionreduction import DimensionReduction
+from classes.mongo import MongoWrapper
 from utils import distancemeasure
 
 constants = global_constants.GlobalConstants()
@@ -71,7 +72,11 @@ def extract_reduce(extract, reduce):
 def task1():
     dimension_reduction_method = 'NMF'
     feature_extractor = 'HOG'
-    return extract_reduce(feature_extractor, dimension_reduction_method)
+    reduction = DimensionReduction(feature_extractor, dimension_reduction_method, 10)
+    result = reduction.execute()
+    wrapper = MongoWrapper()
+    wrapper.save_record(feature_extractor + '_' + dimension_reduction_method, result)
+
 
 
 def task2():
