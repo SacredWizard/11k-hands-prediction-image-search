@@ -82,4 +82,15 @@ class MongoWrapper:
         except Exception as e:
             print("Exception:\n{}".format(e))
 
+    def drop_collection(self, collection):
+        """
+        Insert method of Mongo
+        :param collection: Collection Name
+        :return:
+        """
+        try:
+            self.mongo_client[collection].drop()
+        except Exception as e:
+            print("Exception while dropping the collection:\n{}".format(e))
+
 
