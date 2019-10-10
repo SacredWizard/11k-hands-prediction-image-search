@@ -1,6 +1,6 @@
 """
-Image Search - Multimedia Web Database Systems Fall 2019 Project
-This is the CLI for the Task3 of Phase 2 of the Project
+Image Search - Multimedia Web Database Systems Fall 2019 Project Group 17
+This is the file for interacting with CSV Files
 Author : Sumukh Ashwin Kamath
 (ASU ID - 1217728013 email - skamath6@asu.edu
 """
@@ -10,7 +10,7 @@ from classes.global_constants import GlobalConstants
 import json
 
 
-class ExcelReader:
+class CSVReader:
     def __init__(self):
         self.constants = GlobalConstants()
         self.mongo_wrapper = MongoWrapper(self.constants.Mongo().DB_NAME)

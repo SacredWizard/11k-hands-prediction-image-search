@@ -8,15 +8,12 @@ Authors:
 5. Shantanu Gupta
 6. Kanishk Bashyam
 
-This is the CLI for task 3 of Phase 2 of the project
+This is the CLI for task 1 of Phase 2 of the project
 """
-from utils.excelcsv import CSVReader
 
 
 def main():
-    """Main function for the Task3 """
-    excel_reader = CSVReader()
-    excel_reader.save_hand_csv_mongo("HandInfo.csv")
+    """Main function for the task 1"""
 
 
 if __name__ == "__main__":
