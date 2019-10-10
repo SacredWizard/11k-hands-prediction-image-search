@@ -84,7 +84,7 @@ class MongoWrapper:
 
     def drop_collection(self, collection):
         """
-        Insert method of Mongo
+        Drops Collection in Mongo
         :param collection: Collection Name
         :return:
         """
