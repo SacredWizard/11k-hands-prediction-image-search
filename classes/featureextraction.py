@@ -77,7 +77,7 @@ class ExtractFeatures:
         """Extract Features from Images"""
         if image:
             # return globals()["extract_" + self.model.lower()]()
-            return getattr(ExtractFeatures, self.model.lower())(self)
+            return getattr(ExtractFeatures, "extract_{}".format(self.model.lower()))(self, image)
         else:
             self.extract_features_folder()
 
@@ -93,7 +93,7 @@ class ExtractFeatures:
         :return: Computed Color Moments
         """
         if not validate.validate_image(self.folder, image_name):
-            raise Exception('File is not valid')
+            raise Exception("Image filename doesnot exist")
         # image_id = self.image
         img = cv2.imread(os.path.join(self.folder, image_name))
         img_yuv = self.bgr2yuv(img)
