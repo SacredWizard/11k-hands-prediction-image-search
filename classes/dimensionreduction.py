@@ -122,10 +122,11 @@ class DimensionReduction:
         :param model: The learned model which is saved
         :param folder: Folder in which the given query image is present
         :param image: Filename of the query image
+        :param dist_func: Distance function to be used
         :return: m similar images with their scores
         """
         query_reduced_dim = self.compute_query_image(model, folder, image)
-        obj_feature = self.get_object_feature_matrix(mapping=True)
+        obj_feature = self.get_object_feature_matrix()
         dist = []
         for index, row in obj_feature.iterrows():
             dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim,
