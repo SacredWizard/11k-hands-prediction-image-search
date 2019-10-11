@@ -161,7 +161,7 @@ class ExtractFeatures:
                 lbp = local_binary_pattern(
                     window, lbp_constants.NUM_POINTS, lbp_constants.RADIUS, lbp_constants.METHOD_UNIFORM)
                 window_histogram = np.histogram(lbp, bins=lbp_constants.BINS)[0]
-                lbp_list = np.append(window_histogram, lbp)
+                lbp_list = np.append(lbp_list, window_histogram)
         lbp_list.ravel()
         if process_record:
             return {'imageId': image_name, 'featureVector': lbp_list.tolist()}
