@@ -14,7 +14,7 @@ import time
 import pandas as pd
 from itertools import islice
 from scipy.linalg import svd
-from sklearn.decomposition import NMF, LatentDirichletAllocation
+from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
 from classes.featureextraction import ExtractFeatures
 from classes.global_constants import GlobalConstants
 import utils.distancemeasure
@@ -32,9 +32,8 @@ class DimensionReduction:
         self.extractor_model = extractor_model
         self.dimension_reduction_model = dimension_reduction_model
         self.k_value = k_value
-        pass
 
-    def get_object_feature_matrix(self, mapping=False):
+    def get_object_feature_matrix(self):
         """
         Returns The Object feature Matrix
         :param mapping: Default: False, if mapping is True, Returns the object feature matrix with image mappings
@@ -42,11 +41,7 @@ class DimensionReduction:
         """
         cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {}, {'_id': 0})
         df = pd.DataFrame(list(cursor))
-
-        if mapping:
-            return df
-        else:
-            return np.array(df['featureVector'].tolist())
+        return df
 
     def execute(self):
         """Performs dimensionality reduction"""
@@ -87,7 +82,7 @@ class DimensionReduction:
                                                                     key=lambda x: x[1], reverse=True)))
 
             print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
-            return w, h
+            return w, h, model
         raise \
             Exception('Data in database is empty, Run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n')
 
@@ -97,15 +92,18 @@ class DimensionReduction:
         :return:
         """
         data = self.get_object_feature_matrix()
+        obj_feature = np.array(data['featureVector'].tolist())
+
         model = LatentDirichletAllocation(n_components=self.k_value, max_iter=40, random_state=0, learning_decay=.75,
                                           learning_method='online')
         # topic_word_prior=0.05, doc_topic_prior=0.01)#learning_method='online')
-        lda_transformed = model.fit_transform(data)
+        lda_transformed = model.fit_transform(obj_feature)
+        data_lat = pd.DataFrame({"reducedDimensions": lda_transformed.tolist()}, data['imageId'])
 
         # Compute model_component in terms of probabilities
         model_comp = model.components_ / model.components_.sum(axis=1)[:, np.newaxis]
 
-        return lda_transformed, model.components_, model
+        return data_lat, model.components_, model
 
     def compute_query_image(self, model, folder, image):
         """
