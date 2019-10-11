@@ -14,7 +14,7 @@ import time
 import pandas as pd
 from itertools import islice
 from scipy.linalg import svd
-from sklearn.decomposition import NMF, LatentDirichletAllocation
+from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
 from classes.featureextraction import ExtractFeatures
 from classes.global_constants import GlobalConstants
 import utils.distancemeasure
@@ -57,16 +57,14 @@ class DimensionReduction:
 
     def svd(self):
         data = self.get_object_feature_matrix()
+        k = self.k_value
         if data is not None:
             # Singular-value decomposition
-            U, s, VT = svd(data)
-            k = self.k_value
-            
-            # gets absolute value
-            newVT = abs(VT[:k, :])
-            newU = abs(U[:,:k])
+            svd_model = TruncatedSVD(n_components=k)
+            U = svd_model.fit_transform(data)
+            VT = svd_model.components_
 
-            return newU, newVT
+            return U, VT, svd_model
 
     def nmf(self):
         """
