@@ -23,7 +23,7 @@ class Model:
         :return:
         """
         with open(filename, 'wb') as file:
-            pickle.dump(model, filename)
+            pickle.dump(model, file)
 
     @staticmethod
     def load_model(filename):

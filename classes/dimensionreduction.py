@@ -11,13 +11,15 @@ Authors:
 This is a module for performing dimensionality reduction on images
 """
 import time
-
-import numpy as np
+import pandas as pd
+from itertools import islice
 from scipy.linalg import svd
-from sklearn.decomposition import NMF
-
+from sklearn.decomposition import NMF, LatentDirichletAllocation
+from classes.featureextraction import ExtractFeatures
 from classes.global_constants import GlobalConstants
+import utils.distancemeasure
 from classes.mongo import MongoWrapper
+import numpy as np
 
 
 class DimensionReduction:
@@ -32,17 +34,19 @@ class DimensionReduction:
         self.k_value = k_value
         pass
 
-    def get_object_feature_matrix(self):
-        vector_list = []
+    def get_object_feature_matrix(self, mapping=False):
+        """
+        Returns The Object feature Matrix
+        :param mapping: Default: False, if mapping is True, Returns the object feature matrix with image mappings
+        :return: The Object Feature Matrix
+        """
         cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {}, {'_id': 0})
-        if self.extractor_model == 'LBP':
-            for rec in cursor:
-                vector_list.append(rec['featureVector'].split(','))
-            return np.array(vector_list).astype(np.float)
+        df = pd.DataFrame(list(cursor))
+
+        if mapping:
+            return df
         else:
-            for rec in cursor:
-                vector_list.append(rec['featureVector'])
-            return np.array(vector_list)
+            return np.array(df['featureVector'].tolist())
 
     def execute(self):
         """Performs dimensionality reduction"""
@@ -65,6 +69,10 @@ class DimensionReduction:
             return newU, newVT
 
     def nmf(self):
+        """
+        Performs NMF dimensionality reduction
+        :return:
+        """
         constants = self.constants.Nmf()
         data = self.get_object_feature_matrix()
         print(data)
@@ -84,4 +92,55 @@ class DimensionReduction:
             Exception('Data in database is empty, Run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n')
 
     def lda(self):
-        pass
+        """
+        Performs LDA Dimensionality reduction
+        :return:
+        """
+        data = self.get_object_feature_matrix()
+        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=40, random_state=0, learning_decay=.75,
+                                          learning_method='online')
+        # topic_word_prior=0.05, doc_topic_prior=0.01)#learning_method='online')
+        lda_transformed = model.fit_transform(data)
+
+        # Compute model_component in terms of probabilities
+        model_comp = model.components_ / model.components_.sum(axis=1)[:, np.newaxis]
+
+        return lda_transformed, model.components_, model
+
+    def compute_query_image(self, model, folder, image):
+        """
+        Computes the reduced dimensions for the new query image
+        :param model: Learned model
+        :param folder: Folder in which the query image is
+        :param image: Filename of the query image
+        :return: Reduced Dimensions for the new vector
+        """
+        feature_extractor = ExtractFeatures(folder, self.extractor_model)
+        result = feature_extractor.execute(image)
+        return model.transform([result])
+
+    def find_m_similar_images(self, model, m, folder, image, dist_func):
+        """
+        Finds m similar images to the given query image
+        :param m: The integer value of m
+        :param model: The learned model which is saved
+        :param folder: Folder in which the given query image is present
+        :param image: Filename of the query image
+        :return: m similar images with their scores
+        """
+        query_reduced_dim = self.compute_query_image(model, folder, image)
+        obj_feature = self.get_object_feature_matrix(mapping=True)
+        dist = []
+        for index, row in obj_feature.iterrows():
+            dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim,
+                                                                  model.transform([row['featureVector']])))
+        obj_feature['dist'] = dist
+        obj_feature = obj_feature.sort_values(by="dist")
+
+        result = []
+        for index, row in islice(obj_feature.iterrows(), m):
+            rec = dict()
+            rec['imageId'] = row['imageId']
+            rec['dist'] = row['dist']
+            result.append(rec)
+        return result
