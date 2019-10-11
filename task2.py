@@ -33,6 +33,7 @@ def main():
 
     # Compute the reduced dimensions for the new query image
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)
+    # print(dim_reduction.compute_query_image(model, folder, image_name))
     result = dim_reduction.find_m_similar_images(model, m_value, folder, image_name, dist_func)
     for rec in result:
         print(rec)
