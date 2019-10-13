@@ -23,6 +23,7 @@ class GlobalConstants:
             self.MONGO_SERVER_TIMEOUT = 2000
             self.BULK_INSERT_REC_COUNT = 50
             self.DB_NAME = 'mwdb'
+            self.METADATA_DB_NAME = "metadata"
 
     class Lbp:
 
