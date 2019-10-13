@@ -12,7 +12,6 @@ This is the CLI for task 2 of Phase 2 of the project
 """
 import os
 from classes.dimensionreduction import DimensionReduction
-from classes.globalconstants import GlobalConstants
 from utils.model import Model
 from utils.imageviewer import show_images
 
@@ -31,7 +30,7 @@ def main():
 
     # Saves the returned model
     filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
-    model = model_interact.load_model(filename=os.path.join(GlobalConstants().MODELS_FOLDER, filename))
+    model = model_interact.load_model(filename=filename)
 
     # Compute the reduced dimensions for the new query image
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)

@@ -10,9 +10,7 @@ Authors:
 
 This is the CLI for task 4 of Phase 2 of the project
 """
-import os
 from classes.dimensionreduction import DimensionReduction
-from classes.globalconstants import GlobalConstants
 from utils.model import Model
 
 model_interact = Model()
@@ -32,7 +30,7 @@ def main():
     # Saves the returned model
     filename = "{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label.replace(" ", ''),
                                         str(k_value))
-    model = model_interact.load_model(filename=os.path.join(GlobalConstants().MODELS_FOLDER, filename))
+    model = model_interact.load_model(filename=filename)
 
     # Compute the reduced dimensions for the new query image and find m similar images
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value, label)
