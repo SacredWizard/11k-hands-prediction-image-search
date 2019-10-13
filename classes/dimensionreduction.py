@@ -11,16 +11,18 @@ Authors:
 This is a module for performing dimensionality reduction on images
 """
 import time
+from itertools import islice
+
+import numpy as np
 import pandas as pd
 import re
 from itertools import islice
 from scipy.linalg import svd
 from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
-from classes.featureextraction import ExtractFeatures
-from classes.global_constants import GlobalConstants
 import utils.distancemeasure
+from classes.featureextraction import ExtractFeatures
+from classes.globalconstants import GlobalConstants
 from classes.mongo import MongoWrapper
-import numpy as np
 
 
 class DimensionReduction:
@@ -155,7 +157,6 @@ class DimensionReduction:
         """
         query_reduced_dim = self.compute_query_image(model, folder, image)
         obj_feature = self.get_object_feature_matrix()
-
         dist = []
         for index, row in obj_feature.iterrows():
             dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim,

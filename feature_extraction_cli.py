@@ -106,8 +106,8 @@ def get_input_data():
             model = get_input_model()
             feature_extractor = ExtractFeatures(folder, model)
             result = feature_extractor.execute(image)
-            if model == "LBP":
-                result = [float(x) for x in result.strip('[]').split(",")]
+            # if model == "LBP":
+            #     result = [float(x) for x in result.strip('[]').split(",")]
             print(numpy.array(result))
 
         elif choice == 2:

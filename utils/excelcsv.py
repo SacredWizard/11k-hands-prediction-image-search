@@ -4,10 +4,12 @@ This is the file for interacting with CSV Files
 Author : Sumukh Ashwin Kamath
 (ASU ID - 1217728013 email - skamath6@asu.edu
 """
-import pandas
-from classes.mongo import MongoWrapper
-from classes.global_constants import GlobalConstants
 import json
+
+import pandas
+
+from classes.globalconstants import GlobalConstants
+from classes.mongo import MongoWrapper
 
 
 class CSVReader:

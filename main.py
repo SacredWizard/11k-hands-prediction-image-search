@@ -5,12 +5,13 @@ import pandas as pd
 import pymongo
 import pymongo.errors
 
-from classes import mongo, global_constants
+import task1
+from classes import mongo, globalconstants
 from classes.dimensionreduction import DimensionReduction
 from classes.mongo import MongoWrapper
 from utils import distancemeasure
 
-constants = global_constants.GlobalConstants()
+constants = globalconstants.GlobalConstants()
 connection = mongo.MongoWrapper()
 
 
@@ -72,10 +73,10 @@ def get_object_feature_matrix_pandas(type):
 def task1():
     print('Task 1\n\n')
     dimension_reduction_method = 'NMF'
-    feature_extractor = 'HOG'
+    feature_extractor = 'SIFT'
     try:
         reduction = DimensionReduction(feature_extractor, dimension_reduction_method, 10)
-        w, h = reduction.execute()
+        l, w, h = reduction.execute()
         wrapper = MongoWrapper()
         try:
             print(wrapper.save_record(feature_extractor + '_' + dimension_reduction_method, w.tolist()))
@@ -85,6 +86,8 @@ def task1():
         return w, h
     except Exception as e:
         print("Exception:\n{}".format(e))
+    pass
+
 
 def task2():
     print("Task 2")
@@ -109,8 +112,17 @@ def task2():
 
 
 def main():
-    t1 = time.time()
+    folder = 'testset2'
+    image = 'Hand_0000025.jpg'
+    model = 'SIFT'
     task1()
+    # print(x)
+
+
+    exit(0)
+
+    t1 = time.time()
+    task1.main()
     # print(task1())
     # task2()
     print("Time Taken for complete Task 1: {}".format(time.time() - t1))

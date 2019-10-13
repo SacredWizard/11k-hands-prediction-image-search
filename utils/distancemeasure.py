@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def euclidean(x, y):
+def euclidian(x, y):
     """
     Calculates the Euclidean distance between 2 vectors
     :param x: Vector 1

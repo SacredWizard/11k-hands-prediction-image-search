@@ -20,8 +20,8 @@ model_interact = Model()
 
 def main():
     """Main function for the task 2"""
-    feature_extraction_model = "HOG"
-    dimension_reduction_model = "LDA"
+    feature_extraction_model = "SIFT"
+    dimension_reduction_model = "NMF"
     folder = "testset2/"
     image_name = "Hand_0009885.jpg"
     dist_func = "euclidean"

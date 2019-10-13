@@ -18,8 +18,8 @@ model_interact = Model()
 
 def main():
     """Main function for the task 1"""
-    feature_extraction_model = "HOG"
-    dimension_reduction_model = "LDA"
+    feature_extraction_model = "SIFT"
+    dimension_reduction_model = "NMF"
     k_value = 10
 
     # Performs the dimensionality reduction
