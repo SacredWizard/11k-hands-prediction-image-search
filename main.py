@@ -74,14 +74,9 @@ def task1():
     print('Task 1\n\n')
     dimension_reduction_method = 'NMF'
     feature_extractor = 'SIFT'
-    reduction = DimensionReduction(feature_extractor, dimension_reduction_method, 10)
-    w, h = reduction.execute()
-    print('AHSHASHHSHASHHA')
-    print(w, h)
-    exit(0)
     try:
         reduction = DimensionReduction(feature_extractor, dimension_reduction_method, 10)
-        w, h = reduction.execute()
+        l, w, h = reduction.execute()
         wrapper = MongoWrapper()
         try:
             print(wrapper.save_record(feature_extractor + '_' + dimension_reduction_method, w.tolist()))
