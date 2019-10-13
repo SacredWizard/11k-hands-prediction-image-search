@@ -10,8 +10,10 @@ Authors:
 
 This is the CLI for task 2 of Phase 2 of the project
 """
+import os
 from classes.dimensionreduction import DimensionReduction
 from utils.model import Model
+from utils.imageviewer import show_images
 
 model_interact = Model()
 
@@ -36,6 +38,7 @@ def main():
     result = dim_reduction.find_m_similar_images(model, m_value, folder, image_name, dist_func)
     for rec in result:
         print(rec)
+    show_images(os.path.abspath(os.path.join(folder, image_name)), result)
 
 
 if __name__ == "__main__":
