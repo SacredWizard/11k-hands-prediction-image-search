@@ -27,6 +27,7 @@ class GlobalConstants:
             self.BULK_INSERT_REC_COUNT = 50
             self.DB_NAME = 'mwdb'
             self.SIFT_FEATURE_COLLECTION = 'sift_features'
+            self.METADATA_DB_NAME = "metadata"
 
     class Lbp:
 

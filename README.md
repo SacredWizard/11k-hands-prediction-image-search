@@ -15,7 +15,7 @@ The dependencies for this project are present in `environment.yml`
     ```shell script
     conda deactivate
     conda env update -f config/environment.yml --prune
-    conda activate CSE515
+    conda activate <env_name>
     ```
 * To remove an environment
     ```shell script
