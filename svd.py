@@ -6,17 +6,13 @@ Created on Sun Sep 29 21:55:44 2019
 @author: karishmajoseph, baani-khurana
 """
 
-from numpy import array
-from numpy import diag
-from numpy import zeros
-from numpy import argsort
-import pymongo
 import numpy as np
-
+import pymongo
+from numpy import argsort
 from scipy.linalg import svd
-from classes.global_constants import GlobalConstants
+
+from classes.globalconstants import GlobalConstants
 from classes.mongo import MongoWrapper
-from classes.featureextraction import ExtractFeatures
 
 
 def implement_svd(feature_matrix, k, feature_descriptor):

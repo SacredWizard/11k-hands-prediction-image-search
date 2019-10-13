@@ -11,15 +11,16 @@ Authors:
 This is a module for performing dimensionality reduction on images
 """
 import time
-import pandas as pd
 from itertools import islice
-from scipy.linalg import svd
-from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
-from classes.featureextraction import ExtractFeatures
-from classes.global_constants import GlobalConstants
-import utils.distancemeasure
-from classes.mongo import MongoWrapper
+
 import numpy as np
+import pandas as pd
+from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
+
+import utils.distancemeasure
+from classes.featureextraction import ExtractFeatures
+from classes.globalconstants import GlobalConstants
+from classes.mongo import MongoWrapper
 
 
 class DimensionReduction:

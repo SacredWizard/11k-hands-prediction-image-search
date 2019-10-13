@@ -1,6 +1,6 @@
 import os
 
-from classes.global_constants import GlobalConstants
+from classes.globalconstants import GlobalConstants
 
 constants = GlobalConstants()
 
