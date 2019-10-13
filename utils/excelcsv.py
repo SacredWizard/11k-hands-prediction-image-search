@@ -4,10 +4,12 @@ This is the file for interacting with CSV Files
 Author : Sumukh Ashwin Kamath
 (ASU ID - 1217728013 email - skamath6@asu.edu
 """
-import pandas
-from classes.mongo import MongoWrapper
-from classes.global_constants import GlobalConstants
 import json
+
+import pandas
+
+from classes.globalconstants import GlobalConstants
+from classes.mongo import MongoWrapper
 
 
 class CSVReader:
@@ -20,5 +22,5 @@ class CSVReader:
         """Reads the HandsInfo CSV and saves it to Mongo collection Metadata"""
         data = pandas.read_csv(filename)
         data_json = json.loads(data.to_json(orient='records'))
-        self.mongo_wrapper.drop_collection("metadata")  # Drop Metadata Collection
-        self.mongo_wrapper.bulk_insert("metadata", data_json)  # Insert new Metadata
+        self.mongo_wrapper.drop_collection(self.constants.METADATA)  # Drop Metadata Collection
+        self.mongo_wrapper.bulk_insert(self.constants.METADATA, data_json)  # Insert new Metadata

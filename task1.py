@@ -10,8 +10,10 @@ Authors:
 
 This is the CLI for task 1 of Phase 2 of the project
 """
+import os
 from classes.dimensionreduction import DimensionReduction
 from utils.model import Model
+from classes.globalconstants import GlobalConstants
 
 model_interact = Model()
 
@@ -19,7 +21,7 @@ model_interact = Model()
 def main():
     """Main function for the task 1"""
     feature_extraction_model = "HOG"
-    dimension_reduction_model = "LDA"
+    dimension_reduction_model = "NMF"
     k_value = 10
 
     # Performs the dimensionality reduction
@@ -28,7 +30,7 @@ def main():
 
     # Saves the returned model
     filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
-    model_interact.save_model(model=model, filename=filename)
+    model_interact.save_model(model=model, filename=os.path.join(GlobalConstants().MODELS_FOLDER, filename))
 
 
 if __name__ == "__main__":

@@ -32,6 +32,9 @@ class Model:
         :param filename: Filename to load the model from
         :return: The learning Model
         """
-        with open(filename, 'rb') as file:
-            model = pickle.load(file)
-        return model
+        try:
+            with open(filename, 'rb') as file:
+                model = pickle.load(file)
+            return model
+        except FileNotFoundError:
+            print("The model file is not found. Please run the previous task")
