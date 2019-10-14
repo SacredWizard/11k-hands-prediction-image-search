@@ -30,8 +30,14 @@ def get_feature_latent_semantics(feature_m, k):
     return tw
 
 
-def print_tw(data_tw, feature_tw, feature_descriptor):
+def print_tw(data_m, feature_m):
     """ prints Term Weight Pairs to console"""
+    images = data_m['imageId'].tolist()
+    data_m = np.array(data_m['reducedDimensions'].tolist())
+    data_tw = get_data_latent_semantics(data_m, data_m.shape[1], images)
+
+    feature_tw = get_feature_latent_semantics(feature_m, feature_m.shape[0])
+
     separator = "\n{}\n".format("-" * 200)
 
     print(separator)

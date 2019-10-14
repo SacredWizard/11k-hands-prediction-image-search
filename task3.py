@@ -12,6 +12,7 @@ This is the CLI for task 3 of Phase 2 of the project
 """
 from utils.excelcsv import CSVReader
 from classes.dimensionreduction import DimensionReduction
+from utils.termweight import print_tw
 from utils.model import Model
 
 model_interact = Model()
@@ -35,6 +36,9 @@ def main():
     filename = "{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label.replace(" ", ''),
                                         str(k_value))
     model_interact.save_model(model=model, filename=filename)
+
+    # Printing the term weight pairs
+    print_tw(obj_lat, feat_lat)
 
 
 if __name__ == "__main__":
