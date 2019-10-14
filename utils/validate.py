@@ -9,6 +9,10 @@ def validate_image(folder, image):
     return image.endswith(constants.JPG_EXTENSION) and os.path.isfile(os.path.join(folder, image))
 
 
+def validate_file(filename):
+    return os.path.isfile(filename)
+
+
 def validate_folder(folder):
     return os.path.isdir(folder)
 

@@ -13,7 +13,6 @@ This is a module for performing feature extraction on images
 
 import glob
 import os
-import pickle
 from multiprocessing.pool import ThreadPool
 
 import cv2
@@ -27,6 +26,7 @@ from sklearn.cluster import MiniBatchKMeans
 import utils.validate as validate
 from classes import globalconstants
 from classes import mongo
+from utils.model import Model
 
 
 class ExtractFeatures:
@@ -186,9 +186,19 @@ class ExtractFeatures:
         sft = cv2.xfeatures2d.SIFT_create()
         kp, des = sft.detectAndCompute(gray_img, None)
         if process_record:
-            return {'imageId': image_name, 'kps':
-                [{'x': k.pt[0], 'y': k.pt[1], 'size': k.size, 'angle': k.angle, 'response': k.response} for k in kp]
-                , 'featureVector': [i.tolist() for i in des]}
+            return {'imageId': image_name,
+                    'kps': [{'x': k.pt[0], 'y': k.pt[1], 'size': k.size, 'angle': k.angle, 'response': k.response}
+                            for k in kp], 'featureVector': [i.tolist() for i in des]}
+        model_file = os.path.join(self.constants.MODELS_FOLDER, "{}_{}_{}".format(
+            self.constants.MODELS_FOLDER, self.model.lower(), self.constants.BOW_MODEL.lower()))
+        if validate.validate_file(model_file):
+            model = Model()
+            knn = model.load_model(model_file)
+            histogram = np.zeros(knn.n_clusters)
+            for desc in des:
+                index = knn.predict([desc])
+                histogram[index] += 1 / len(kp)
+            return histogram
         return des
 
     def create_bog_histogram(self, overwrite=False):
@@ -199,7 +209,8 @@ class ExtractFeatures:
         mongo_wrapper = mongo.MongoWrapper()
         cursor = mongo_wrapper.find(self.model.lower() + '_features', {}, {'_id': 0, 'featureVector': 1, 'imageId': 1})
         model_file_name = "{}_{}_{}".format(self.folder, self.model.lower(), self.constants.BOW_MODEL.lower())
-        if not os.path.isfile(os.path.join(self.constants.MODELS_FOLDER, model_file_name)) or overwrite:
+        if not validate.validate_file(os.path.join(self.constants.MODELS_FOLDER, model_file_name)) or overwrite:
+            model = Model()
             max_kp_count = 0
             feature_data = {}
             feature_data_list = []
@@ -208,22 +219,21 @@ class ExtractFeatures:
                 max_kp_count = length if length > max_kp_count else max_kp_count
                 feature_data[rec['imageId']] = rec['featureVector']
             descriptor_values = feature_data.values()
-            kmeans = MiniBatchKMeans(
+            knn = MiniBatchKMeans(
                 init_size=5 * max_kp_count, n_clusters=max_kp_count, batch_size=self.constants.BOW_BATCH_SIZE). \
                 fit(np.array([item for descriptor_values in descriptor_values for item in descriptor_values]))
-            pickle.dump(kmeans, open(os.path.join(self.constants.MODELS_FOLDER, model_file_name), 'wb'))
+            model.save_model(knn, model_file_name)
             histogram_list = []
             for key in feature_data.keys():
                 descriptors = feature_data[key]
                 desc_count = len(descriptors)
                 histogram = np.zeros(max_kp_count)
                 for descriptor in descriptors:
-                    index = kmeans.predict([descriptor])
+                    index = knn.predict([descriptor])
                     histogram[index] += 1 / desc_count
                 histogram_list.append(histogram)
                 feature_data_list.append({'imageId': key, 'featureVector': histogram.tolist()})
-            pickle.dump(np.asarray(histogram_list), open(os.path.join(self.constants.MODELS_FOLDER, "{}_{}".format(
-                model_file_name, 'bow_histogram')), 'wb'))
+            model.save_model(np.asarray(histogram_list), "{}_{}".format(model_file_name, 'bow_histogram'))
             mongo_wrapper.bulk_insert(self.model.lower(), feature_data_list)
 
     def extract_features_folder(self):
