@@ -12,9 +12,13 @@ class GlobalConstants:
         self.LDA = 'LDA'
         self.FEATURE_MODELS = [self.CM, self.HOG, self.LBP, self.SIFT]
         self.REDUCTION_MODELS = [self.PCA, self.SVD, self.NMF, self.LDA]
+        self.METADATA = "metadata"
         self.WINDOW_SIZE = 100
         self.BULK_PROCESS_COUNT = 50
         self.NUM_THREADS = 4
+        self.MODELS_FOLDER = 'models'
+        self.BOW_MODEL = 'KNN'
+        self.BOW_BATCH_SIZE = 50
 
     class Mongo:
 
@@ -23,6 +27,8 @@ class GlobalConstants:
             self.MONGO_SERVER_TIMEOUT = 2000
             self.BULK_INSERT_REC_COUNT = 50
             self.DB_NAME = 'mwdb'
+            self.SIFT_FEATURE_COLLECTION = 'sift_features'
+            self.METADATA_DB_NAME = "metadata"
 
     class Lbp:
 

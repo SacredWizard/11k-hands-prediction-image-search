@@ -13,6 +13,7 @@ This is a module for performing feature extraction on images
 
 import glob
 import os
+import pickle
 from multiprocessing.pool import ThreadPool
 
 import cv2
@@ -21,9 +22,10 @@ import numpy as np
 from skimage import io, color
 from skimage.feature import hog, local_binary_pattern
 from skimage.transform import rescale
+from sklearn.cluster import MiniBatchKMeans
 
 import utils.validate as validate
-from classes import global_constants
+from classes import globalconstants
 from classes import mongo
 
 
@@ -41,7 +43,7 @@ class ExtractFeatures:
         """Init function for the Feature Extraction class"""
         if not validate.validate_folder(folder):
             raise Exception('Input Parameters are incorrect, Pass Valid Folder and Model Name')
-        self.constants = global_constants.GlobalConstants()
+        self.constants = globalconstants.GlobalConstants()
         self.folder = folder
         self.model = model
         # if image and image.endswith(self.constants.JPG_EXTENSION):
@@ -76,7 +78,6 @@ class ExtractFeatures:
     def execute(self, image=None):
         """Extract Features from Images"""
         if image:
-            # return globals()["extract_" + self.model.lower()]()
             return getattr(ExtractFeatures, "extract_{}".format(self.model.lower()))(self, image)
         else:
             self.extract_features_folder()
@@ -87,7 +88,7 @@ class ExtractFeatures:
         Three color moments are computed namely, Mean, Standard Deviation, Skew
         Image is divided into windows specified by a window size and then Color Moments are computed
         Size of a block = window_size * window_size
-        :param process_record: Convert the ouput in a form to store in the database (JSON Format)
+        :param process_record: Convert the output in a form to store in the database (JSON Format)
         :param image_name: Image ID (An Identifier for an Image)
         :param window_size: The Window size of the image used to split the image into blocks having a size of window
         :return: Computed Color Moments
@@ -95,6 +96,7 @@ class ExtractFeatures:
         if not validate.validate_image(self.folder, image_name):
             raise Exception("Image filename doesnot exist")
         # image_id = self.image
+
         img = cv2.imread(os.path.join(self.folder, image_name))
         img_yuv = self.bgr2yuv(img)
         (rows, cols) = img.shape[:2]
@@ -113,7 +115,8 @@ class ExtractFeatures:
                 v = v + [mean[2][0], std_dev[2][0], skw[2]]
 
         if process_record:
-            return {'imageId': image_name, 'featureVector': y + u + v}
+            return {'imageId': image_name, 'featureVector': y + u + v,
+                    "path": os.path.abspath(os.path.join(self.folder, image_name))}
         return y + u + v
 
     def extract_hog(self, image_name, process_record=False, show=False):
@@ -137,7 +140,8 @@ class ExtractFeatures:
             plt.imshow(hog_image)
             plt.show()
         if process_record:
-            return {'imageId': image_name, 'featureVector': fd.ravel().tolist()}
+            return {'imageId': image_name, 'featureVector': fd.ravel().tolist(),
+                    "path": os.path.abspath(os.path.join(self.folder, image_name))}
         return fd.ravel().tolist()
 
     def extract_lbp(self, image_name, process_record=False):
@@ -164,7 +168,8 @@ class ExtractFeatures:
                 lbp_list = np.append(lbp_list, window_histogram)
         lbp_list.ravel()
         if process_record:
-            return {'imageId': image_name, 'featureVector': lbp_list.tolist()}
+            return {'imageId': image_name, 'featureVector': lbp_list.tolist(),
+                    "path": os.path.abspath(os.path.join(self.folder, image_name))}
         return lbp_list.tolist()
 
     def extract_sift(self, image_name, process_record=False):
@@ -179,17 +184,51 @@ class ExtractFeatures:
         if not validate.validate_image(self.folder, image_name):
             raise Exception('File is not valid')
 
-        # image_id = image
         img = cv2.imread(os.path.join(self.folder, image_name))
         gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         sft = cv2.xfeatures2d.SIFT_create()
         kp, des = sft.detectAndCompute(gray_img, None)
-        # sift_features = [{"keyPoint": i, "x": kp[i].pt[0], "y": kp[i].pt[1], "angle": kp[i].angle,
-        #                   "size": kp[i].size, "descriptor": des[i].tolist()} for i in range(len(kp))]
-        # return {"imageId": image_id, "kpCount": len(kp), "features": sift_features}
         if process_record:
-            return {'imageId': image_name, 'featureVector': des}
+            return {'imageId': image_name, 'kps':
+                [{'x': k.pt[0], 'y': k.pt[1], 'size': k.size, 'angle': k.angle, 'response': k.response} for k in kp]
+                , 'featureVector': [i.tolist() for i in des],
+                    "path": os.path.abspath(os.path.join(self.folder, image_name))}
         return des
+
+    def create_bog_histogram(self, overwrite=False):
+        """
+        Convert Sift Features into Bag of Words Representation
+        :return:
+        """
+        mongo_wrapper = mongo.MongoWrapper()
+        cursor = mongo_wrapper.find(self.model.lower() + '_features', {}, {'_id': 0, 'featureVector': 1, 'imageId': 1})
+        model_file_name = "{}_{}_{}".format(self.folder, self.model.lower(), self.constants.BOW_MODEL.lower())
+        if not os.path.isfile(os.path.join(self.constants.MODELS_FOLDER, model_file_name)) or overwrite:
+            max_kp_count = 0
+            feature_data = {}
+            feature_data_list = []
+            for rec in cursor:
+                length = len(rec['featureVector'])
+                max_kp_count = length if length > max_kp_count else max_kp_count
+                feature_data[rec['imageId']] = rec['featureVector']
+            descriptor_values = feature_data.values()
+            kmeans = MiniBatchKMeans(
+                init_size=5 * max_kp_count, n_clusters=max_kp_count, batch_size=self.constants.BOW_BATCH_SIZE). \
+                fit(np.array([item for descriptor_values in descriptor_values for item in descriptor_values]))
+            pickle.dump(kmeans, open(os.path.join(self.constants.MODELS_FOLDER, model_file_name), 'wb'))
+            histogram_list = []
+            for key in feature_data.keys():
+                descriptors = feature_data[key]
+                desc_count = len(descriptors)
+                histogram = np.zeros(max_kp_count)
+                for descriptor in descriptors:
+                    index = kmeans.predict([descriptor])
+                    histogram[index] += 1 / desc_count
+                histogram_list.append(histogram)
+                feature_data_list.append({'imageId': key, 'featureVector': histogram.tolist()})
+            pickle.dump(np.asarray(histogram_list), open(os.path.join(self.constants.MODELS_FOLDER, "{}_{}".format(
+                model_file_name, 'bow_histogram')), 'wb'))
+            mongo_wrapper.bulk_insert(self.model.lower(), feature_data_list)
 
     def extract_features_folder(self):
         """
@@ -197,22 +236,21 @@ class ExtractFeatures:
         :return:
         """
         file_names = sorted(glob.glob1(self.folder, '*' + self.constants.JPG_EXTENSION))
-        # try:
         length = len(file_names)
         mongo_wrapper = mongo.MongoWrapper()
         for i in range(0, length, self.constants.BULK_PROCESS_COUNT):
             pool = ThreadPool(self.constants.NUM_THREADS)
-            mongo_wrapper.bulk_insert(self.model.lower(), pool.starmap(
+            mongo_wrapper.bulk_insert(self.model.lower() if self.model != self.constants.SIFT
+                                      else mongo_wrapper.constants.SIFT_FEATURE_COLLECTION, pool.starmap(
                 getattr(
                     ExtractFeatures, 'extract_' + self.model.lower()), [(self, i, True) for i in file_names[i: length]]
                 if i + self.constants.BULK_PROCESS_COUNT > length
                 else [(self, i) for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]]))
+        if self.model == self.constants.SIFT:
+            print('Processing Data for {}'.format(self.model))
+            self.create_bog_histogram()
 
             # mongo_wrapper.bulk_insert(self.model.lower(), pool.starmap(
             #     getattr(ExtractFeatures, 'extract_' + self.model.lower())(self, [i for i in file_names[i: length]]
             #     if i + self.constants.BULK_PROCESS_COUNT > length
             #     else [i for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]])))
-
-        print("Successfully Inserted Feature Vectors for {} images".format(length))
-        # except Exception as e:
-        #     print('Error:\n{}'.format(e))

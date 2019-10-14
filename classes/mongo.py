@@ -1,7 +1,7 @@
 import pymongo
 import pymongo.errors
 
-from classes import global_constants
+from classes import globalconstants
 
 
 class MongoWrapper:
@@ -12,7 +12,7 @@ class MongoWrapper:
         the constants file and use it
         :param dbname: Optional Database name
         """
-        self.constants = global_constants.GlobalConstants().Mongo()
+        self.constants = globalconstants.GlobalConstants().Mongo()
         try:
             if dbname:
                 self.mongo_client = pymongo.MongoClient(
@@ -75,6 +75,7 @@ class MongoWrapper:
         """
         try:
             self.mongo_client[collection].insert_many(records)
+            print("Successfully Inserted {} Documents in {}".format(len(records), collection))
         except pymongo.errors.BulkWriteError as e:
             print("Bulk Write Error:\n{}".format(e))
         except TypeError as e:
