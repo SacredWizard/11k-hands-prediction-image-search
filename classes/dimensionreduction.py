@@ -104,6 +104,10 @@ class DimensionReduction:
 
         if not data.size == 0:
             obj_feature = np.array(data['featureVector'].tolist())
+            if (obj_feature < 0).any():
+                print("NMF does not accept negative values")
+                return
+
             model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
                         , init=constants.INIT_MATRIX, random_state=0)
             w = model.fit_transform(obj_feature)
@@ -126,6 +130,10 @@ class DimensionReduction:
         """
         data = self.get_object_feature_matrix()
         obj_feature = np.array(data['featureVector'].tolist())
+
+        if (obj_feature < 0).any():
+            print("LDA does not accept negative values")
+            return
 
         model = LatentDirichletAllocation(n_components=self.k_value, max_iter=40, random_state=0, learning_decay=.75,
                                           learning_method='online')
