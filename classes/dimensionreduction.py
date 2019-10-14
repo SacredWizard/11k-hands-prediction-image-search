@@ -43,7 +43,7 @@ class DimensionReduction:
         :param mapping: Default: False, if mapping is True, Returns the object feature matrix with image mappings
         :return: The Object Feature Matrix
         """
-        cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {}, {'_id': 0})
+        cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
         df = pd.DataFrame(list(cursor))
 
         if self.label:
@@ -67,7 +67,7 @@ class DimensionReduction:
             raise Exception("Incorrect Label")
 
         filter_images_list = [d['imageName'] for d in list(self.mongo_wrapper.find(
-            self.constants.Mongo().METADATA_DB_NAME, query, {"imageName": 1, "_id": 0}))]
+            self.constants.METADATA, query, {"imageName": 1, "_id": 0}))]
 
         return filter_images_list
 
@@ -169,5 +169,6 @@ class DimensionReduction:
             rec = dict()
             rec['imageId'] = row['imageId']
             rec['dist'] = row['dist']
+            rec['path'] = row['path']
             result.append(rec)
         return result

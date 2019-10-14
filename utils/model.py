@@ -5,6 +5,9 @@ Author : Sumukh Ashwin Kamath
 (ASU ID - 1217728013 email - skamath6@asu.edu
 """
 import pickle
+import os
+from classes.globalconstants import GlobalConstants
+constants = GlobalConstants()
 
 
 class Model:
@@ -22,7 +25,7 @@ class Model:
         :param filename: Filename for the model
         :return:
         """
-        with open(filename, 'wb') as file:
+        with open(os.path.join(constants.MODELS_FOLDER, filename), 'wb') as file:
             pickle.dump(model, file)
 
     @staticmethod
@@ -33,7 +36,7 @@ class Model:
         :return: The learning Model
         """
         try:
-            with open(filename, 'rb') as file:
+            with open(os.path.join(constants.MODELS_FOLDER, filename), 'rb') as file:
                 model = pickle.load(file)
             return model
         except FileNotFoundError:

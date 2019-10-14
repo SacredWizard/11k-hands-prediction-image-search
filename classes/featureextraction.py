@@ -78,7 +78,6 @@ class ExtractFeatures:
     def execute(self, image=None):
         """Extract Features from Images"""
         if image:
-            # return globals()["extract_" + self.model.lower()]()
             return getattr(ExtractFeatures, "extract_{}".format(self.model.lower()))(self, image)
         else:
             self.extract_features_folder()
@@ -89,7 +88,7 @@ class ExtractFeatures:
         Three color moments are computed namely, Mean, Standard Deviation, Skew
         Image is divided into windows specified by a window size and then Color Moments are computed
         Size of a block = window_size * window_size
-        :param process_record: Convert the ouput in a form to store in the database (JSON Format)
+        :param process_record: Convert the output in a form to store in the database (JSON Format)
         :param image_name: Image ID (An Identifier for an Image)
         :param window_size: The Window size of the image used to split the image into blocks having a size of window
         :return: Computed Color Moments
@@ -115,7 +114,8 @@ class ExtractFeatures:
                 v = v + [mean[2][0], std_dev[2][0], skw[2]]
 
         if process_record:
-            return {'imageId': image_name, 'featureVector': y + u + v}
+            return {'imageId': image_name, 'featureVector': y + u + v,
+                    "path": os.path.abspath(os.path.join(self.folder, image_name))}
         return y + u + v
 
     def extract_hog(self, image_name, process_record=False, show=False):
@@ -139,7 +139,8 @@ class ExtractFeatures:
             plt.imshow(hog_image)
             plt.show()
         if process_record:
-            return {'imageId': image_name, 'featureVector': fd.ravel().tolist()}
+            return {'imageId': image_name, 'featureVector': fd.ravel().tolist(),
+                    "path": os.path.abspath(os.path.join(self.folder, image_name))}
         return fd.ravel().tolist()
 
     def extract_lbp(self, image_name, process_record=False):
@@ -166,7 +167,8 @@ class ExtractFeatures:
                 lbp_list = np.append(lbp_list, window_histogram)
         lbp_list.ravel()
         if process_record:
-            return {'imageId': image_name, 'featureVector': lbp_list.tolist()}
+            return {'imageId': image_name, 'featureVector': lbp_list.tolist(),
+                    "path": os.path.abspath(os.path.join(self.folder, image_name))}
         return lbp_list.tolist()
 
     def extract_sift(self, image_name, process_record=False):
@@ -188,7 +190,8 @@ class ExtractFeatures:
         if process_record:
             return {'imageId': image_name,
                     'kps': [{'x': k.pt[0], 'y': k.pt[1], 'size': k.size, 'angle': k.angle, 'response': k.response}
-                            for k in kp], 'featureVector': [i.tolist() for i in des]}
+                            for k in kp], 'featureVector': [i.tolist() for i in des],
+                    "path": os.path.abspath(os.path.join(self.folder, image_name))}
         model_file = os.path.join(self.constants.MODELS_FOLDER, "{}_{}_{}".format(
             self.constants.MODELS_FOLDER, self.model.lower(), self.constants.BOW_MODEL.lower()))
         if validate.validate_file(model_file):
