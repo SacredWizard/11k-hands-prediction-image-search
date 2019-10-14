@@ -10,15 +10,14 @@ Authors:
 
 This is a module for performing dimensionality reduction on images
 """
+import re
 import time
 from itertools import islice
 
 import numpy as np
 import pandas as pd
-import re
-from itertools import islice
-from scipy.linalg import svd
 from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
+
 import utils.distancemeasure
 from classes.featureextraction import ExtractFeatures
 from classes.globalconstants import GlobalConstants
@@ -44,12 +43,15 @@ class DimensionReduction:
         :return: The Object Feature Matrix
         """
         cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
-        df = pd.DataFrame(list(cursor))
+        if cursor.count() > 0:
+            df = pd.DataFrame(list(cursor))
 
-        if self.label:
-            filter_images_list = self.filter_images_by_label(df['imageId'].tolist())
-            df = df[df.imageId.isin(filter_images_list)]
-        return df
+            if self.label:
+                filter_images_list = self.filter_images_by_label(df['imageId'].tolist())
+                df = df[df.imageId.isin(filter_images_list)]
+            return df
+        else:
+            return pd.DataFrame()
 
     def filter_images_by_label(self, images_list):
         """Fetches the list of images by label"""
@@ -80,11 +82,14 @@ class DimensionReduction:
 
     def svd(self):
         data = self.get_object_feature_matrix()
+        obj_feature = np.array(data['featureVector'].tolist())
+
         k = self.k_value
-        if data is not None:
+        if obj_feature is not None:
             # Singular-value decomposition
             svd_model = TruncatedSVD(n_components=k)
-            U = svd_model.fit_transform(data)
+            U = svd_model.fit_transform(obj_feature)
+            U = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": U.tolist()})
             VT = svd_model.components_
 
             return U, VT, svd_model
@@ -96,9 +101,9 @@ class DimensionReduction:
         """
         constants = self.constants.Nmf()
         data = self.get_object_feature_matrix()
-        obj_feature = np.array(data['featureVector'].tolist())
 
         if not data.size == 0:
+            obj_feature = np.array(data['featureVector'].tolist())
             model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
                         , init=constants.INIT_MATRIX, random_state=0)
             w = model.fit_transform(obj_feature)
@@ -112,7 +117,7 @@ class DimensionReduction:
             print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
             return data_lat, h, model
         raise \
-            Exception('Data in database is empty, Run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n')
+            Exception("Data in database is empty, Run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n")
 
     def lda(self):
         """
