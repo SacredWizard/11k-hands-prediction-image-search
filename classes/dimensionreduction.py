@@ -65,7 +65,7 @@ class DimensionReduction:
             # Singular-value decomposition
             svd_model = TruncatedSVD(n_components=k)
             U = svd_model.fit_transform(obj_feature)
-            U = pd.DataFrame({"reducedDimensions": U.tolist(), "imageId": data['imageId']})
+            U = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": U.tolist()})
             VT = svd_model.components_
 
             return U, VT, svd_model
