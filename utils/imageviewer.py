@@ -27,7 +27,7 @@ def show_images(query_image, image_list):
         f.add_subplot(no_of_lines, 5, count)
         plt.imshow(io.imread(os.path.join(r['path'])))
         plt.title(
-            "{}\nDist: {}".format(r['imageId'], round(r['dist'], 5)))
+            "{}\nScore: {}%".format(r['imageId'], round(r['score'], 3)))
         plt.axis('off')
         count = count + 1
     plt.show()

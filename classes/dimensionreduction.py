@@ -163,17 +163,26 @@ class DimensionReduction:
         query_reduced_dim = self.compute_query_image(model, folder, image)
         obj_feature = self.get_object_feature_matrix()
         dist = []
+        score = []
         for index, row in obj_feature.iterrows():
             dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim,
                                                                   model.transform([row['featureVector']])))
+        for d in dist:
+            if dist_func == "nvsc1":
+                score.append(d * 100)
+            else:
+                score.append((1 - d/max(dist)) * 100)
+
         obj_feature['dist'] = dist
-        obj_feature = obj_feature.sort_values(by="dist")
+        obj_feature['score'] = score
+
+        obj_feature = obj_feature.sort_values(by="score", ascending=False)
 
         result = []
         for index, row in islice(obj_feature.iterrows(), m):
             rec = dict()
             rec['imageId'] = row['imageId']
-            rec['dist'] = row['dist']
+            rec['score'] = row['score']
             rec['path'] = row['path']
             result.append(rec)
         return result
