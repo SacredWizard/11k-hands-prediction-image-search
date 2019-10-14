@@ -32,17 +32,16 @@ def get_feature_latent_semantics(feature_m, k):
 
 def print_tw(data_tw, feature_tw, feature_descriptor):
     """ prints Term Weight Pairs to console"""
-    print()
-    print("-------------------------------------------------------------------------------------------------------------")
-    print()
-    print("Data Latent Semantics\n")
+    separator = "\n{}\n".format("-" * 200)
+
+    print(separator)
+    print("Data Latent Semantics")
+    print(separator)
     for i in range(len(data_tw)):
-        print("LS {}  -->  {}".format(i + 1, data_tw[i]))
-        print()
-    print()
-    print("-------------------------------------------------------------------------------------------------------------")
-    print()
-    print("Feature Latent Semantics\n")
+        print("LS {}  -->  {}\n".format(i + 1, data_tw[i]))
+
+    print(separator)
+    print("Feature Latent Semantics")
+    print(separator)
     for i in range(len(feature_tw)):
-        print("LS {}  -->  {}".format(i + 1, feature_tw[i]))
-        print()
+        print("LS {}  -->  {}\n".format(i + 1, feature_tw[i]))
