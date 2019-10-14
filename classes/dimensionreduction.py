@@ -43,10 +43,11 @@ class DimensionReduction:
         cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {}, {'_id': 0})
         df = pd.DataFrame(list(cursor))
 
-        if mapping:
-            return df
-        else:
-            return np.array(df['featureVector'].tolist())
+        return df
+        # if mapping:
+        #     return df
+        # else:
+        #     return np.array(df['featureVector'].tolist())
 
     def execute(self):
         """Performs dimensionality reduction"""
@@ -57,11 +58,14 @@ class DimensionReduction:
 
     def svd(self):
         data = self.get_object_feature_matrix()
+        obj_feature = np.array(data['featureVector'].tolist())
+
         k = self.k_value
-        if data is not None:
+        if obj_feature is not None:
             # Singular-value decomposition
             svd_model = TruncatedSVD(n_components=k)
-            U = svd_model.fit_transform(data)
+            U = svd_model.fit_transform(obj_feature)
+            U = pd.DataFrame({"reducedDimensions": U.tolist(), "imageId": data['imageId']})
             VT = svd_model.components_
 
             return U, VT, svd_model
