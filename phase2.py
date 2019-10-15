@@ -23,19 +23,9 @@ def main():
 
     dim_reduce = DimensionReduction(feature_descriptor, dr_method, k)
     data_m, feature_m, model = dim_reduce.execute()
-    
-    images = data_m['imageId'].tolist()
-    data_m = data_m['reducedDimensions'].tolist()
-    data_m = np.array(data_m)
-
-    # gets data term weight pairs
-    data_tw = tw.get_data_latent_semantics(data_m, k, images)
-
-    # gets feature term weight pairs
-    feature_tw = tw.get_feature_latent_semantics(feature_m, k)
 
     # prints all term weight pairs
-    tw.print_tw(data_tw, feature_tw, feature_descriptor)
+    tw.print_tw(data_m, feature_m)
 
 
 if __name__ == "__main__":
