@@ -13,14 +13,16 @@ This is the CLI for task 1 of Phase 2 of the project
 from classes.dimensionreduction import DimensionReduction
 from utils.termweight import print_tw
 from utils.model import Model
-
+from utils.excelcsv import CSVReader
+import pandas as pd
+import numpy as np
 model_interact = Model()
 
 
 def main():
     """Main function for the task 1"""
     feature_extraction_model = "HOG"
-    dimension_reduction_model = "NMF"
+    dimension_reduction_model = "LDA"
     k_value = 10
 
     # Performs the dimensionality reduction
@@ -31,9 +33,12 @@ def main():
     filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
     model_interact.save_model(model=model, filename=filename)
 
-    # Printing the term weight pairs
+    # Print term weight pairs to terminal  
     print_tw(obj_lat, feat_lat)
 
+    # save term weight pairs to csv  
+    filename = "task1"+feature_extraction_model+'_'+dimension_reduction_model+'_'+str(k_value)
+    CSVReader().save_to_csv(obj_lat, feat_lat, filename)
 
 if __name__ == "__main__":
     main()

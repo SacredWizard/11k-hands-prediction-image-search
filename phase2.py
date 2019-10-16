@@ -18,8 +18,8 @@ import numpy as np
 def main():
     """Main function for Phase 2"""
 
-    feature_descriptor = "LBP"
-    dr_method = "NMF"
+    feature_descriptor = "CM"
+    dr_method = "PCA"
     k = 5
 
     dim_reduce = DimensionReduction(feature_descriptor, dr_method, k)
@@ -30,7 +30,7 @@ def main():
 
     # save term weight pairs to csv  
     excsv = CSVReader()
-    excsv.save_to_csv(data_tw, feature_tw)
+    excsv.save_to_csv(data_m, feature_m)
 
 if __name__ == "__main__":
     main()

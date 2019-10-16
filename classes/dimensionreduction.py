@@ -16,7 +16,8 @@ from itertools import islice
 
 import numpy as np
 import pandas as pd
-from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
+from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD, PCA
+from sklearn.preprocessing import normalize
 
 import utils.distancemeasure
 from classes.featureextraction import ExtractFeatures
@@ -77,8 +78,37 @@ class DimensionReduction:
         """Performs dimensionality reduction"""
         return getattr(DimensionReduction, self.dimension_reduction_model.lower())(self)
 
+    # method to perform Principal Component Analysis on n-dimensional features 
     def pca(self):
-        pass
+        data = self.get_object_feature_matrix()
+        # get object-feature vectors matrix
+        data_feature_matrix = np.array(data['featureVector'].tolist())
+        k = self.k_value
+        if not data_feature_matrix.size == 0:
+            # normalize feature vector data for PCA
+            normalize(data_feature_matrix)
+            # apply PCA to features
+            features_pca_decomposition = PCA(n_components=k,copy=False)
+            features_pca_decomposition.fit_transform(data_feature_matrix)
+            # get latent feature components
+            feature_components = features_pca_decomposition.components_
+            
+            data_pca_decomposition = PCA(n_components=k,copy=False)
+            # transpose matrix to feature-data matrix
+            feature_data_matrix = np.transpose(data_feature_matrix)
+            # normalize feature vector data for PCA
+            normalize(feature_data_matrix)
+            # apply PCA to features
+            fit = data_pca_decomposition.fit_transform(feature_data_matrix)
+            # get latent data components
+            data_components = np.transpose(data_pca_decomposition.components_)
+            # map imageID with principal components
+            img_dim_mapping = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": data_components.tolist()})
+            return img_dim_mapping, feature_components, features_pca_decomposition
+        raise \
+            Exception("Data is empty in database, run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n")
+        # 
+        
 
     def svd(self):
         data = self.get_object_feature_matrix()
