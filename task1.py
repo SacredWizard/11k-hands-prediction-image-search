@@ -37,7 +37,7 @@ def main():
     print_tw(obj_lat, feat_lat)
 
     # save term weight pairs to csv  
-    filename = "task1"+feature_extraction_model+'_'+dimension_reduction_model+'_'+str(k_value)
+    filename = "task1"+'_'+feature_extraction_model+'_'+dimension_reduction_model+'_'+str(k_value)
     CSVReader().save_to_csv(obj_lat, feat_lat, filename)
 
 if __name__ == "__main__":
