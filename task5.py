@@ -71,24 +71,24 @@ def main():
     image_name = "Hand_0003521.jpg"
     dist_func = "euclidean"
     k_value = 10
-    m_value = 5
+    m_value = 1
     label = "male"
 
     class1_label, class2_label = get_class_labels(label)
 
     run_task3(feature_extraction_model, dimension_reduction_model, folder, dist_func, class1_label, k_value)
     result1 = run_task4(feature_extraction_model, dimension_reduction_model, query_folder, image_name, dist_func, class1_label, k_value, m_value)
-    for rec in result1:
-        print(rec['score'])
+    # for rec in result1:
+    #     print(rec['score'])
     class1_score = result1[0]['score']
-    print(class1_score)
+    # print(class1_score)
 
     run_task3(feature_extraction_model, dimension_reduction_model, folder, dist_func, class2_label, k_value)
     result2 = run_task4(feature_extraction_model, dimension_reduction_model, query_folder, image_name, dist_func, class2_label, k_value, m_value)
-    for rec in result2:
-        print(rec['score'])
+    # for rec in result2:
+    #     print(rec['score'])
     class2_score = result2[0]['score']
-    print(class2_score)
+    # print(class2_score)
 
     final_label = class1_label if class1_score > class2_score else class2_label
 
