@@ -11,6 +11,7 @@ Authors:
 This is a module for performing feature extraction on images
 """
 import utils.termweight as tw
+from utils.excelcsv import CSVReader
 from classes.dimensionreduction import DimensionReduction
 import numpy as np
 
@@ -18,8 +19,8 @@ def main():
     """Main function for Phase 2"""
 
     feature_descriptor = "CM"
-    dr_method = "SVD"
-    k = 3
+    dr_method = "PCA"
+    k = 5
 
     dim_reduce = DimensionReduction(feature_descriptor, dr_method, k)
     data_m, feature_m, model = dim_reduce.execute()
@@ -27,6 +28,9 @@ def main():
     # prints all term weight pairs
     tw.print_tw(data_m, feature_m)
 
+    # save term weight pairs to csv  
+    excsv = CSVReader()
+    excsv.save_to_csv(data_m, feature_m)
 
 if __name__ == "__main__":
     main()
