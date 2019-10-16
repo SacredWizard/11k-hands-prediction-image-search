@@ -255,7 +255,7 @@ class ExtractFeatures:
                 getattr(
                     ExtractFeatures, 'extract_' + self.model.lower()), [(self, i, True) for i in file_names[i: length]]
                 if i + self.constants.BULK_PROCESS_COUNT > length
-                else [(self, i) for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]]))
+                else [(self, i, True) for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]]))
         if self.model == self.constants.SIFT:
             print('Processing Data for {}'.format(self.model))
             self.create_bog_histogram()
