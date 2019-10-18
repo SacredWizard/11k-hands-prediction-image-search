@@ -9,9 +9,10 @@ import matplotlib.pyplot as plt
 from skimage import io
 
 
-def show_images(query_image, image_list):
+def show_images(query_image, image_list, title):
     """Visualizer for the images"""
     f = plt.figure()
+    f.suptitle(title, fontsize=20)
 
     no_images_per_row = 5
     no_of_lines = int(len(image_list) / no_images_per_row + 1)

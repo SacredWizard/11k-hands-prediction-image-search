@@ -78,8 +78,8 @@ class DimensionReduction:
         """Performs dimensionality reduction"""
         return getattr(DimensionReduction, self.dimension_reduction_model.lower())(self)
 
-    # method to perform Principal Component Analysis on n-dimensional features 
     def pca(self):
+        # method to perform Principal Component Analysis on n-dimensional features
         data = self.get_object_feature_matrix()
         # get object-feature vectors matrix
         data_feature_matrix = np.array(data['featureVector'].tolist())
@@ -108,7 +108,6 @@ class DimensionReduction:
         raise \
             Exception("Data is empty in database, run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n")
         # 
-        
 
     def svd(self):
         data = self.get_object_feature_matrix()
@@ -165,8 +164,8 @@ class DimensionReduction:
             print("LDA does not accept negative values")
             return
 
-        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=40, random_state=0, learning_decay=.75,
-                                          learning_method='online')
+        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=10, random_state=0,
+                                          learning_method='online', n_jobs=1, batch_size=512)
         # topic_word_prior=0.05, doc_topic_prior=0.01)#learning_method='online')
         lda_transformed = model.fit_transform(obj_feature)
         data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": lda_transformed.tolist()})
@@ -213,8 +212,8 @@ class DimensionReduction:
         dist = []
         score = []
         for index, row in obj_feature.iterrows():
-            dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim,
-                                                                  model.transform([row['featureVector']])))
+            dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim[0],
+                                                                  model.transform([row['featureVector']])[0]))
         for d in dist:
             if dist_func == "nvsc1":
                 score.append(d * 100)
