@@ -198,8 +198,18 @@ class DimensionReduction:
         :param dist_func: Distance function to be used
         :return: m similar images with their scores
         """
-        query_reduced_dim = self.compute_query_image(model, folder, image)
+        
         obj_feature = self.get_object_feature_matrix()
+        metadata = pd.DataFrame()
+        if folder == '':
+            query_image = (obj_feature.loc[obj_feature['imageId'] == image])["featureVector"]
+            query_reduced_dim = model.transform([(query_image.tolist())[0]])
+
+            cursor = self.mongo_wrapper.find(self.constants.METADATA, {})
+            if cursor.count() > 0:
+                metadata = pd.DataFrame(list(cursor))
+        else:
+            query_reduced_dim = self.compute_query_image(model, folder, image)
         dist = []
         score = []
         for index, row in obj_feature.iterrows():
@@ -222,5 +232,16 @@ class DimensionReduction:
             rec['imageId'] = row['imageId']
             rec['score'] = row['score']
             rec['path'] = row['path']
+            if not metadata.empty:
+                rec['subject'] = ((metadata.loc[metadata['imageName'] == row['imageId']])['id']).tolist()[0]
             result.append(rec)
         return result
+
+    def get_metadata(self, column, values):
+        query = {column: {"$in": values}}
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, query)
+        if cursor.count() > 0:
+            df = pd.DataFrame(list(cursor))
+            return df
+        else:
+            return pd.DataFrame()
