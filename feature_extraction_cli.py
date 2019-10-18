@@ -9,6 +9,7 @@ import argparse
 import os
 import sys
 import warnings
+from utils.inputhelper import get_input_feature_extractor_model, get_input_image, get_input_folder
 
 import numpy
 
@@ -21,49 +22,6 @@ def numpy_set_params():
     """Set limits for numpy"""
     numpy.set_printoptions(suppress=True)
     numpy.set_printoptions(threshold=sys.maxsize)
-
-
-def get_input_folder():
-    """Get input from User for folder"""
-    folder = str(input("Enter the folder path: "))
-    if not folder or not os.path.isdir(folder):
-        print("Please enter a valid folder path")
-        return get_input_folder()
-    return folder
-
-
-def get_input_image(folder):
-    """Get input from User for image"""
-    image = str(input("Enter the Image filename: "))
-    formats = [".jpeg", ".png", ".jpg"]
-    if not image or not os.path.isfile(os.path.join(folder, image)):
-        print("The image does not exist in the folder")
-        return get_input_image(folder)
-    elif not image.endswith(tuple(formats)):
-        print("Please enter a valid Image name")
-        return get_input_image(folder)
-    return image
-
-
-def get_input_model():
-    """Gets the Input Model"""
-    try:
-        model = int(input("Enter the model name: Choices:\n1. CM\n2. HOG\n3. SIFT\n4. LBP\n"))
-        if model not in [1, 2, 3, 4]:
-            print("Please enter a valid choice")
-            return get_input_model()
-        elif model == 1:
-            model = "CM"
-        elif model == 2:
-            model = "HOG"
-        elif model == 3:
-            model = "SIFT"
-        elif model == 4:
-            model = "LBP"
-        return model
-    except ValueError as exp:
-        print("Enter a valid choice")
-        return get_input_model()
 
 
 def get_input_dist():
@@ -103,7 +61,7 @@ def get_input_data():
         if choice == 1:
             folder = get_input_folder()
             image = get_input_image(folder)
-            model = get_input_model()
+            model = get_input_feature_extractor_model()
             feature_extractor = ExtractFeatures(folder, model)
             result = feature_extractor.execute(image)
             # if model == "LBP":
@@ -112,7 +70,7 @@ def get_input_data():
 
         elif choice == 2:
             folder = get_input_folder()
-            model = get_input_model()
+            model = get_input_feature_extractor_model()
 
             feature_extractor = ExtractFeatures(folder, model)
             feature_extractor.execute()

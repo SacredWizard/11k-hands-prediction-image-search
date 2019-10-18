@@ -38,7 +38,10 @@ def main():
     result = dim_reduction.find_m_similar_images(model, m_value, folder, image_name, dist_func)
     for rec in result:
         print(rec)
-    show_images(os.path.abspath(os.path.join(folder, image_name)), result)
+    title = "Feature Extraction Model: {}   Dimensionality Reduction: {}   k value: {} Distance: {}".\
+            format(feature_extraction_model, dimension_reduction_model, k_value, dist_func)
+
+    show_images(os.path.abspath(os.path.join(folder, image_name)), result, title)
 
 
 if __name__ == "__main__":
