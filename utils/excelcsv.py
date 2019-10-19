@@ -60,8 +60,8 @@ class CSVReader:
                 csv_writer.writerow(["Data Latent Semantics"])
             csv_writer.writerows(self.prepare_rows(data_tw))
             if not subject_subject:
-                feature_tw = tw.get_feature_latent_semantics(feature_latent_semantics,
-                                                             feature_latent_semantics.shape[0])
+                feature_tw = tw.get_feature_latent_semantics(feature_latent_semantics, feature_latent_semantics.
+                                                             shape[0], image_metadata=image_metadata)
                 if image_metadata:
                     csv_writer.writerow(["LS in Metadata Space"])
                 else:
