@@ -35,10 +35,12 @@ def show_images(query_image, image_list, title):
 
 def show_subjectwise_images(subjects_with_scores, similar_subjects_images):
     # array of sub-plotss
-    nrows, ncols = len(similar_subjects_images), (max(len(l) for l in similar_subjects_images))
+    maximages = 5
+    nrows, ncols = len(similar_subjects_images), maximages
     figsize = [10,10]     # figure size, inches
     # create figure (fig), and array of axes (ax)
     fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, sharey=True)
+    # max images to display per subject
     # plot images on each sub-plot
     for i,images_for_subject in enumerate(similar_subjects_images):
         # add subject ID and similarity score
@@ -52,8 +54,10 @@ def show_subjectwise_images(subjects_with_scores, similar_subjects_images):
             ax_subplot.imshow(io.imread(image))
             ax_subplot.set_title("{0}".format(str(os.path.basename(image))))
             ax_subplot.axis('off')
+            if j >= maximages-1:
+                break
         # turn off axis and markings  
-        while j < ncols:
+        while j < maximages:
             ax_subplot = (ax[i][j])
             ax_subplot.axis('off')
             j+=1

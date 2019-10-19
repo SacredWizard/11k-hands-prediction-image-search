@@ -40,7 +40,7 @@ class CSVReader:
         return result
 
     # method to save latent semantics to csv
-    def save_to_csv(self, data_latent_semantics, feature_latent_semantics, filename):
+    def save_to_csv(self, data_latent_semantics, feature_latent_semantics, filename, subject_subject=False):
         current_path = path.dirname(path.dirname(path.realpath(__file__)))
         _finalPath = path.join(current_path,"output")
         if not path.exists(_finalPath):
@@ -48,10 +48,15 @@ class CSVReader:
         images = data_latent_semantics['imageId'].tolist()
         data_latent_semantics = np.array(data_latent_semantics['reducedDimensions'].tolist())
         data_tw = tw.get_data_latent_semantics(data_latent_semantics, data_latent_semantics.shape[1], images)
-        feature_tw = tw.get_feature_latent_semantics(feature_latent_semantics, feature_latent_semantics.shape[0])
+        if not subject_subject:
+            feature_tw = tw.get_feature_latent_semantics(feature_latent_semantics, feature_latent_semantics.shape[0])
         with open(path.join(_finalPath, filename+".csv"), mode='w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=",")
-            csv_writer.writerow(["Data Latent Semantics"])
+            if not subject_subject:
+                csv_writer.writerow(["Data Latent Semantics"])
+            else:
+                csv_writer.writerow(["Top-k Latent Semantics"])
             csv_writer.writerows(self.prepare_rows(data_tw))
-            csv_writer.writerow(["Feature Latent Semantics"])
-            csv_writer.writerows(self.prepare_rows(feature_tw))
+            if not subject_subject:
+                csv_writer.writerow(["Feature Latent Semantics"])
+                csv_writer.writerows(self.prepare_rows(feature_tw))

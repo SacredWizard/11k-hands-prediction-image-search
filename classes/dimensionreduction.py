@@ -30,7 +30,7 @@ class DimensionReduction:
     Class for performing Dimensionality Reduction
     """
     def __init__(self, extractor_model, dimension_reduction_model, k_value, label=None, image_metadata=False,
-                 subject_subject=None, folder_metadata=None):
+                 subject_subject=False, folder_metadata=None, matrix=None):
         self.constants = GlobalConstants()
         self.mongo_wrapper = MongoWrapper(self.constants.Mongo().DB_NAME)
         self.extractor_model = extractor_model
@@ -40,6 +40,7 @@ class DimensionReduction:
         self.binary_image_metadata = image_metadata
         self.subject_subject = subject_subject
         self.folder_metadata = folder_metadata
+        self.matrix = matrix
 
     def get_object_feature_matrix(self):
         """
@@ -166,7 +167,7 @@ class DimensionReduction:
         if self.binary_image_metadata:
             data = self.get_binary_image_metadata_matrix()
         elif self.subject_subject:
-            data = self.subject_subject
+            data = self.matrix
         else:
             data = self.get_object_feature_matrix()
 
@@ -182,9 +183,9 @@ class DimensionReduction:
             h = model.components_
             tt1 = time.time()
             data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": w.tolist()})
-            for i in range(h.shape[0]):
-                print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
-                                                                    key=lambda x: x[1], reverse=True)))
+            # for i in range(h.shape[0]):
+            #     print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
+            #                                                         key=lambda x: x[1], reverse=True)))
 
             print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
             return data_lat, h, model

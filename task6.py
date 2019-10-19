@@ -1,4 +1,3 @@
-
 from classes.dimensionreduction import DimensionReduction
 from utils.model import Model
 from utils.excelcsv import CSVReader
@@ -12,6 +11,7 @@ import operator
 import os
 import utils.imageviewer as imgvwr
 import task1 as task1
+import time
 
 model_interact = Model()
 mongo_wrapper = MongoWrapper(GlobalConstants().Mongo().DB_NAME)
@@ -26,6 +26,9 @@ obj_feat_matrix = dim_reduction.get_object_feature_matrix()
 # extract model saved from task 1
 filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
 model = model_interact.load_model(filename=filename)
+if model is None:
+    task1.save_model(dim_reduction,feature_extraction_model,dimension_reduction_model,k_value)
+    model = model_interact.load_model(filename=filename)
 # get the img IDs from the database for images in the fit model
 img_set = pd.DataFrame({"imageId": obj_feat_matrix['imageId']})
 # image count to rank against current image
@@ -53,10 +56,10 @@ def find_similar_subjects(given_subject_id):
         for subject in dataset_subject_ids:
             # get the list of similarity scores for each subject against given image
             list_image_subject_scores = list( (float(d['score']) for d in image_image_distances if int(d['subject']) == subject))
-            # take an average of subject similarity score to each image of given subject 
-            mean_image_subject_scores = max(list_image_subject_scores)
+            # take max similarity score of images of each subject as image-subject score 
+            max_image_subject_scores = max(list_image_subject_scores)
             # get all the similarity scores for all images of given subject with each subject in database
-            distance_for_subject.append({"subject":subject , "score":mean_image_subject_scores})
+            distance_for_subject.append({"subject":subject , "score":max_image_subject_scores})
     subject_similarity = {}
     for subject in dataset_subject_ids:
         # get the average subject-subject similarity scores
@@ -70,6 +73,8 @@ def main():
     given_subject_id = get_input_subject_id()
     # similar subjects to find
     similar_subject_count = 3
+    starttime = time.time()
+
     # method call to find similar subjects
     subject_similarity = find_similar_subjects(given_subject_id)
     sorted_subject_similarity = sorted(subject_similarity.items(), key=operator.itemgetter(1), reverse=True)
@@ -90,6 +95,7 @@ def main():
 
     image_list_for_similar_subjects_abs_path = []
     similarity_scores = []
+    path = os.path.dirname(obj_feat_matrix['path'][0])
     # create list of images for each subject to visualize most similar subjects
     for subject in (sorted_subject_similarity):
         metadata = dim_reduction.get_metadata("id", list([subject[0]]))
@@ -97,7 +103,7 @@ def main():
         image_list_for_similar_subject = list(set(metadata["imageName"].tolist()).intersection(set(img_set["imageId"].tolist())))
         image_list_for_one_similar_subject_abs_path = []
         for image in image_list_for_similar_subject:
-            image_list_for_one_similar_subject_abs_path.append((os.path.abspath(os.path.join("Dataset2",image))))
+            image_list_for_one_similar_subject_abs_path.append((os.path.join(path,image)))
 
         image_list_for_similar_subjects_abs_path.append(image_list_for_one_similar_subject_abs_path)
         similar_subject_count -=1
@@ -105,6 +111,8 @@ def main():
             break
     # show images on a plot
     imgvwr.show_subjectwise_images(list_subjects, image_list_for_similar_subjects_abs_path)
+
+    print("\nTime taken for task 6: {}\n".format(time.time() - starttime))
 
 if __name__ == "__main__":
     main()
