@@ -9,9 +9,10 @@ import matplotlib.pyplot as plt
 from skimage import io
 
 
-def show_images(query_image, image_list):
+def show_images(query_image, image_list, title):
     """Visualizer for the images"""
     f = plt.figure()
+    f.suptitle(title, fontsize=20)
 
     no_images_per_row = 5
     no_of_lines = int(len(image_list) / no_images_per_row + 1)
@@ -27,7 +28,7 @@ def show_images(query_image, image_list):
         f.add_subplot(no_of_lines, 5, count)
         plt.imshow(io.imread(os.path.join(r['path'])))
         plt.title(
-            "{}\nDist: {}".format(r['imageId'], round(r['dist'], 5)))
+            "{}\nScore: {}%".format(r['imageId'], round(r['score'], 3)))
         plt.axis('off')
         count = count + 1
     plt.show()

@@ -14,19 +14,21 @@ import os
 from classes.dimensionreduction import DimensionReduction
 from utils.model import Model
 from utils.imageviewer import show_images
+from utils.inputhelper import get_input_k, get_input_feature_extractor_model, \
+    get_input_dimensionality_reduction_model, get_input_folder, get_input_image, get_input_m
 
 model_interact = Model()
 
 
 def main():
     """Main function for the task 2"""
-    feature_extraction_model = "HOG"
-    dimension_reduction_model = "NMF"
-    folder = "testset2/"
-    image_name = "Hand_0009885.jpg"
+    feature_extraction_model = get_input_feature_extractor_model()
+    dimension_reduction_model = get_input_dimensionality_reduction_model()
+    k_value = get_input_k()
+    folder = get_input_folder()
+    image_name = get_input_image(folder)
+    m_value = get_input_m()
     dist_func = "euclidean"
-    k_value = 10
-    m_value = 5
 
     # Saves the returned model
     filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
@@ -38,7 +40,10 @@ def main():
     result = dim_reduction.find_m_similar_images(model, m_value, folder, image_name, dist_func)
     for rec in result:
         print(rec)
-    show_images(os.path.abspath(os.path.join(folder, image_name)), result)
+    title = "Feature Extraction Model: {}   Dimensionality Reduction: {}   k value: {} Distance: {}".\
+            format(feature_extraction_model, dimension_reduction_model, k_value, dist_func)
+
+    show_images(os.path.abspath(os.path.join(folder, image_name)), result, title)
 
 
 if __name__ == "__main__":

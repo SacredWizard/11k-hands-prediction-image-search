@@ -11,6 +11,7 @@ Authors:
 This is a module for performing feature extraction on images
 """
 import utils.termweight as tw
+from utils.excelcsv import CSVReader
 from classes.dimensionreduction import DimensionReduction
 import numpy as np
 
@@ -18,25 +19,18 @@ def main():
     """Main function for Phase 2"""
 
     feature_descriptor = "CM"
-    dr_method = "SVD"
-    k = 3
+    dr_method = "PCA"
+    k = 5
 
     dim_reduce = DimensionReduction(feature_descriptor, dr_method, k)
     data_m, feature_m, model = dim_reduce.execute()
-    
-    images = data_m['imageId'].tolist()
-    data_m = data_m['reducedDimensions'].tolist()
-    data_m = np.array(data_m)
-
-    # gets data term weight pairs
-    data_tw = tw.get_data_latent_semantics(data_m, k, images)
-
-    # gets feature term weight pairs
-    feature_tw = tw.get_feature_latent_semantics(feature_m, k)
 
     # prints all term weight pairs
-    tw.print_tw(data_tw, feature_tw, feature_descriptor)
+    tw.print_tw(data_m, feature_m)
 
+    # save term weight pairs to csv  
+    excsv = CSVReader()
+    excsv.save_to_csv(data_m, feature_m)
 
 if __name__ == "__main__":
     main()

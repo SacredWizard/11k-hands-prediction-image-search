@@ -3,5 +3,7 @@
 .idea/*
 .DS_Store
 __pycache__/*
-*/__pycache__/*
+.vscode/*
+output/
 models/
+*/__pycache__/*

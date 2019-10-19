@@ -16,7 +16,8 @@ from itertools import islice
 
 import numpy as np
 import pandas as pd
-from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD
+from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD, PCA
+from sklearn.preprocessing import normalize
 
 import utils.distancemeasure
 from classes.featureextraction import ExtractFeatures
@@ -78,7 +79,35 @@ class DimensionReduction:
         return getattr(DimensionReduction, self.dimension_reduction_model.lower())(self)
 
     def pca(self):
-        pass
+        # method to perform Principal Component Analysis on n-dimensional features
+        data = self.get_object_feature_matrix()
+        # get object-feature vectors matrix
+        data_feature_matrix = np.array(data['featureVector'].tolist())
+        k = self.k_value
+        if not data_feature_matrix.size == 0:
+            # normalize feature vector data for PCA
+            normalize(data_feature_matrix)
+            # apply PCA to features
+            features_pca_decomposition = PCA(n_components=k,copy=False)
+            features_pca_decomposition.fit_transform(data_feature_matrix)
+            # get latent feature components
+            feature_components = features_pca_decomposition.components_
+            
+            data_pca_decomposition = PCA(n_components=k,copy=False)
+            # transpose matrix to feature-data matrix
+            feature_data_matrix = np.transpose(data_feature_matrix)
+            # normalize feature vector data for PCA
+            normalize(feature_data_matrix)
+            # apply PCA to features
+            fit = data_pca_decomposition.fit_transform(feature_data_matrix)
+            # get latent data components
+            data_components = np.transpose(data_pca_decomposition.components_)
+            # map imageID with principal components
+            img_dim_mapping = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": data_components.tolist()})
+            return img_dim_mapping, feature_components, features_pca_decomposition
+        raise \
+            Exception("Data is empty in database, run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n")
+        # 
 
     def svd(self):
         data = self.get_object_feature_matrix()
@@ -104,6 +133,10 @@ class DimensionReduction:
 
         if not data.size == 0:
             obj_feature = np.array(data['featureVector'].tolist())
+            if (obj_feature < 0).any():
+                print("NMF does not accept negative values")
+                return
+
             model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
                         , init=constants.INIT_MATRIX, random_state=0)
             w = model.fit_transform(obj_feature)
@@ -127,8 +160,12 @@ class DimensionReduction:
         data = self.get_object_feature_matrix()
         obj_feature = np.array(data['featureVector'].tolist())
 
-        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=40, random_state=0, learning_decay=.75,
-                                          learning_method='online')
+        if (obj_feature < 0).any():
+            print("LDA does not accept negative values")
+            return
+
+        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=10, random_state=0,
+                                          learning_method='online', n_jobs=1, batch_size=512)
         # topic_word_prior=0.05, doc_topic_prior=0.01)#learning_method='online')
         lda_transformed = model.fit_transform(obj_feature)
         data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": lda_transformed.tolist()})
@@ -160,20 +197,50 @@ class DimensionReduction:
         :param dist_func: Distance function to be used
         :return: m similar images with their scores
         """
-        query_reduced_dim = self.compute_query_image(model, folder, image)
+        
         obj_feature = self.get_object_feature_matrix()
+        metadata = pd.DataFrame()
+        if folder == '':
+            query_image = (obj_feature.loc[obj_feature['imageId'] == image])["featureVector"]
+            query_reduced_dim = model.transform([(query_image.tolist())[0]])
+
+            cursor = self.mongo_wrapper.find(self.constants.METADATA, {})
+            if cursor.count() > 0:
+                metadata = pd.DataFrame(list(cursor))
+        else:
+            query_reduced_dim = self.compute_query_image(model, folder, image)
         dist = []
+        score = []
         for index, row in obj_feature.iterrows():
-            dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim,
-                                                                  model.transform([row['featureVector']])))
+            dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim[0],
+                                                                  model.transform([row['featureVector']])[0]))
+        for d in dist:
+            if dist_func == "nvsc1":
+                score.append(d * 100)
+            else:
+                score.append((1 - d/max(dist)) * 100)
+
         obj_feature['dist'] = dist
-        obj_feature = obj_feature.sort_values(by="dist")
+        obj_feature['score'] = score
+
+        obj_feature = obj_feature.sort_values(by="score", ascending=False)
 
         result = []
         for index, row in islice(obj_feature.iterrows(), m):
             rec = dict()
             rec['imageId'] = row['imageId']
-            rec['dist'] = row['dist']
+            rec['score'] = row['score']
             rec['path'] = row['path']
+            if not metadata.empty:
+                rec['subject'] = ((metadata.loc[metadata['imageName'] == row['imageId']])['id']).tolist()[0]
             result.append(rec)
         return result
+
+    def get_metadata(self, column, values):
+        query = {column: {"$in": values}}
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, query)
+        if cursor.count() > 0:
+            df = pd.DataFrame(list(cursor))
+            return df
+        else:
+            return pd.DataFrame()

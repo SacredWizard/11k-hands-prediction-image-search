@@ -12,6 +12,8 @@ class GlobalConstants:
         self.LDA = 'LDA'
         self.FEATURE_MODELS = [self.CM, self.HOG, self.LBP, self.SIFT]
         self.REDUCTION_MODELS = [self.PCA, self.SVD, self.NMF, self.LDA]
+        self.image_labels = ["dorsal", "palmar", "left-hand", "right-hand", "with accessories", "without accessories",
+                             "male", "female"]
         self.METADATA = "metadata"
         self.WINDOW_SIZE = 100
         self.BULK_PROCESS_COUNT = 50

@@ -12,17 +12,20 @@ This is the CLI for task 3 of Phase 2 of the project
 """
 from utils.excelcsv import CSVReader
 from classes.dimensionreduction import DimensionReduction
+from utils.termweight import print_tw
 from utils.model import Model
+from utils.inputhelper import get_input_k, get_input_dimensionality_reduction_model, \
+    get_input_feature_extractor_model, get_input_image_label
 
 model_interact = Model()
 
 
 def main():
     """Main function for the Task3"""
-    feature_extraction_model = "HOG"
-    dimension_reduction_model = "LDA"
-    label = "with accessories"
-    k_value = 10
+    feature_extraction_model = get_input_feature_extractor_model()
+    dimension_reduction_model = get_input_dimensionality_reduction_model()
+    k_value = get_input_k()
+    label = get_input_image_label()
 
     excel_reader = CSVReader()
     excel_reader.save_hand_csv_mongo("HandInfo.csv")
@@ -35,6 +38,9 @@ def main():
     filename = "{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label.replace(" ", ''),
                                         str(k_value))
     model_interact.save_model(model=model, filename=filename)
+
+    # Printing the term weight pairs
+    print_tw(obj_lat, feat_lat)
 
 
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ class ExtractFeatures:
         if not validate.validate_folder(folder):
             raise Exception('Input Parameters are incorrect, Pass Valid Folder and Model Name')
         self.constants = globalconstants.GlobalConstants()
-        self.folder = folder
+        self.folder = folder.strip("/")
         self.model = model
         # if image and image.endswith(self.constants.JPG_EXTENSION):
         #     try:
@@ -192,9 +192,9 @@ class ExtractFeatures:
                     'kps': [{'x': k.pt[0], 'y': k.pt[1], 'size': k.size, 'angle': k.angle, 'response': k.response}
                             for k in kp], 'featureVector': [i.tolist() for i in des],
                     "path": os.path.abspath(os.path.join(self.folder, image_name))}
-        model_file = os.path.join(self.constants.MODELS_FOLDER, "{}_{}_{}".format(
-            self.constants.MODELS_FOLDER, self.model.lower(), self.constants.BOW_MODEL.lower()))
-        if validate.validate_file(model_file):
+        model_file = "{}_{}_{}".format(self.folder, self.model.lower(), self.constants.BOW_MODEL.lower())
+
+        if validate.validate_file(os.path.join(self.constants.MODELS_FOLDER, model_file)):
             model = Model()
             knn = model.load_model(model_file)
             histogram = np.zeros(knn.n_clusters)
@@ -235,7 +235,8 @@ class ExtractFeatures:
                     index = knn.predict([descriptor])
                     histogram[index] += 1 / desc_count
                 histogram_list.append(histogram)
-                feature_data_list.append({'imageId': key, 'featureVector': histogram.tolist()})
+                feature_data_list.append({'imageId': key, 'featureVector': histogram.tolist(),
+                                          "path": os.path.abspath(os.path.join(self.folder, key))})
             model.save_model(np.asarray(histogram_list), "{}_{}".format(model_file_name, 'bow_histogram'))
             mongo_wrapper.bulk_insert(self.model.lower(), feature_data_list)
 
@@ -254,7 +255,7 @@ class ExtractFeatures:
                 getattr(
                     ExtractFeatures, 'extract_' + self.model.lower()), [(self, i, True) for i in file_names[i: length]]
                 if i + self.constants.BULK_PROCESS_COUNT > length
-                else [(self, i) for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]]))
+                else [(self, i, True) for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]]))
         if self.model == self.constants.SIFT:
             print('Processing Data for {}'.format(self.model))
             self.create_bog_histogram()
