@@ -15,8 +15,6 @@ from utils.termweight import print_tw
 from utils.model import Model
 from utils.excelcsv import CSVReader
 from utils.inputhelper import get_input_dimensionality_reduction_model, get_input_feature_extractor_model, get_input_k
-import pandas as pd
-import numpy as np
 model_interact = Model()
 
 
@@ -40,7 +38,7 @@ def main():
     print_tw(obj_lat, feat_lat)
 
     # save term weight pairs to csv  
-    filename = "task1"+'_'+feature_extraction_model+'_'+dimension_reduction_model+'_'+str(k_value)
+    filename = "task1" + '_' + feature_extraction_model + '_' + dimension_reduction_model + '_' + str(k_value)
     CSVReader().save_to_csv(obj_lat, feat_lat, filename)
 
 
