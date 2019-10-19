@@ -25,22 +25,30 @@ def get_input_image(folder):
     return image
 
 
+def get_task_number(number_of_tasks):
+    """Getting the task number from user"""
+    try:
+        input_string = "\n".join(["{}. Task-{}".format(i, str(i)) for i in range(1, number_of_tasks+1)])
+        choice = int(input("Enter the task you want to Perform. Choices: \n{}\n".format(input_string)))
+        if choice not in range(1, number_of_tasks+1):
+            print("Enter a valid choice.")
+            return get_task_number(number_of_tasks)
+        else:
+            return choice
+    except ValueError as exp:
+        print("Enter a valid choice: {}".format(exp))
+        return get_task_number(number_of_tasks)
+
+
 def get_input_feature_extractor_model():
     """Gets the Input Model"""
     try:
         model = int(input("Enter the feature extractor name: Choices:\n1. CM\n2. HOG\n3. SIFT\n4. LBP\n"))
+        model_map = {1: "CM", 2: "HOG", 3: "SIFT", 4: "LBP"}
         if model not in [1, 2, 3, 4]:
             print("Please enter a valid choice")
             return get_input_feature_extractor_model()
-        elif model == 1:
-            model = "CM"
-        elif model == 2:
-            model = "HOG"
-        elif model == 3:
-            model = "SIFT"
-        elif model == 4:
-            model = "LBP"
-        return model
+        return model_map[model]
     except ValueError as exp:
         print("Enter a valid choice")
         return get_input_feature_extractor_model()
@@ -72,5 +80,15 @@ def get_input_k():
         count = int(input("Enter the value for k: "))
         return count
     except ValueError as exp:
-        print("Enter a valid Integer")
+        print("Enter a valid Integer: {}".format(exp))
         return get_input_k()
+
+
+def get_input_m():
+    """Getting the value of m from user"""
+    try:
+        count = int(input("Enter the value for m: "))
+        return count
+    except ValueError as exp:
+        print("Enter a valid Integer: {}".format(exp))
+        return get_input_m()
