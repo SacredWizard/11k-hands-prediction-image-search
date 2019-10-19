@@ -4,6 +4,7 @@ from utils.model import Model
 from utils.excelcsv import CSVReader
 from classes.mongo import MongoWrapper
 from classes.globalconstants import GlobalConstants
+from utils.inputhelper import get_input_subject_id
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
@@ -60,9 +61,10 @@ def find_similar_subjects(given_subject_id):
     sorted_subject_similarity = sorted(subject_similarity.items(), key=operator.itemgetter(1), reverse=True)
     return sorted_subject_similarity
 
+
 def main():
     # given subject id
-    given_subject_id = 27
+    given_subject_id = get_input_subject_id()
     # similar subjects to find
     similar_subject_count = 3
     # method call to find similar subjects
@@ -80,6 +82,7 @@ def main():
             break
     print()
     # print(sorted_subject_similarity)
+
 
 if __name__ == "__main__":
     main()
