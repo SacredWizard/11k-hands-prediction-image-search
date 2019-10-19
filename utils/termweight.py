@@ -35,19 +35,22 @@ def get_feature_latent_semantics(feature_m, k, image_metadata=False):
     return tw
 
 
-def print_tw(data_m, feature_m, image_metadata=False):
+def print_tw(data_m, feature_m, image_metadata=False, subject_subject=False):
     """ prints Term Weight Pairs to console"""
     images = data_m['imageId'].tolist()
     data_m = np.array(data_m['reducedDimensions'].tolist())
     data_tw = get_data_latent_semantics(data_m, data_m.shape[1], images)
 
-    feature_tw = get_feature_latent_semantics(feature_m, feature_m.shape[0], image_metadata)
+    if not subject_subject:
+        feature_tw = get_feature_latent_semantics(feature_m, feature_m.shape[0], image_metadata)
 
     separator = "\n{}\n".format("-" * 200)
 
     print(separator)
     if image_metadata:
         print("Latent Semantics in Image space")
+    elif subject_subject:
+        print("Top-k Latent Semantics")
     else:
         print("Data Latent Semantics")
     print(separator)
@@ -55,10 +58,11 @@ def print_tw(data_m, feature_m, image_metadata=False):
         print("LS {}  -->  {}\n".format(i + 1, data_tw[i]))
 
     print(separator)
-    if image_metadata:
-        print("Latent Semantics in Metadata space")
-    else:
-        print("Feature Latent Semantics")
-    print(separator)
-    for i in range(len(feature_tw)):
-        print("LS {}  -->  {}\n".format(i + 1, feature_tw[i]))
+    if not subject_subject:
+        if image_metadata:
+            print("Latent Semantics in Metadata space")
+        else:
+            print("Feature Latent Semantics")
+        print(separator)
+        for i in range(len(feature_tw)):
+            print("LS {}  -->  {}\n".format(i + 1, feature_tw[i]))

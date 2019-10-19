@@ -17,6 +17,12 @@ from utils.excelcsv import CSVReader
 from utils.inputhelper import get_input_dimensionality_reduction_model, get_input_feature_extractor_model, get_input_k
 model_interact = Model()
 
+def save_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value):
+    obj_lat, feat_lat, model = dim_reduction.execute()
+    # Saves the returned model
+    filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
+    model_interact.save_model(model=model, filename=filename)
+    return obj_lat, feat_lat
 
 def main():
     """Main function for the task 1"""
@@ -28,11 +34,7 @@ def main():
           format(dimension_reduction_model, feature_extraction_model, k_value))
     # Performs the dimensionality reduction
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)
-    obj_lat, feat_lat, model = dim_reduction.execute()
-
-    # Saves the returned model
-    filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
-    model_interact.save_model(model=model, filename=filename)
+    obj_lat, feat_lat = save_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value)
 
     # Print term weight pairs to terminal  
     print_tw(obj_lat, feat_lat)
@@ -40,7 +42,6 @@ def main():
     # save term weight pairs to csv  
     filename = "task1" + '_' + feature_extraction_model + '_' + dimension_reduction_model + '_' + str(k_value)
     CSVReader().save_to_csv(obj_lat, feat_lat, filename)
-
 
 if __name__ == "__main__":
     main()

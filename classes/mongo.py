@@ -60,7 +60,10 @@ class MongoWrapper:
         :return: Mongo Cursor
         """
         try:
-            return self.mongo_client[collection_name].find(query, fields_filter)
+            if query == '':
+                return self.mongo_client[collection_name].find()
+            else:
+                return self.mongo_client[collection_name].find(query, fields_filter)
         except pymongo.errors.ServerSelectionTimeoutError as e:
             print("Timeout:\n{}".format(e))
         except Exception as e:
