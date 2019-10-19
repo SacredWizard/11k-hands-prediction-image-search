@@ -1,7 +1,9 @@
 import os
 from classes.globalconstants import GlobalConstants
+from classes.mongo import MongoWrapper
 
 global_constants = GlobalConstants()
+mongo_wrapper = MongoWrapper()
 
 
 def get_input_folder():
@@ -55,6 +57,20 @@ def get_task_number(number_of_tasks):
     except ValueError as exp:
         print("Enter a valid choice: {}".format(exp))
         return get_task_number(number_of_tasks)
+
+
+def get_input_subject_id():
+    """Gets the subject id as input from the user"""
+    try:
+        subject_ids_db = mongo_wrapper.distinct(global_constants.METADATA, "id", {})
+        subject_id = int(input("Enter the subject ID: "))
+        if subject_id not in subject_ids_db:
+            print("Subject ID not found. Please enter the correct subject ID")
+            return get_input_subject_id()
+        return subject_id
+    except ValueError as exp:
+        print("Enter a valid Subject Id")
+        return get_input_subject_id()
 
 
 def get_input_feature_extractor_model():
