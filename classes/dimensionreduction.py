@@ -290,3 +290,11 @@ class DimensionReduction:
             return df
         else:
             return pd.DataFrame()
+
+    def get_metadata_unique_values(self, column):
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, '')
+        if cursor.count()>0:
+            distinct_values = cursor.distinct(column)
+            if len(distinct_values) > 0:
+                return distinct_values
+        return list()

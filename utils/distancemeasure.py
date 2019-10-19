@@ -2,7 +2,6 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.stats import wasserstein_distance
 
-
 def euclidean(x, y):
     """
     Calculates the Euclidean distance between 2 vectors
@@ -26,7 +25,13 @@ def chebyshev(x, y):
 
 
 def manhattan(x, y):
-    return distance.cityblock(x, y)
+    """
+    Calculates the Manhattan or "straight line" distance between 2 vectors
+    :param x: Vector 1
+    :param y: Vector 2
+    :return: distance between them
+    """
+    return sum(sum(abs(a-b) for a, b in zip(x, y)))
 
 
 def earth_movers(x, y):
