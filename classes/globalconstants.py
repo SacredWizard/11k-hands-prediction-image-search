@@ -21,6 +21,7 @@ class GlobalConstants:
         self.MODELS_FOLDER = 'models'
         self.BOW_MODEL = 'KNN'
         self.BOW_BATCH_SIZE = 50
+        self.CM_BIN_COUNT = 1000
 
     class Mongo:
 

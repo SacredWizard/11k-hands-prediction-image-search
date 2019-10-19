@@ -46,7 +46,16 @@ class DimensionReduction:
         cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
         if cursor.count() > 0:
             df = pd.DataFrame(list(cursor))
-
+            if self.extractor_model == self.constants.CM:
+                histogram_matrix = []
+                feature_vector_lsit = df['featureVector'].tolist()
+                min_val = np.min(feature_vector_lsit)
+                max_val = np.max(feature_vector_lsit)
+                for featureVector in df['featureVector'].tolist():
+                    value, value_range = np.histogram(featureVector, bins=self.constants.CM_BIN_COUNT,
+                                                      range=(min_val, max_val + 1))
+                    histogram_matrix.append(value)
+                df['featureVector'] = histogram_matrix
             if self.label:
                 filter_images_list = self.filter_images_by_label(df['imageId'].tolist())
                 df = df[df.imageId.isin(filter_images_list)]
@@ -185,6 +194,13 @@ class DimensionReduction:
         """
         feature_extractor = ExtractFeatures(folder, self.extractor_model)
         result = feature_extractor.execute(image)
+        if self.extractor_model == self.constants.CM:
+            cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
+            df = pd.DataFrame(list(cursor))
+            feature_vector_lsit = df['featureVector'].tolist()
+            min_val = np.min(feature_vector_lsit)
+            max_val = np.max(feature_vector_lsit)
+            result, value_range = np.histogram(result, bins=self.constants.CM_BIN_COUNT, range=(min_val, max_val + 1))
         return model.transform([result])
 
     def find_m_similar_images(self, model, m, folder, image, dist_func):
