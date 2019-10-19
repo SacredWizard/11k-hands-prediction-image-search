@@ -15,12 +15,9 @@ from utils.excelcsv import CSVReader
 
 model_interact = Model()
 
+
 def run_task3(feature_extraction_model, dimension_reduction_model, folder, dist_func, label, k_value):
     """Main function for the Task3"""
-
-    excel_reader = CSVReader()
-    excel_reader.save_hand_csv_mongo("HandInfo.csv")
-
     # Performs the dimensionality reduction
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value, label)
     obj_feature = dim_reduction.get_object_feature_matrix()
@@ -30,6 +27,7 @@ def run_task3(feature_extraction_model, dimension_reduction_model, folder, dist_
     filename = "{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label.replace(" ", ''),
                                         str(k_value))
     model_interact.save_model(model=model, filename=filename)
+
 
 def run_task4(feature_extraction_model, dimension_reduction_model, folder, image_name, dist_func, label, k_value, m_value):
     """Main function for the Task4"""
@@ -44,6 +42,7 @@ def run_task4(feature_extraction_model, dimension_reduction_model, folder, image
     obj_feature = dim_reduction.get_object_feature_matrix()
     result = dim_reduction.find_m_similar_images(model, m_value, folder, image_name, dist_func)
     return result
+
 
 def get_class_labels(label):
     class1_labels = ["left-hand", "dorsal", "with accessories", "male"]
@@ -62,6 +61,7 @@ def get_class_labels(label):
         class1_label = class1_labels[index]
     
     return class1_label, class2_label
+
 
 def main():
     feature_extraction_model = "CM"
@@ -93,6 +93,7 @@ def main():
     final_label = class1_label if class1_score > class2_score else class2_label
 
     print(final_label)
+
 
 if __name__ == "__main__":
     main()
