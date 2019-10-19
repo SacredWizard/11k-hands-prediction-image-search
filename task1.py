@@ -43,5 +43,6 @@ def main():
     filename = "task1"+'_'+feature_extraction_model+'_'+dimension_reduction_model+'_'+str(k_value)
     CSVReader().save_to_csv(obj_lat, feat_lat, filename)
 
+
 if __name__ == "__main__":
     main()
