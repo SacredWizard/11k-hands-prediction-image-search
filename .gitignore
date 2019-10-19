@@ -4,7 +4,6 @@
 .DS_Store
 __pycache__/*
 .vscode/*
-classes/__pycache__/*
-utils/__pycache__/*
 output/
 models/
+*/__pycache__/*
