@@ -166,7 +166,7 @@ class DimensionReduction:
         if self.binary_image_metadata:
             data = self.get_binary_image_metadata_matrix()
         elif self.subject_subject:
-            data = []
+            data = self.subject_subject
         else:
             data = self.get_object_feature_matrix()
 
