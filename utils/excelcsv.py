@@ -49,7 +49,7 @@ class CSVReader:
         images = data_latent_semantics['imageId'].tolist()
         data_latent_semantics = np.array(data_latent_semantics['reducedDimensions'].tolist())
         data_tw = tw.get_data_latent_semantics(data_latent_semantics, data_latent_semantics.shape[1], images)
-        print(data_tw)
+
         with open(path.join(_finalPath, filename+".csv"), mode='w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=",")
             if subject_subject:
