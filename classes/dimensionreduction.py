@@ -30,7 +30,7 @@ class DimensionReduction:
     Class for performing Dimensionality Reduction
     """
     def __init__(self, extractor_model, dimension_reduction_model, k_value, label=None, image_metadata=False,
-                 subject_subject=False, folder_metadata=None):
+                 subject_subject=None, folder_metadata=None):
         self.constants = GlobalConstants()
         self.mongo_wrapper = MongoWrapper(self.constants.Mongo().DB_NAME)
         self.extractor_model = extractor_model
