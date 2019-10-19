@@ -7,7 +7,7 @@ Author : Sumukh Ashwin Kamath
 import os
 import matplotlib.pyplot as plt
 from skimage import io
-
+import numpy as np
 
 def show_images(query_image, image_list, title):
     """Visualizer for the images"""
@@ -31,4 +31,36 @@ def show_images(query_image, image_list, title):
             "{}\nScore: {}%".format(r['imageId'], round(r['score'], 3)))
         plt.axis('off')
         count = count + 1
+    plt.show()
+
+def show_subjectwise_images(subjects_with_scores, similar_subjects_images):
+    # array of sub-plotss
+    maximages = 5
+    nrows, ncols = len(similar_subjects_images), maximages
+    figsize = [10,10]     # figure size, inches
+    # create figure (fig), and array of axes (ax)
+    fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, sharey=True)
+    # max images to display per subject
+    # plot images on each sub-plot
+    for i,images_for_subject in enumerate(similar_subjects_images):
+        # add subject ID and similarity score
+        ax[i][0].text(x = -1.0, y = 0.5, s = "ID : {0}\n Score : {1}%".format(subjects_with_scores[i][0],
+                        round(subjects_with_scores[i][1],2)), rotation = 0, horizontalalignment='center',
+                        verticalalignment='center', transform=ax[i][0].transAxes)
+        # populate images for each subject
+        for j,image in enumerate(images_for_subject):
+            ax_subplot = (ax[i][j])
+            ax_subplot.set_xlabel("xlabel")
+            ax_subplot.imshow(io.imread(image))
+            ax_subplot.set_title("{0}".format(str(os.path.basename(image))))
+            ax_subplot.axis('off')
+            if j >= maximages-1:
+                break
+        # turn off axis and markings  
+        while j < maximages:
+            ax_subplot = (ax[i][j])
+            ax_subplot.axis('off')
+            j+=1
+
+    plt.tight_layout(True)
     plt.show()
