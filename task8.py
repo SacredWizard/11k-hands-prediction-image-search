@@ -14,6 +14,7 @@ This is the CLI for task 8 of Phase 2 of the project
 from utils.inputhelper import get_input_k, get_input_folder
 from classes.dimensionreduction import DimensionReduction
 from utils.termweight import print_tw
+from utils.excelcsv import CSVReader
 
 
 def main():
@@ -25,6 +26,10 @@ def main():
 
     # printing the term weight
     print_tw(w, h, image_metadata=True)
+
+    # save to csv
+    filename = "task8" + "_" + str(k_value)
+    CSVReader().save_to_csv(w, h, filename, image_metadata=True)
 
 
 if __name__ == "__main__":
