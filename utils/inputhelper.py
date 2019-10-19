@@ -25,6 +25,23 @@ def get_input_image(folder):
     return image
 
 
+def get_input_image_label():
+    """Gets the image label input from the user"""
+    try:
+        label_map = {}
+        input_string = "\n".join(["{}. {}".format(i, label) for i, label in enumerate(global_constants.image_labels,
+                                                                                      start=1)])
+        choice = int(input("Enter the Label. Choices: \n{}\n".format(input_string)))
+        if choice not in range(1, len(global_constants.image_labels)+1):
+            print("Enter a valid choice.")
+            return get_input_image_label()
+        else:
+            return global_constants.image_labels[choice - 1]
+    except ValueError as exp:
+        print("Enter a valid choice: {}".format(exp))
+        return get_input_image_label()
+
+
 def get_task_number(number_of_tasks):
     """Getting the task number from user"""
     try:
