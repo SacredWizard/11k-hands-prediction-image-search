@@ -43,8 +43,23 @@ def get_task_number(number_of_tasks):
 def get_input_feature_extractor_model():
     """Gets the Input Model"""
     try:
-        model = int(input("Enter the feature extractor name: Choices:\n1. CM\n2. HOG\n3. SIFT\n4. LBP\n"))
+        model = int(input("Enter the feature extractor model: Choices:\n1. Color Moments\n"
+                          "2. Histogram of Oriented Gradients\n3. SIFT\n4. Local Binary Patterns\n"))
         model_map = {1: "CM", 2: "HOG", 3: "SIFT", 4: "LBP"}
+        if model not in [1, 2, 3, 4]:
+            print("Please enter a valid choice")
+            return get_input_feature_extractor_model()
+        return model_map[model]
+    except ValueError as exp:
+        print("Enter a valid choice")
+        return get_input_feature_extractor_model()
+
+
+def get_input_dimensionality_reduction_model():
+    """Gets the Dimensionality Reduction Model"""
+    try:
+        model = int(input("Enter the Dimensionality Reduction Model: Choices:\n1. PCA\n2. SVD\n3. NMF\n4. LDA\n"))
+        model_map = {1: "PCA", 2: "SVD", 3: "NMF", 4: "LDA"}
         if model not in [1, 2, 3, 4]:
             print("Please enter a valid choice")
             return get_input_feature_extractor_model()
