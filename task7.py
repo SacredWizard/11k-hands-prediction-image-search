@@ -50,7 +50,7 @@ def main():
     # printing the term weight
     print_tw(w, h, subject_subject=True)
     # save to csv
-    filename = "task7" + '_' + feature_extraction_model + '_' + dimension_reduction_model + '_' + str(k_value)
+    filename = "task7" + '_' + feature_extraction_model + '_' + dimension_reduction_model + '_' + str(given_k_value)
     CSVReader().save_to_csv(w, None, filename, subject_subject=True)
 
     print("\nTime taken for task 7: {}\n".format(time.time() - starttime))
