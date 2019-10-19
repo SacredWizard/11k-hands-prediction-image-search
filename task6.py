@@ -95,7 +95,7 @@ def main():
 
     image_list_for_similar_subjects_abs_path = []
     similarity_scores = []
-    path = os.path.dirname(obj_feat_matrix['path'][0])
+    folder_path = os.path.dirname(obj_feat_matrix['path'][0])
     # create list of images for each subject to visualize most similar subjects
     for subject in (sorted_subject_similarity):
         metadata = dim_reduction.get_metadata("id", list([subject[0]]))
@@ -103,7 +103,7 @@ def main():
         image_list_for_similar_subject = list(set(metadata["imageName"].tolist()).intersection(set(img_set["imageId"].tolist())))
         image_list_for_one_similar_subject_abs_path = []
         for image in image_list_for_similar_subject:
-            image_list_for_one_similar_subject_abs_path.append((os.path.join(path,image)))
+            image_list_for_one_similar_subject_abs_path.append((os.path.join(folder_path,image)))
 
         image_list_for_similar_subjects_abs_path.append(image_list_for_one_similar_subject_abs_path)
         similar_subject_count -=1
