@@ -5,9 +5,10 @@ Author : Sumukh Ashwin Kamath
 (ASU ID - 1217728013 email - skamath6@asu.edu
 """
 import os
+
 import matplotlib.pyplot as plt
-from skimage import io
 import numpy as np
+from skimage import io
 
 
 def show_images(query_image, image_list, title):
@@ -43,9 +44,16 @@ def show_images(query_image, image_list, title):
     fig.savefig(filename, dpi=500)
     plt.show()
 
+
 def show_feature_ls(data, feat_lat, title):
+    """
+    :param data: data containg the latent semantics
+    :param feat_lat: Feature Latent semantics
+    :param title: Image Title
+    :return: Nothing!
+    """
     plt.rcParams.update({'font.size': 10})
-    """Visualizer for the images"""
+
     f = plt.figure(figsize=(20, 12))
     title_visualizer = ""
     for i in title:
@@ -80,6 +88,7 @@ def show_feature_ls(data, feat_lat, title):
     fig.set_size_inches((20, 12), forward=True)
     filename = "output/{}_feature_ls".format("_".join([str(i) for i in title.values()]))
     fig.savefig(filename, dpi=500)
+
 
 def show_subjectwise_images(subjects_with_scores, similar_subjects_images):
     # array of sub-plotss
