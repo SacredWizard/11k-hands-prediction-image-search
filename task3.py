@@ -11,6 +11,7 @@ Authors:
 This is the CLI for task 3 of Phase 2 of the project
 """
 from classes.dimensionreduction import DimensionReduction
+from classes.globalconstants import GlobalConstants
 from utils.excelcsv import CSVReader
 from utils.inputhelper import get_input_k, get_input_dimensionality_reduction_model, \
     get_input_feature_extractor_model, get_input_image_label
@@ -19,6 +20,7 @@ from utils.termweight import print_tw
 
 model_interact = Model()
 csv_reader = CSVReader()
+global_constants = GlobalConstants()
 
 
 def main():
@@ -28,8 +30,18 @@ def main():
     k_value = get_input_k()
     label = get_input_image_label()
 
-    excel_reader = CSVReader()
-    excel_reader.save_hand_csv_mongo("HandInfo.csv")
+    print(global_constants.LINE_SEPARATOR)
+    print("User Inputs summary")
+    print(global_constants.LINE_SEPARATOR)
+    print("\nFeature Extraction Model: {}\nDimensionality Reduction Model: {}\nk-value: {}\n".
+          format(feature_extraction_model, dimension_reduction_model, k_value))
+    print(global_constants.LINE_SEPARATOR)
+
+    print(global_constants.LINE_SEPARATOR)
+    print("Saving the metadata to MongoDB")
+    print(global_constants.LINE_SEPARATOR)
+    csv_reader.save_hand_csv_mongo("HandInfo.csv")
+    print(global_constants.LINE_SEPARATOR)
 
     # Performs the dimensionality reduction
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value, label)
@@ -46,6 +58,7 @@ def main():
     # save term weight pairs to csv
     filename = "task3_{}_{}_{}_{}".format(feature_extraction_model, dimension_reduction_model, label, k_value)
     csv_reader.save_to_csv(obj_lat, feat_lat, filename)
+    print("Please check the CSV file: output/{}.csv".format(filename))
 
     # data = dim_reduction.get_object_feature_matrix()
     #

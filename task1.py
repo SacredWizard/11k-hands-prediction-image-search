@@ -15,11 +15,11 @@ from utils.termweight import print_tw
 from utils.model import Model
 from utils.excelcsv import CSVReader
 from utils.imageviewer import show_feature_ls
-import pandas as pd
-import numpy as np
+from classes.globalconstants import GlobalConstants
 from utils.inputhelper import get_input_dimensionality_reduction_model, get_input_feature_extractor_model, get_input_k
 
 model_interact = Model()
+global_constants = GlobalConstants()
 
 
 def save_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value):
@@ -36,8 +36,13 @@ def main():
     dimension_reduction_model = get_input_dimensionality_reduction_model()
     k_value = get_input_k()
 
-    print("\n\nFeature Extraction Model:{}\nDimensionality Reduction Model: {}\nk-value:{}".
+    print(global_constants.LINE_SEPARATOR)
+    print("User Inputs summary")
+    print(global_constants.LINE_SEPARATOR)
+    print("\nFeature Extraction Model: {}\nDimensionality Reduction Model: {}\nk-value: {}\n".
           format(feature_extraction_model, dimension_reduction_model, k_value))
+    print(global_constants.LINE_SEPARATOR)
+
     # Performs the dimensionality reduction
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)
     obj_lat, feat_lat = save_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value)
@@ -48,6 +53,7 @@ def main():
     # save term weight pairs to csv  
     filename = "task1" + '_' + feature_extraction_model + '_' + dimension_reduction_model + '_' + str(k_value)
     CSVReader().save_to_csv(obj_lat, feat_lat, filename)
+    print("Please check the CSV file: output/{}.csv".format(filename))
 
     data = dim_reduction.get_object_feature_matrix()
 
@@ -57,6 +63,7 @@ def main():
         "k": k_value,
     }
     show_feature_ls(data, feat_lat, title)
+
 
 if __name__ == "__main__":
     main()

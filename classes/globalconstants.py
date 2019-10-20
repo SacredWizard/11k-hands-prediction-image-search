@@ -22,6 +22,7 @@ class GlobalConstants:
         self.BOW_MODEL = 'KNN'
         self.BOW_BATCH_SIZE = 50
         self.CM_BIN_COUNT = 1000
+        self.LINE_SEPARATOR = "=" * 200
 
     class Mongo:
 
