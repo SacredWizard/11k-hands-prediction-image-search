@@ -13,7 +13,7 @@ This is a module for performing dimensionality reduction on images
 import re
 import time
 from itertools import islice
-
+import os
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD, PCA
@@ -29,13 +29,18 @@ class DimensionReduction:
     """
     Class for performing Dimensionality Reduction
     """
-    def __init__(self, extractor_model, dimension_reduction_model, k_value, label=None):
+    def __init__(self, extractor_model, dimension_reduction_model, k_value, label=None, image_metadata=False,
+                 subject_subject=False, folder_metadata=None, matrix=None):
         self.constants = GlobalConstants()
         self.mongo_wrapper = MongoWrapper(self.constants.Mongo().DB_NAME)
         self.extractor_model = extractor_model
         self.dimension_reduction_model = dimension_reduction_model
         self.label = label
         self.k_value = k_value
+        self.binary_image_metadata = image_metadata
+        self.subject_subject = subject_subject
+        self.folder_metadata = folder_metadata
+        self.matrix = matrix
 
     def get_object_feature_matrix(self):
         """
@@ -46,13 +51,43 @@ class DimensionReduction:
         cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
         if cursor.count() > 0:
             df = pd.DataFrame(list(cursor))
-
+            if self.extractor_model == self.constants.CM:
+                histogram_matrix = []
+                feature_vector_lsit = df['featureVector'].tolist()
+                min_val = np.min(feature_vector_lsit)
+                max_val = np.max(feature_vector_lsit)
+                for featureVector in df['featureVector'].tolist():
+                    value, value_range = np.histogram(featureVector, bins=self.constants.CM_BIN_COUNT,
+                                                      range=(min_val, max_val + 1))
+                    histogram_matrix.append(value)
+                df['featureVector'] = histogram_matrix
             if self.label:
                 filter_images_list = self.filter_images_by_label(df['imageId'].tolist())
                 df = df[df.imageId.isin(filter_images_list)]
             return df
         else:
             return pd.DataFrame()
+
+    def get_binary_image_metadata_matrix(self):
+        """
+        Gets the Binary Image Metadata Matrix
+        :return: The Binary Image Metadata Matrix
+        """
+        images_list = [i for i in os.listdir(self.folder_metadata) if i.endswith(self.constants.JPG_EXTENSION)]
+        metadata = self.get_metadata("imageName", images_list, {"_id": 0})
+        metadata['male'] = [1 if i == "male" else 0 for i in metadata['gender'].tolist()]
+        metadata['female'] = [1 if i == "female" else 0 for i in metadata['gender'].tolist()]
+        metadata['without accessories'] = np.array([1] * len(metadata['accessories'])) - np.array(metadata['accessories'])
+        metadata['dorsal'] = [1 if "dorsal" in i else 0 for i in metadata['aspectOfHand']]
+        metadata['palmar'] = [1 if "palmar" in i else 0 for i in metadata['aspectOfHand']]
+        metadata['left'] = [1 if "left" in i else 0 for i in metadata['aspectOfHand']]
+        metadata['right'] = [1 if "right" in i else 0 for i in metadata['aspectOfHand']]
+        metadata['featureVector'] = metadata[['male', 'female', 'dorsal', 'palmar', 'accessories',
+                                              'without accessories', 'left', 'right']].values.tolist()
+        binary_image_metadata = metadata[['imageName', 'featureVector', 'male', 'female', 'dorsal', 'palmar',
+                                          'accessories', 'without accessories', 'left', 'right']]
+        binary_image_metadata = binary_image_metadata.rename(columns={"imageName": "imageId"})
+        return binary_image_metadata
 
     def filter_images_by_label(self, images_list):
         """Fetches the list of images by label"""
@@ -78,8 +113,8 @@ class DimensionReduction:
         """Performs dimensionality reduction"""
         return getattr(DimensionReduction, self.dimension_reduction_model.lower())(self)
 
-    # method to perform Principal Component Analysis on n-dimensional features 
     def pca(self):
+        # method to perform Principal Component Analysis on n-dimensional features
         data = self.get_object_feature_matrix()
         # get object-feature vectors matrix
         data_feature_matrix = np.array(data['featureVector'].tolist())
@@ -108,7 +143,6 @@ class DimensionReduction:
         raise \
             Exception("Data is empty in database, run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n")
         # 
-        
 
     def svd(self):
         data = self.get_object_feature_matrix()
@@ -130,7 +164,12 @@ class DimensionReduction:
         :return:
         """
         constants = self.constants.Nmf()
-        data = self.get_object_feature_matrix()
+        if self.binary_image_metadata:
+            data = self.get_binary_image_metadata_matrix()
+        elif self.subject_subject:
+            data = self.matrix
+        else:
+            data = self.get_object_feature_matrix()
 
         if not data.size == 0:
             obj_feature = np.array(data['featureVector'].tolist())
@@ -144,9 +183,9 @@ class DimensionReduction:
             h = model.components_
             tt1 = time.time()
             data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": w.tolist()})
-            for i in range(h.shape[0]):
-                print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
-                                                                    key=lambda x: x[1], reverse=True)))
+            # for i in range(h.shape[0]):
+            #     print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
+            #                                                         key=lambda x: x[1], reverse=True)))
 
             print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
             return data_lat, h, model
@@ -165,8 +204,8 @@ class DimensionReduction:
             print("LDA does not accept negative values")
             return
 
-        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=40, random_state=0, learning_decay=.75,
-                                          learning_method='online')
+        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=10, random_state=0,
+                                          learning_method='online', n_jobs=1, batch_size=512)
         # topic_word_prior=0.05, doc_topic_prior=0.01)#learning_method='online')
         lda_transformed = model.fit_transform(obj_feature)
         data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": lda_transformed.tolist()})
@@ -186,6 +225,13 @@ class DimensionReduction:
         """
         feature_extractor = ExtractFeatures(folder, self.extractor_model)
         result = feature_extractor.execute(image)
+        if self.extractor_model == self.constants.CM:
+            cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
+            df = pd.DataFrame(list(cursor))
+            feature_vector_lsit = df['featureVector'].tolist()
+            min_val = np.min(feature_vector_lsit)
+            max_val = np.max(feature_vector_lsit)
+            result, value_range = np.histogram(result, bins=self.constants.CM_BIN_COUNT, range=(min_val, max_val + 1))
         return model.transform([result])
 
     def find_m_similar_images(self, model, m, folder, image, dist_func):
@@ -198,13 +244,23 @@ class DimensionReduction:
         :param dist_func: Distance function to be used
         :return: m similar images with their scores
         """
-        query_reduced_dim = self.compute_query_image(model, folder, image)
+        
         obj_feature = self.get_object_feature_matrix()
+        metadata = pd.DataFrame()
+        if folder == '':
+            query_image = (obj_feature.loc[obj_feature['imageId'] == image])["featureVector"]
+            query_reduced_dim = model.transform([(query_image.tolist())[0]])
+
+            cursor = self.mongo_wrapper.find(self.constants.METADATA, {})
+            if cursor.count() > 0:
+                metadata = pd.DataFrame(list(cursor))
+        else:
+            query_reduced_dim = self.compute_query_image(model, folder, image)
         dist = []
         score = []
         for index, row in obj_feature.iterrows():
-            dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim,
-                                                                  model.transform([row['featureVector']])))
+            dist.append(getattr(utils.distancemeasure, dist_func)(query_reduced_dim[0],
+                                                                  model.transform([row['featureVector']])[0]))
         for d in dist:
             if dist_func == "nvsc1":
                 score.append(d * 100)
@@ -222,5 +278,24 @@ class DimensionReduction:
             rec['imageId'] = row['imageId']
             rec['score'] = row['score']
             rec['path'] = row['path']
+            if not metadata.empty:
+                rec['subject'] = ((metadata.loc[metadata['imageName'] == row['imageId']])['id']).tolist()[0]
             result.append(rec)
         return result
+
+    def get_metadata(self, column, values, filter_query=None):
+        query = {column: {"$in": values}}
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, query, filter_query)
+        if cursor.count() > 0:
+            df = pd.DataFrame(list(cursor))
+            return df
+        else:
+            return pd.DataFrame()
+
+    def get_metadata_unique_values(self, column):
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, '')
+        if cursor.count()>0:
+            distinct_values = cursor.distinct(column)
+            if len(distinct_values) > 0:
+                return distinct_values
+        return list()

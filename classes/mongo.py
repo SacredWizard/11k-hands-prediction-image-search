@@ -36,6 +36,21 @@ class MongoWrapper:
         """
         return self.mongo_client
 
+    def distinct(self, collection_name, field, query):
+        """
+        Run a distinct query on a collection
+        :param collection_name: the collection on which you want to run the distinct query
+        :param field: Field for which you want to get the distinct values
+        :param query: Query for filtering the documents
+        :return: distinct values for the field
+        """
+        try:
+            return self.mongo_client[collection_name].distinct(field, query)
+        except pymongo.errors.ExecutionTimeout as e:
+            print("Timeout : {}".format(e))
+        except Exception as e:
+            print("Exception occured while running mongo distinct query: {}".format(e))
+
     def find(self, collection_name, query, fields_filter=None):
         """
         Find records in Mongo
@@ -45,7 +60,10 @@ class MongoWrapper:
         :return: Mongo Cursor
         """
         try:
-            return self.mongo_client[collection_name].find(query, fields_filter)
+            if query == '':
+                return self.mongo_client[collection_name].find()
+            else:
+                return self.mongo_client[collection_name].find(query, fields_filter)
         except pymongo.errors.ServerSelectionTimeoutError as e:
             print("Timeout:\n{}".format(e))
         except Exception as e:
