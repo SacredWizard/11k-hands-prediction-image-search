@@ -24,6 +24,9 @@ global_constants = GlobalConstants()
 def main():
     """Main function for the Task 8"""
     k_value = get_input_k()
+    while k_value > 8:
+        print("Please enter a value of k within 8")
+        k_value = get_input_k()
     folder = get_input_folder()
 
     print(global_constants.LINE_SEPARATOR)
