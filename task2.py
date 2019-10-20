@@ -11,11 +11,12 @@ Authors:
 This is the CLI for task 2 of Phase 2 of the project
 """
 import os
+
 from classes.dimensionreduction import DimensionReduction
-from utils.model import Model
 from utils.imageviewer import show_images
 from utils.inputhelper import get_input_k, get_input_feature_extractor_model, \
     get_input_dimensionality_reduction_model, get_input_folder, get_input_image, get_input_m
+from utils.model import Model
 
 model_interact = Model()
 
@@ -28,7 +29,17 @@ def main():
     folder = get_input_folder()
     image_name = get_input_image(folder)
     m_value = get_input_m()
-    dist_func = "euclidean"
+    if dimension_reduction_model != "NMF":
+        dist_func = "euclidean"
+    elif feature_extraction_model in ["CM", "LBP"]:
+        dist_func = "nvsc1"
+    else:
+        dist_func = "euclidean"
+        # dist_func = "cosine"
+        # dist_func = "chebyshev"
+        # dist_func = "manhattan"
+        # dist_func = "chi_square"
+        # dist_func = "euclidean"
 
     # Saves the returned model
     filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)

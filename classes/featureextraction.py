@@ -222,7 +222,7 @@ class ExtractFeatures:
                 max_kp_count = length if length > max_kp_count else max_kp_count
                 feature_data[rec['imageId']] = rec['featureVector']
             descriptor_values = feature_data.values()
-            knn = MiniBatchKMeans(
+            knn = MiniBatchKMeans(init='random',
                 init_size=5 * max_kp_count, n_clusters=max_kp_count, batch_size=self.constants.BOW_BATCH_SIZE). \
                 fit(np.array([item for descriptor_values in descriptor_values for item in descriptor_values]))
             model.save_model(knn, model_file_name)
@@ -258,7 +258,7 @@ class ExtractFeatures:
                 else [(self, i, True) for i in file_names[i: i + self.constants.BULK_PROCESS_COUNT]]))
         if self.model == self.constants.SIFT:
             print('Processing Data for {}'.format(self.model))
-            self.create_bog_histogram()
+            self.create_bog_histogram(overwrite=True)
 
             # mongo_wrapper.bulk_insert(self.model.lower(), pool.starmap(
             #     getattr(ExtractFeatures, 'extract_' + self.model.lower())(self, [i for i in file_names[i: length]]

@@ -46,7 +46,8 @@ class DimensionReduction:
         cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
         if cursor.count() > 0:
             df = pd.DataFrame(list(cursor))
-            if self.extractor_model == self.constants.CM:
+            if self.extractor_model == self.constants.CM and \
+                    self.dimension_reduction_model in [self.constants.LDA, self.constants.NMF]:
                 histogram_matrix = []
                 feature_vector_lsit = df['featureVector'].tolist()
                 min_val = np.min(feature_vector_lsit)
@@ -146,15 +147,17 @@ class DimensionReduction:
                 print("NMF does not accept negative values")
                 return
 
-            model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_FROB
-                        , init=constants.INIT_MATRIX, random_state=0)
-            w = model.fit_transform(obj_feature)
+            model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_KL
+                        , init=constants.INIT_MATRIX, random_state=0, solver='mu', max_iter=1000)
+            w = model.fit_transform(obj_feature.transpose())
             h = model.components_
+            w1 = model.fit_transform(obj_feature)
+            h1 = model.components_
             tt1 = time.time()
-            data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": w.tolist()})
-            for i in range(h.shape[0]):
-                print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
-                                                                    key=lambda x: x[1], reverse=True)))
+            data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": h.transpose().tolist()})
+            # for i in range(h.shape[0]):
+            #     print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
+            #                                                         key=lambda x: x[1], reverse=True)))
 
             print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
             return data_lat, h, model
@@ -173,7 +176,7 @@ class DimensionReduction:
             print("LDA does not accept negative values")
             return
 
-        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=10, random_state=0,
+        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=10,
                                           learning_method='online', n_jobs=1, batch_size=512)
         # topic_word_prior=0.05, doc_topic_prior=0.01)#learning_method='online')
         lda_transformed = model.fit_transform(obj_feature)
@@ -194,7 +197,8 @@ class DimensionReduction:
         """
         feature_extractor = ExtractFeatures(folder, self.extractor_model)
         result = feature_extractor.execute(image)
-        if self.extractor_model == self.constants.CM:
+        if self.extractor_model == self.constants.CM and \
+                self.dimension_reduction_model in [self.constants.LDA, self.constants.NMF]:
             cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
             df = pd.DataFrame(list(cursor))
             feature_vector_lsit = df['featureVector'].tolist()

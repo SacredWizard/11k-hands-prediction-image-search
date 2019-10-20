@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.spatial import distance
+from scipy.stats import chisquare
 from scipy.stats import wasserstein_distance
 
 
@@ -31,3 +32,7 @@ def manhattan(x, y):
 
 def earth_movers(x, y):
     return wasserstein_distance(x, y)
+
+
+def chi_square(x, y):
+    return chisquare(x, y)

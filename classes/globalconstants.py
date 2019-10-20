@@ -46,5 +46,5 @@ class GlobalConstants:
     class Nmf:
 
         def __init__(self):
-            self.BETA_LOSS_FROB = 'frobenius'
-            self.INIT_MATRIX = 'nndsvd'
+            self.BETA_LOSS_KL = 'kullback-leibler'
+            self.INIT_MATRIX = 'nndsvda'
