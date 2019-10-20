@@ -59,7 +59,6 @@ def show_feature_ls(data, feat_lat, title):
     for k in feat_lat:
         k_list = [k.dot(data['featureVector'][i]) for i in range(len(data['featureVector']))]
         index = np.argsort(-np.array(k_list))[0]
-        print(index)
         rec = dict()
         rec['imageId'] = data['imageId'][index]
         rec['path'] = data['path'][index]
