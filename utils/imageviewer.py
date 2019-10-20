@@ -41,6 +41,7 @@ def show_images(query_image, image_list, title):
     fig.set_size_inches((20, 12), forward=True)
     filename = "output/{}".format("_".join([str(i) for i in title.values()]) + "_" + query_image.split("/")[-1].
                                   strip(".jpg"))
+    print("Visualizer Image saved to: {}.png".format(filename))
     fig.savefig(filename, dpi=500)
     plt.show()
 
@@ -86,27 +87,38 @@ def show_feature_ls(data, feat_lat, title):
 
     fig = plt.gcf()
     fig.set_size_inches((20, 12), forward=True)
-    filename = "output/{}_feature_ls".format("_".join([str(i) for i in title.values()]))
+    filename = os.path.join(os.path.abspath("output"),"{}_feature_ls".format("_".join([str(i) for i in title.values()])))
+    print("Visualizer Image for feature latent semantics saved to: {}.png".format(filename))
     fig.savefig(filename, dpi=500)
 
 
-def show_subjectwise_images(subjects_with_scores, similar_subjects_images):
+def show_subjectwise_images(given_subject_id, given_subject_images, subjects_with_scores, similar_subjects_images, fig_filename):
     # array of sub-plotss
     maximages = 5
-    nrows, ncols = len(similar_subjects_images), maximages
+    nrows, ncols = len(similar_subjects_images)+1, maximages
     figsize = [10,10]     # figure size, inches
     # create figure (fig), and array of axes (ax)
     fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, sharey=True)
     # max images to display per subject
     # plot images on each sub-plot
+    
+    ax[0][0].text(x = -1.0, y = 0.5, s = "Query ID : {0}".format(given_subject_id), rotation = 0,
+                    horizontalalignment='center', verticalalignment='center', transform=ax[0][0].transAxes)
+    for i,image in enumerate(given_subject_images):
+        ax_subplot = (ax[0][i])
+        ax_subplot.set_xlabel("xlabel")
+        ax_subplot.imshow(io.imread(image))
+        ax_subplot.set_title("{0}".format(str(os.path.basename(image))))
+        ax_subplot.axis('off')
+
     for i,images_for_subject in enumerate(similar_subjects_images):
         # add subject ID and similarity score
-        ax[i][0].text(x = -1.0, y = 0.5, s = "ID : {0}\n Score : {1}%".format(subjects_with_scores[i][0],
+        ax[i+1][0].text(x = -1.0, y = 0.5, s = "ID : {0}\n Score : {1}%".format(subjects_with_scores[i][0],
                         round(subjects_with_scores[i][1],2)), rotation = 0, horizontalalignment='center',
-                        verticalalignment='center', transform=ax[i][0].transAxes)
+                        verticalalignment='center', transform=ax[i+1][0].transAxes)
         # populate images for each subject
         for j,image in enumerate(images_for_subject):
-            ax_subplot = (ax[i][j])
+            ax_subplot = (ax[i+1][j])
             ax_subplot.set_xlabel("xlabel")
             ax_subplot.imshow(io.imread(image))
             ax_subplot.set_title("{0}".format(str(os.path.basename(image))))
@@ -115,10 +127,12 @@ def show_subjectwise_images(subjects_with_scores, similar_subjects_images):
                 break
         # turn off axis and markings
         while j < maximages:
-            ax_subplot = (ax[i][j])
+            ax_subplot = (ax[i+1][j])
             ax_subplot.axis('off')
             j+=1
 
     plt.tight_layout(True)
+    save_fig = plt.gcf()
+    save_fig.savefig(fig_filename)
     plt.show()
-
+    

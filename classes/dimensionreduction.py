@@ -189,7 +189,7 @@ class DimensionReduction:
             #     print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
             #                                                         key=lambda x: x[1], reverse=True)))
 
-            print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
+            # print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
             return data_lat, h, model
         raise \
             Exception("Data in database is empty, Run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n")
@@ -249,16 +249,12 @@ class DimensionReduction:
         """
         
         obj_feature = self.get_object_feature_matrix()
-        metadata = pd.DataFrame()
-        if folder == '':
-            query_image = (obj_feature.loc[obj_feature['imageId'] == image])["featureVector"]
-            query_reduced_dim = model.transform([(query_image.tolist())[0]])
-
-            cursor = self.mongo_wrapper.find(self.constants.METADATA, {})
-            if cursor.count() > 0:
-                metadata = pd.DataFrame(list(cursor))
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, {})
+        if cursor.count() > 0:
+            metadata = pd.DataFrame(list(cursor))
         else:
-            query_reduced_dim = self.compute_query_image(model, folder, image)
+            metadata = pd.DataFrame()
+        query_reduced_dim = self.compute_query_image(model, folder, image)
         dist = []
         score = []
         for index, row in obj_feature.iterrows():

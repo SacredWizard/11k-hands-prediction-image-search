@@ -17,8 +17,10 @@ from utils.imageviewer import show_images
 from utils.inputhelper import get_input_k, get_input_feature_extractor_model, \
     get_input_dimensionality_reduction_model, get_input_folder, get_input_image, get_input_m
 from utils.model import Model
+from classes.globalconstants import GlobalConstants
 
 model_interact = Model()
+global_constants = GlobalConstants()
 
 
 def main():
@@ -29,6 +31,15 @@ def main():
     folder = get_input_folder()
     image_name = get_input_image(folder)
     m_value = get_input_m()
+
+    print(global_constants.LINE_SEPARATOR)
+    print("User Inputs summary")
+    print(global_constants.LINE_SEPARATOR)
+    print("Feature Extraction Model: {}\nDimensionality Reduction Model: {}\nk-value: {}\nFolder: {}\n"
+          "Image: {}\nm-value: {}".format(feature_extraction_model, dimension_reduction_model, k_value, folder,
+                                          image_name, m_value))
+    print(global_constants.LINE_SEPARATOR)
+
     if dimension_reduction_model != "NMF":
         dist_func = "euclidean"
     elif feature_extraction_model in ["CM", "LBP"]:
@@ -49,8 +60,12 @@ def main():
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)
     # print(dim_reduction.compute_query_image(model, folder, image_name))
     result = dim_reduction.find_m_similar_images(model, m_value, folder, image_name, dist_func)
+    print(global_constants.LINE_SEPARATOR)
+    print("Similar Images")
+    print(global_constants.LINE_SEPARATOR)
     for rec in result:
         print(rec)
+    print(global_constants.LINE_SEPARATOR)
     title = {
         "Feature Extraction": feature_extraction_model,
         "Dimensionality Reduction": dimension_reduction_model,

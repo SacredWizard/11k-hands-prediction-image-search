@@ -3,6 +3,7 @@ from scipy.spatial import distance
 from scipy.stats import chisquare
 from scipy.stats import wasserstein_distance
 
+
 def euclidean(x, y):
     """
     Calculates the Euclidean distance between 2 vectors

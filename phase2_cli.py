@@ -6,11 +6,15 @@ Author : Sumukh Ashwin Kamath
 """
 from utils.inputhelper import get_task_number
 import importlib
+import warnings
+
+warnings.filterwarnings('ignore')
 
 
 def main():
     """Main function for the script"""
     number_of_tasks = 8
+    print("Welcome to Phase 2!")
     choice = get_task_number(number_of_tasks)
     module_name = "task{}".format(choice)
     module = importlib.import_module(module_name)

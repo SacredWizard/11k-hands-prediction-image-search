@@ -10,11 +10,13 @@ Authors:
 This is the CLI for task 5 of Phase 2 of the project
 """
 from classes.dimensionreduction import DimensionReduction
+from classes.globalconstants import GlobalConstants
 from utils.model import Model
 from utils.inputhelper import get_input_image_label, get_input_folder, get_input_image, \
     get_input_dimensionality_reduction_model, get_input_feature_extractor_model, get_input_k, get_input_m
 
 model_interact = Model()
+global_constants = GlobalConstants()
 
 
 def run_task3(feature_extraction_model, dimension_reduction_model, label, k_value):
@@ -72,8 +74,27 @@ def main():
     k_value = get_input_k()
     query_folder = get_input_folder()
     image_name = get_input_image(query_folder)
-    dist_func = "euclidean"
     m_value = 1
+
+    print(global_constants.LINE_SEPARATOR)
+    print("User Inputs summary")
+    print(global_constants.LINE_SEPARATOR)
+    print("Feature Extraction Model: {}\nDimensionality Reduction Model: {}\nLabel: {}\nk-value: {}\nQuery Folder: {}"
+          "\nImage: {}".format(feature_extraction_model, dimension_reduction_model, label, k_value, query_folder,
+                               image_name, m_value))
+    print(global_constants.LINE_SEPARATOR)
+
+    if dimension_reduction_model != "NMF":
+        dist_func = "euclidean"
+    elif feature_extraction_model in ["CM", "LBP"]:
+        dist_func = "nvsc1"
+    else:
+        dist_func = "euclidean"
+        # dist_func = "cosine"
+        # dist_func = "chebyshev"
+        # dist_func = "manhattan"
+        # dist_func = "chi_square"
+        # dist_func = "euclidean"
 
     class1_label, class2_label = get_class_labels(label)
 
@@ -90,7 +111,9 @@ def main():
     # print(class2_score)
 
     final_label = class1_label if class1_score > class2_score else class2_label
-    print(final_label)
+    print(global_constants.LINE_SEPARATOR)
+    print("{} !!!".format(final_label.upper()))
+    print(global_constants.LINE_SEPARATOR)
 
 
 if __name__ == "__main__":
