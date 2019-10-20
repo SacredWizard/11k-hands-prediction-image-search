@@ -33,7 +33,7 @@ def main():
     print(global_constants.LINE_SEPARATOR)
     print("User Inputs summary")
     print(global_constants.LINE_SEPARATOR)
-    print("\nFeature Extraction Model: {}\nDimensionality Reduction Model: {}\nk-value: {}\n".
+    print("Feature Extraction Model: {}\nDimensionality Reduction Model: {}\nk-value: {}".
           format(feature_extraction_model, dimension_reduction_model, k_value))
     print(global_constants.LINE_SEPARATOR)
 

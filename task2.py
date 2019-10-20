@@ -35,7 +35,7 @@ def main():
     print(global_constants.LINE_SEPARATOR)
     print("User Inputs summary")
     print(global_constants.LINE_SEPARATOR)
-    print("\nFeature Extraction Model: {}\nDimensionality Reduction Model: {}\nk-value: {}\nFolder: {}  "
+    print("Feature Extraction Model: {}\nDimensionality Reduction Model: {}\nk-value: {}\nFolder: {}\n"
           "Image: {}\nm-value: {}".format(feature_extraction_model, dimension_reduction_model, k_value, folder,
                                           image_name, m_value))
     print(global_constants.LINE_SEPARATOR)

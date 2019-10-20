@@ -40,4 +40,4 @@ class Model:
                 model = pickle.load(file)
             return model
         except FileNotFoundError:
-            print("The model file is not found. Please run the previous task")
+            print("The model file is not found")
