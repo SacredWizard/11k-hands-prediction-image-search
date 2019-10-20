@@ -13,7 +13,8 @@ from utils.inputhelper import get_input_k
 import time
 from utils.termweight import print_tw
 model_interact = Model()
-mongo_wrapper = MongoWrapper(GlobalConstants().Mongo().DB_NAME)
+global_constants = GlobalConstants()
+mongo_wrapper = MongoWrapper(global_constants.Mongo().DB_NAME)
 
 
 def main():
@@ -22,6 +23,11 @@ def main():
     k_value_for_ss_similarity = 10
 
     given_k_value = get_input_k()
+    print(global_constants.LINE_SEPARATOR)
+    print("User Inputs summary")
+    print(global_constants.LINE_SEPARATOR)
+    print("k-value: {}".format(given_k_value))
+    print(global_constants.LINE_SEPARATOR)
 
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value_for_ss_similarity)
     # original feature vectors
@@ -58,8 +64,9 @@ def main():
     # save to csv
     filename = "task7" + '_' + str(given_k_value)
     CSVReader().save_to_csv(w, None, filename, subject_subject=True)
+    print("Please check the CSV file: output/{}.csv".format(filename))
 
-    print("\nTime taken for task 7: {}\n".format(time.time() - starttime))
+    # print("\nTime taken for task 7: {}\n".format(time.time() - starttime))
 
 
 if __name__ == "__main__":
