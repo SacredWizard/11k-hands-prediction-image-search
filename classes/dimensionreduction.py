@@ -125,12 +125,12 @@ class DimensionReduction:
             # normalize feature vector data for PCA
             normalize(data_feature_matrix)
             # apply PCA to features
-            features_pca_decomposition = PCA(n_components=k,copy=False)
+            features_pca_decomposition = PCA(n_components=k, copy=False)
             features_pca_decomposition.fit_transform(data_feature_matrix)
             # get latent feature components
             feature_components = features_pca_decomposition.components_
             
-            data_pca_decomposition = PCA(n_components=k,copy=False)
+            data_pca_decomposition = PCA(n_components=k, copy=False)
             # transpose matrix to feature-data matrix
             feature_data_matrix = np.transpose(data_feature_matrix)
             # normalize feature vector data for PCA
@@ -181,16 +181,16 @@ class DimensionReduction:
 
             model = NMF(n_components=self.k_value, beta_loss=constants.BETA_LOSS_KL
                         , init=constants.INIT_MATRIX, random_state=0, solver='mu', max_iter=1000)
-            w = model.fit_transform(obj_feature.transpose())
+            w = model.fit_transform(obj_feature)
             h = model.components_
             tt1 = time.time()
-            data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": h.transpose().tolist()})
+            data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": w.tolist()})
             # for i in range(h.shape[0]):
             #     print("Latent Feature: {}\n{}".format(i + 1, sorted(((i, v) for i, v in enumerate(h[i])),
             #                                                         key=lambda x: x[1], reverse=True)))
 
             print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
-            return data_lat, w.transpose(), model
+            return data_lat, h, model
         raise \
             Exception("Data in database is empty, Run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n")
 
