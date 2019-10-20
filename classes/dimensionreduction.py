@@ -249,16 +249,12 @@ class DimensionReduction:
         """
         
         obj_feature = self.get_object_feature_matrix()
-        metadata = pd.DataFrame()
-        if folder == '':
-            query_image = (obj_feature.loc[obj_feature['imageId'] == image])["featureVector"]
-            query_reduced_dim = model.transform([(query_image.tolist())[0]])
-
-            cursor = self.mongo_wrapper.find(self.constants.METADATA, {})
-            if cursor.count() > 0:
-                metadata = pd.DataFrame(list(cursor))
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, {})
+        if cursor.count() > 0:
+            metadata = pd.DataFrame(list(cursor))
         else:
-            query_reduced_dim = self.compute_query_image(model, folder, image)
+            metadata = pd.DataFrame()
+        query_reduced_dim = self.compute_query_image(model, folder, image)
         dist = []
         score = []
         for index, row in obj_feature.iterrows():
