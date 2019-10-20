@@ -13,7 +13,7 @@ This is a module for performing dimensionality reduction on images
 import re
 import time
 from itertools import islice
-
+import os
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD, PCA
@@ -29,13 +29,18 @@ class DimensionReduction:
     """
     Class for performing Dimensionality Reduction
     """
-    def __init__(self, extractor_model, dimension_reduction_model, k_value, label=None):
+    def __init__(self, extractor_model, dimension_reduction_model, k_value, label=None, image_metadata=False,
+                 subject_subject=False, folder_metadata=None, matrix=None):
         self.constants = GlobalConstants()
         self.mongo_wrapper = MongoWrapper(self.constants.Mongo().DB_NAME)
         self.extractor_model = extractor_model
         self.dimension_reduction_model = dimension_reduction_model
         self.label = label
         self.k_value = k_value
+        self.binary_image_metadata = image_metadata
+        self.subject_subject = subject_subject
+        self.folder_metadata = folder_metadata
+        self.matrix = matrix
 
     def get_object_feature_matrix(self):
         """
@@ -63,6 +68,27 @@ class DimensionReduction:
             return df
         else:
             return pd.DataFrame()
+
+    def get_binary_image_metadata_matrix(self):
+        """
+        Gets the Binary Image Metadata Matrix
+        :return: The Binary Image Metadata Matrix
+        """
+        images_list = [i for i in os.listdir(self.folder_metadata) if i.endswith(self.constants.JPG_EXTENSION)]
+        metadata = self.get_metadata("imageName", images_list, {"_id": 0})
+        metadata['male'] = [1 if i == "male" else 0 for i in metadata['gender'].tolist()]
+        metadata['female'] = [1 if i == "female" else 0 for i in metadata['gender'].tolist()]
+        metadata['without accessories'] = np.array([1] * len(metadata['accessories'])) - np.array(metadata['accessories'])
+        metadata['dorsal'] = [1 if "dorsal" in i else 0 for i in metadata['aspectOfHand']]
+        metadata['palmar'] = [1 if "palmar" in i else 0 for i in metadata['aspectOfHand']]
+        metadata['left'] = [1 if "left" in i else 0 for i in metadata['aspectOfHand']]
+        metadata['right'] = [1 if "right" in i else 0 for i in metadata['aspectOfHand']]
+        metadata['featureVector'] = metadata[['male', 'female', 'dorsal', 'palmar', 'accessories',
+                                              'without accessories', 'left', 'right']].values.tolist()
+        binary_image_metadata = metadata[['imageName', 'featureVector', 'male', 'female', 'dorsal', 'palmar',
+                                          'accessories', 'without accessories', 'left', 'right']]
+        binary_image_metadata = binary_image_metadata.rename(columns={"imageName": "imageId"})
+        return binary_image_metadata
 
     def filter_images_by_label(self, images_list):
         """Fetches the list of images by label"""
@@ -139,7 +165,12 @@ class DimensionReduction:
         :return:
         """
         constants = self.constants.Nmf()
-        data = self.get_object_feature_matrix()
+        if self.binary_image_metadata:
+            data = self.get_binary_image_metadata_matrix()
+        elif self.subject_subject:
+            data = self.matrix
+        else:
+            data = self.get_object_feature_matrix()
 
         if not data.size == 0:
             obj_feature = np.array(data['featureVector'].tolist())
@@ -151,8 +182,6 @@ class DimensionReduction:
                         , init=constants.INIT_MATRIX, random_state=0, solver='mu', max_iter=1000)
             w = model.fit_transform(obj_feature.transpose())
             h = model.components_
-            w1 = model.fit_transform(obj_feature)
-            h1 = model.components_
             tt1 = time.time()
             data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": h.transpose().tolist()})
             # for i in range(h.shape[0]):
@@ -256,11 +285,19 @@ class DimensionReduction:
             result.append(rec)
         return result
 
-    def get_metadata(self, column, values):
+    def get_metadata(self, column, values, filter_query=None):
         query = {column: {"$in": values}}
-        cursor = self.mongo_wrapper.find(self.constants.METADATA, query)
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, query, filter_query)
         if cursor.count() > 0:
             df = pd.DataFrame(list(cursor))
             return df
         else:
             return pd.DataFrame()
+
+    def get_metadata_unique_values(self, column):
+        cursor = self.mongo_wrapper.find(self.constants.METADATA, '')
+        if cursor.count()>0:
+            distinct_values = cursor.distinct(column)
+            if len(distinct_values) > 0:
+                return distinct_values
+        return list()

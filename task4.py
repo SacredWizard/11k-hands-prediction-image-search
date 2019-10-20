@@ -41,8 +41,14 @@ def main():
     result = dim_reduction.find_m_similar_images(model, m_value, folder, image_name, dist_func)
     for rec in result:
         print(rec)
-    title = "Feature Model: {}   Dimension Reduction: {}   k: {}  Label: {}".\
-        format(feature_extraction_model, dimension_reduction_model, k_value, label, dist_func)
+
+    title = {
+        "Feature Extraction": feature_extraction_model,
+        "Dimension Reduction": dimension_reduction_model,
+        "k": k_value,
+        "Label": label,
+        "Distance": dist_func
+             }
     show_images(os.path.abspath(os.path.join(folder, image_name)), result, title)
 
 

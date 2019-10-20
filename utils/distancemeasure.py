@@ -3,7 +3,6 @@ from scipy.spatial import distance
 from scipy.stats import chisquare
 from scipy.stats import wasserstein_distance
 
-
 def euclidean(x, y):
     """
     Calculates the Euclidean distance between 2 vectors
@@ -27,7 +26,7 @@ def chebyshev(x, y):
 
 
 def manhattan(x, y):
-    return distance.cityblock(x, y)
+    return distance.cityblock(x,y)
 
 
 def earth_movers(x, y):
