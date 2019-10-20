@@ -1,5 +1,5 @@
-from numpy import argsort
 import numpy as np
+from numpy import argsort
 
 metadata_list = ['male', 'female', 'dorsal', 'palmar', 'accessories', 'without accessories', 'left', 'right']
 
@@ -40,7 +40,7 @@ def print_tw(data_m, feature_m, image_metadata=False, subject_subject=False):
     images = data_m['imageId'].tolist()
     data_m = np.array(data_m['reducedDimensions'].tolist())
     data_tw = get_data_latent_semantics(data_m, data_m.shape[1], images)
-
+    feature_tw = []
     if not subject_subject:
         feature_tw = get_feature_latent_semantics(feature_m, feature_m.shape[0], image_metadata)
 

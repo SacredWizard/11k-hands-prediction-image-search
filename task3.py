@@ -10,13 +10,12 @@ Authors:
 
 This is the CLI for task 3 of Phase 2 of the project
 """
-from utils.excelcsv import CSVReader
 from classes.dimensionreduction import DimensionReduction
-from utils.termweight import print_tw
 from utils.excelcsv import CSVReader
-from utils.model import Model
 from utils.inputhelper import get_input_k, get_input_dimensionality_reduction_model, \
     get_input_feature_extractor_model, get_input_image_label
+from utils.model import Model
+from utils.termweight import print_tw
 
 model_interact = Model()
 csv_reader = CSVReader()
@@ -47,6 +46,15 @@ def main():
     # save term weight pairs to csv
     filename = "task3_{}_{}_{}_{}".format(feature_extraction_model, dimension_reduction_model, label, k_value)
     csv_reader.save_to_csv(obj_lat, feat_lat, filename)
+
+    # data = dim_reduction.get_object_feature_matrix()
+    #
+    # title = {
+    #     "Feature Extraction": feature_extraction_model,
+    #     "Dimensionality Reduction": dimension_reduction_model,
+    #     "k": k_value,
+    # }
+    # show_feature_ls(data, feat_lat, title)
 
 
 if __name__ == "__main__":
