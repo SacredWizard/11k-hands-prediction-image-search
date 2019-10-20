@@ -10,10 +10,11 @@ Authors:
 
 This is a module for performing dimensionality reduction on images
 """
+import os
 import re
 import time
 from itertools import islice
-import os
+
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import NMF, LatentDirichletAllocation, TruncatedSVD, PCA
@@ -189,7 +190,7 @@ class DimensionReduction:
             #                                                         key=lambda x: x[1], reverse=True)))
 
             print("\n\nTime Taken for NMF {}\n".format(time.time() - tt1))
-            return data_lat, h, model
+            return data_lat, w.transpose(), model
         raise \
             Exception("Data in database is empty, Run Task 2 of Phase 1 (Insert feature extracted records in db )\n\n")
 
