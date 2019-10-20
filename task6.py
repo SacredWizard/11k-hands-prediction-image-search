@@ -16,7 +16,8 @@ import random
 import warnings
 warnings.filterwarnings("ignore")
 model_interact = Model()
-mongo_wrapper = MongoWrapper(GlobalConstants().Mongo().DB_NAME)
+global_constants = GlobalConstants()
+mongo_wrapper = MongoWrapper(global_constants.Mongo().DB_NAME)
 
 feature_extraction_model = "HOG"
 dimension_reduction_model = "NMF"
@@ -53,16 +54,20 @@ def find_similar_subjects(given_subject_id, image_list_for_given_subject, given_
         subject_similarity[subject] = np.mean(list(float(d['score']) for d in distance_for_subject if d['subject'] == subject ))
     return subject_similarity
 
+
 def load_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value):
     filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
     model = model_interact.load_model(filename=filename)
     if model is None:
+        print("Saving the model")
         task1.save_model(dim_reduction,feature_extraction_model,dimension_reduction_model,k_value)
         model = model_interact.load_model(filename=filename)
     return model
 
-def main():
 
+def main():
+    # given subject id
+    given_subject_id = get_input_subject_id()
     k_value = 40
     master_folder = "Hands"
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)
@@ -74,8 +79,11 @@ def main():
     img_set = pd.DataFrame({"imageId": obj_feat_matrix['imageId']})
     # image count to rank against current image
     m_value = len(img_set)
-    # given subject id
-    given_subject_id = get_input_subject_id()
+    print(global_constants.LINE_SEPARATOR)
+    print("User Inputs summary")
+    print(global_constants.LINE_SEPARATOR)
+    print("Query Subject Id: {}".format(given_subject_id))
+    print(global_constants.LINE_SEPARATOR)
     # given_subject_id = 55
     # similar subjects to find
     similar_subject_count = 3

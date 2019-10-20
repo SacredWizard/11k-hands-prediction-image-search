@@ -39,8 +39,9 @@ def show_images(query_image, image_list, title):
 
     fig = plt.gcf()
     fig.set_size_inches((20, 12), forward=True)
-    filename = os.path.join("output","{}".format("_".join([str(i) for i in title.values()]) + "_" + query_image.split(os.path.sep)[-1].
-                                  strip(".jpg")))
+    filename = "output/{}".format("_".join([str(i) for i in title.values()]) + "_" + query_image.split("/")[-1].
+                                  strip(".jpg"))
+    print("Visualizer Image saved to: {}.png".format(filename))
     fig.savefig(filename, dpi=500)
     plt.show()
 
@@ -87,6 +88,7 @@ def show_feature_ls(data, feat_lat, title):
     fig = plt.gcf()
     fig.set_size_inches((20, 12), forward=True)
     filename = os.path.join(os.path.abspath("output"),"{}_feature_ls".format("_".join([str(i) for i in title.values()])))
+    print("Visualizer Image for feature latent semantics saved to: {}.png".format(filename))
     fig.savefig(filename, dpi=500)
 
 
