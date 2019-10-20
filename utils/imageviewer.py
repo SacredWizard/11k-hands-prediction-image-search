@@ -53,7 +53,7 @@ def show_feature_ls(data, feat_lat, title):
     :param title: Image Title
     :return: Nothing!
     """
-    plt.rcParams.update({'font.size': 10})
+    plt.rcParams.update({'font.size': 7})
 
     f = plt.figure(figsize=(20, 12))
     title_visualizer = ""
