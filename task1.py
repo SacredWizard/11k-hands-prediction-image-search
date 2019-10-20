@@ -14,6 +14,7 @@ from classes.dimensionreduction import DimensionReduction
 from utils.termweight import print_tw
 from utils.model import Model
 from utils.excelcsv import CSVReader
+from utils.imageviewer import show_feature_ls
 import pandas as pd
 import numpy as np
 model_interact = Model()
@@ -39,6 +40,15 @@ def main():
     # save term weight pairs to csv  
     filename = "task1"+'_'+feature_extraction_model+'_'+dimension_reduction_model+'_'+str(k_value)
     CSVReader().save_to_csv(obj_lat, feat_lat, filename)
+
+    data = dim_reduction.get_object_feature_matrix()
+
+    title = {
+        "Feature Extraction": feature_extraction_model,
+        "Dimensionality Reduction": dimension_reduction_model,
+        "k": k_value,
+    }
+    show_feature_ls(data, feat_lat, title)
 
 if __name__ == "__main__":
     main()
