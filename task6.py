@@ -75,8 +75,8 @@ def main():
     # image count to rank against current image
     m_value = len(img_set)
     # given subject id
-    # given_subject_id = get_input_subject_id()
-    given_subject_id = 55
+    given_subject_id = get_input_subject_id()
+    # given_subject_id = 55
     # similar subjects to find
     similar_subject_count = 3
     # get metadata for given subject's images
