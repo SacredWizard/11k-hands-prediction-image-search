@@ -9,6 +9,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage import io
+import pandas as pd
 
 
 def show_images(query_image, image_list, title):
@@ -45,6 +46,52 @@ def show_images(query_image, image_list, title):
     fig.savefig(filename, dpi=500)
     plt.show()
 
+def show_data_ls(data, data_tw, title):
+    """
+    :param data_tw: term weight pairs for data latent semantics
+    :param title: Image Title
+    :return: Nothing!
+    """
+    plt.rcParams.update({'font.size': 6})
+
+    f = plt.figure(figsize=(20, 12))
+    title_visualizer = ""
+    for i in title:
+        title_visualizer += i + ":" + str(title[i]) + "  "
+
+    title_visualizer += "Feature Latent Semantics"
+    f.suptitle(title_visualizer, fontsize=18)
+    
+    #extra credit for data latent semantic
+    k = len(data_tw)
+    no_images_per_row = 10
+    no_of_lines = k
+
+    count = 1
+    for i in range(k):
+        for j in range(no_images_per_row + 1):
+            if j == 0:
+                f.add_subplot(no_of_lines, no_images_per_row + 1, count)
+                plt.title("LS {}".format(i+1), fontsize=9)
+                plt.axis('off')
+                count = count + 1
+            else:
+                f.add_subplot(no_of_lines, no_images_per_row + 1, count)
+                imageId = data_tw[i][j-1][0]
+                score = data_tw[i][j-1][1]
+                unique_index = pd.Index(data['imageId'])
+                index = unique_index.get_loc(imageId)
+                path = data['path'][index]
+                plt.imshow(io.imread(os.path.join(path)))
+                plt.title("{}\nScore:{}".format(imageId, round(score, 3)))
+                plt.axis('off')
+                count = count + 1
+
+    fig = plt.gcf()
+    fig.set_size_inches((20, 12), forward=True)
+    filename = os.path.join(os.path.abspath("output"),"{}_data_ls".format("_".join([str(i) for i in title.values()])))
+    print("Visualizer Image for data latent semantics saved to: {}.png".format(filename))
+    fig.savefig(filename, dpi=500)
 
 def show_feature_ls(data, feat_lat, title):
     """
@@ -53,7 +100,7 @@ def show_feature_ls(data, feat_lat, title):
     :param title: Image Title
     :return: Nothing!
     """
-    plt.rcParams.update({'font.size': 10})
+    plt.rcParams.update({'font.size': 7})
 
     f = plt.figure(figsize=(20, 12))
     title_visualizer = ""

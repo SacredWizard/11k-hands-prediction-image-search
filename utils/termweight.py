@@ -67,3 +67,4 @@ def print_tw(data_m, feature_m, image_metadata=False, subject_subject=False):
         for i in range(len(feature_tw)):
             print("LS {}  -->  {}\n".format(i + 1, feature_tw[i]))
         print(separator)
+    return data_tw

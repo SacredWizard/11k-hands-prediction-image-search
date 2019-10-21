@@ -14,7 +14,7 @@ from classes.dimensionreduction import DimensionReduction
 from utils.termweight import print_tw
 from utils.model import Model
 from utils.excelcsv import CSVReader
-from utils.imageviewer import show_feature_ls
+from utils.imageviewer import show_feature_ls, show_data_ls
 from classes.globalconstants import GlobalConstants
 from utils.inputhelper import get_input_dimensionality_reduction_model, get_input_feature_extractor_model, get_input_k
 
@@ -48,7 +48,7 @@ def main():
     obj_lat, feat_lat = save_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value)
 
     # Print term weight pairs to terminal  
-    print_tw(obj_lat, feat_lat)
+    data_tw = print_tw(obj_lat, feat_lat)
 
     # save term weight pairs to csv  
     filename = "task1" + '_' + feature_extraction_model + '_' + dimension_reduction_model + '_' + str(k_value)
@@ -62,7 +62,9 @@ def main():
         "Dimensionality Reduction": dimension_reduction_model,
         "k": k_value,
     }
+    show_data_ls(data, data_tw, title)
     show_feature_ls(data, feat_lat, title)
+
 
 
 if __name__ == "__main__":
