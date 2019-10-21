@@ -13,6 +13,7 @@ This is a module for performing dimensionality reduction on images
 import os
 import re
 import time
+import sys
 from itertools import islice
 
 import numpy as np
@@ -68,7 +69,9 @@ class DimensionReduction:
                 df = df[df.imageId.isin(filter_images_list)]
             return df
         else:
-            return pd.DataFrame()
+            print("No records found in Mongo collection: {}. Please run Task2 from Phase1".
+                  format(self.extractor_model.lower()))
+            sys.exit(1)
 
     def get_binary_image_metadata_matrix(self):
         """
