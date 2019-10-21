@@ -60,14 +60,14 @@ def main():
     csv_reader.save_to_csv(obj_lat, feat_lat, filename)
     print("Please check the CSV file: output/{}.csv".format(filename))
 
-    # data = dim_reduction.get_object_feature_matrix()
-    #
-    # title = {
-    #     "Feature Extraction": feature_extraction_model,
-    #     "Dimensionality Reduction": dimension_reduction_model,
-    #     "k": k_value,
-    # }
-    # show_feature_ls(data, feat_lat, title)
+    data = dim_reduction.get_object_feature_matrix()
+    
+    title = {
+        "Feature Extraction": feature_extraction_model,
+        "Dimensionality Reduction": dimension_reduction_model,
+        "k": k_value,
+    }
+    show_feature_ls(data, feat_lat, title)
 
 
 if __name__ == "__main__":
