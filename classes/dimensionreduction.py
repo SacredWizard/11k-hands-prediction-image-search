@@ -206,8 +206,7 @@ class DimensionReduction:
             print("LDA does not accept negative values")
             return
 
-        model = LatentDirichletAllocation(n_components=self.k_value, max_iter=10,
-                                          learning_method='online', n_jobs=1, batch_size=512)
+        model = LatentDirichletAllocation(n_components=self.k_value, learning_method='batch', n_jobs=-1)
         # topic_word_prior=0.05, doc_topic_prior=0.01)#learning_method='online')
         lda_transformed = model.fit_transform(obj_feature)
         data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": lda_transformed.tolist()})

@@ -11,12 +11,12 @@ Authors:
 This is the CLI for task 1 of Phase 2 of the project
 """
 from classes.dimensionreduction import DimensionReduction
-from utils.termweight import print_tw
-from utils.model import Model
+from classes.globalconstants import GlobalConstants
 from utils.excelcsv import CSVReader
 from utils.imageviewer import show_feature_ls, show_data_ls
-from classes.globalconstants import GlobalConstants
 from utils.inputhelper import get_input_dimensionality_reduction_model, get_input_feature_extractor_model, get_input_k
+from utils.model import Model
+from utils.termweight import print_tw
 
 model_interact = Model()
 global_constants = GlobalConstants()
@@ -62,9 +62,10 @@ def main():
         "Dimensionality Reduction": dimension_reduction_model,
         "k": k_value,
     }
+    print("Generating Visualization ...")
     show_data_ls(data, data_tw, title)
+    print("Generating Visualization ...")
     show_feature_ls(data, feat_lat, title)
-
 
 
 if __name__ == "__main__":
