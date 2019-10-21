@@ -1,17 +1,18 @@
-from classes.dimensionreduction import DimensionReduction
-from utils.model import Model
-from utils.excelcsv import CSVReader
-from classes.mongo import MongoWrapper
-from classes.globalconstants import GlobalConstants
-import pandas as pd
-import numpy as np
-import scipy.stats as stats
-import operator
-import task6 as task6
 import os.path as path
-from utils.inputhelper import get_input_k
 import time
+
+import numpy as np
+import pandas as pd
+
+import task6 as task6
+from classes.dimensionreduction import DimensionReduction
+from classes.globalconstants import GlobalConstants
+from classes.mongo import MongoWrapper
+from utils.excelcsv import CSVReader
+from utils.inputhelper import get_input_k
+from utils.model import Model
 from utils.termweight import print_tw
+
 model_interact = Model()
 global_constants = GlobalConstants()
 mongo_wrapper = MongoWrapper(global_constants.Mongo().DB_NAME)
@@ -32,7 +33,7 @@ def main():
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value_for_ss_similarity)
     # original feature vectors
     obj_feat_matrix = dim_reduction.get_object_feature_matrix()
-        # get the img IDs from the database for images in the fit model
+    # get the img IDs from the database for images in the fit model
     img_set = pd.DataFrame({"imageId": obj_feat_matrix['imageId']})
     # get the metadata for each image with given subject id
     subject_data = dim_reduction.get_metadata("imageName", list(set(img_set["imageId"].tolist())))
@@ -41,20 +42,21 @@ def main():
     subject_subject_matrix = []
     m_value = len(img_set)
     starttime = time.time()
-    model = task6.load_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value_for_ss_similarity)
+    model = task6.load_model(dim_reduction, feature_extraction_model, dimension_reduction_model,
+                             k_value_for_ss_similarity)
     folder = path.basename(path.dirname(obj_feat_matrix['path'][0]))
 
-    for i,subjectid in enumerate(dataset_subject_ids):
+    for i, subjectid in enumerate(dataset_subject_ids):
         given_subject_images = dim_reduction.get_metadata("id", list([subjectid]))["imageName"].tolist()
         image_list_for_subject = list(set(given_subject_images).intersection(set(img_set["imageId"].tolist())))
         similar_subjects = task6.find_similar_subjects(subjectid, image_list_for_subject, model,
-                                                                img_set, dim_reduction, m_value , folder)
+                                                       img_set, dim_reduction, m_value, folder)
         subject_subject_matrix.append(np.asarray(list(similar_subjects.values())))
 
     print("\nTime taken to create subject subject matrix: {}\n".format(time.time() - starttime))
     # perform nmf on subject_subject_matrix
     # given_k_value = 1
-    matrix = pd.DataFrame(data = {'imageId':list(dataset_subject_ids),'featureVector': subject_subject_matrix})
+    matrix = pd.DataFrame(data={'imageId': list(dataset_subject_ids), 'featureVector': subject_subject_matrix})
     dim_red = DimensionReduction(None, "NMF", given_k_value, subject_subject=True, matrix=matrix)
     w, h, model = dim_red.execute()
 
