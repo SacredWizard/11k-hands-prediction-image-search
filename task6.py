@@ -140,8 +140,11 @@ def main():
     for image in image_list_for_given_subject:
         image_list_for_given_subject_abs_path.append(os.path.abspath(os.path.join(master_folder,image)))
 
-    fig_filename = os.path.abspath(os.path.join("output","task6","{0}_{1}_{2}_{3}_{4}.png".format(feature_extraction_model,
-                                        dimension_reduction_model, str(k_value),dist_func,given_subject_id)))
+    output_path = os.path.abspath(os.path.join("output"))
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    fig_filename = os.path.join(output_path,"task6_{0}_{1}_{2}_{3}_{4}.png".format(feature_extraction_model,
+                                        dimension_reduction_model, str(k_value),dist_func,given_subject_id))
     # show images on a plot
     imgvwr.show_subjectwise_images(given_subject_id, image_list_for_given_subject_abs_path,
                                          list_subjects, image_list_for_similar_subjects_abs_path, fig_filename)
