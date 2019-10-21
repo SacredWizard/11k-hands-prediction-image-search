@@ -1,6 +1,6 @@
 import pymongo
 import pymongo.errors
-
+import sys
 from classes import globalconstants
 
 
@@ -24,10 +24,13 @@ class MongoWrapper:
                     .get_database(self.constants.DB_NAME)
         except pymongo.errors.ConnectionFailure as e:
             print("Connection Failure:\n{}".format(e))
+            sys.exit(1)
         except pymongo.errors.ServerSelectionTimeoutError as e:
             print("Timeout:\n{}".format(e))
+            sys.exit(1)
         except Exception as e:
             print("Exception has occurred:\n{}".format(e))
+            sys.exit(1)
 
     def get_db_connection(self):
         """
@@ -48,8 +51,10 @@ class MongoWrapper:
             return self.mongo_client[collection_name].distinct(field, query)
         except pymongo.errors.ExecutionTimeout as e:
             print("Timeout : {}".format(e))
+            sys.exit(1)
         except Exception as e:
             print("Exception occured while running mongo distinct query: {}".format(e))
+            sys.exit(1)
 
     def find(self, collection_name, query, fields_filter=None):
         """
@@ -66,8 +71,10 @@ class MongoWrapper:
                 return self.mongo_client[collection_name].find(query, fields_filter)
         except pymongo.errors.ServerSelectionTimeoutError as e:
             print("Timeout:\n{}".format(e))
+            sys.exit(1)
         except Exception as e:
             print("Exception occurred:\n{}".format(e))
+            sys.exit(1)
 
     def save_record(self, collection_name, rec):
         """
@@ -81,6 +88,7 @@ class MongoWrapper:
                 {"imageId": "{}".format(rec.imageId)}, {"$set": rec}, upsert=True)
         except Exception as e:
             print("Exception while saving record:\n{}".format(e))
+            sys.exit(1)
 
     def bulk_insert(self, collection, records, parallel=False, threads=4):
         """
@@ -96,10 +104,13 @@ class MongoWrapper:
             print("Successfully Inserted {} Documents in {}".format(len(records), collection))
         except pymongo.errors.BulkWriteError as e:
             print("Bulk Write Error:\n{}".format(e))
+            sys.exit(1)
         except TypeError as e:
             print("TypeError:\n{}".format(e))
+            sys.exit(1)
         except Exception as e:
             print("Exception:\n{}".format(e))
+            sys.exit(1)
 
     def drop_collection(self, collection):
         """
@@ -111,5 +122,6 @@ class MongoWrapper:
             self.mongo_client[collection].drop()
         except Exception as e:
             print("Exception while dropping the collection:\n{}".format(e))
+            sys.exit(1)
 
 

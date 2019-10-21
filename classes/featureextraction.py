@@ -248,6 +248,11 @@ class ExtractFeatures:
         file_names = sorted(glob.glob1(self.folder, '*' + self.constants.JPG_EXTENSION))
         length = len(file_names)
         mongo_wrapper = mongo.MongoWrapper()
+        # Dropping the collection before bulk inserting
+        mongo_wrapper.drop_collection(self.model.lower())
+        if self.model == self.constants.SIFT:
+            mongo_wrapper.drop_collection(mongo_wrapper.constants.SIFT_FEATURE_COLLECTION.lower())
+
         for i in range(0, length, self.constants.BULK_PROCESS_COUNT):
             pool = ThreadPool(self.constants.NUM_THREADS)
             mongo_wrapper.bulk_insert(self.model.lower() if self.model != self.constants.SIFT

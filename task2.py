@@ -11,7 +11,7 @@ Authors:
 This is the CLI for task 2 of Phase 2 of the project
 """
 import os
-
+import sys
 from classes.dimensionreduction import DimensionReduction
 from utils.imageviewer import show_images
 from utils.inputhelper import get_input_k, get_input_feature_extractor_model, \
@@ -55,6 +55,10 @@ def main():
     # Saves the returned model
     filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
     model = model_interact.load_model(filename=filename)
+
+    if not model:
+        print("Please run Task 1 for {}, {} and {}".format(feature_extraction_model, dimension_reduction_model, k_value))
+        sys.exit(1)
 
     # Compute the reduced dimensions for the new query image
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)

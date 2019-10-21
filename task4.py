@@ -11,6 +11,7 @@ Authors:
 This is the CLI for task 4 of Phase 2 of the project
 """
 import os
+import sys
 from classes.dimensionreduction import DimensionReduction
 from classes.globalconstants import GlobalConstants
 from utils.imageviewer import show_images
@@ -56,6 +57,10 @@ def main():
     filename = "{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label.replace(" ", ''),
                                         str(k_value))
     model = model_interact.load_model(filename=filename)
+    if not model:
+        print("Please run Task 3 for {}, {}, {} and {}".format(feature_extraction_model, dimension_reduction_model,
+                                                               label, k_value))
+        sys.exit(1)
 
     # Compute the reduced dimensions for the new query image and find m similar images
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value, label)

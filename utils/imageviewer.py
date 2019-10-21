@@ -59,7 +59,7 @@ def show_data_ls(data, data_tw, title):
     for i in title:
         title_visualizer += i + ":" + str(title[i]) + "  "
 
-    title_visualizer += "Feature Latent Semantics"
+    title_visualizer += "Data Latent Semantics"
     f.suptitle(title_visualizer, fontsize=18)
     
     #extra credit for data latent semantic
