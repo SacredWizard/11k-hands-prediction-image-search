@@ -62,8 +62,9 @@ def main():
         "Dimensionality Reduction": dimension_reduction_model,
         "k": k_value,
     }
-    print("Generating Visualization ...")
-    show_data_ls(data, data_tw, title)
+    if k_value <=20:
+        print("Generating Visualization ...")
+        show_data_ls(data, data_tw, title)
     print("Generating Visualization ...")
     show_feature_ls(data, feat_lat, title)
 
