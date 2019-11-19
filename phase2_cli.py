@@ -17,7 +17,7 @@ def main():
     print("Welcome to Phase 2!")
     choice = get_task_number(number_of_tasks)
     module_name = "task{}".format(choice)
-    module = importlib.import_module(module_name)
+    module = importlib.import_module('phase2.{0}'.format(module_name))
     module.main()
 
 
