@@ -9,6 +9,9 @@ Authors:
 6. Kanishk Bashyam
 This is the CLI for task 5 of Phase 2 of the project
 """
+import os
+import sys
+sys.path.append(os.path.split(sys.path[0])[0])
 from classes.dimensionreduction import DimensionReduction
 from classes.globalconstants import GlobalConstants
 from utils.inputhelper import get_input_image_label, get_input_folder, get_input_image, \
