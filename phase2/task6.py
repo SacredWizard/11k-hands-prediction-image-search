@@ -1,12 +1,14 @@
 import operator
 import os
+import sys
+sys.path.append(os.path.split(sys.path[0])[0])
 import random
 import time
 import warnings
 
 import numpy as np
 import pandas as pd
-import task1 as task1
+import phase2.task1 as task1
 
 import utils.imageviewer as imgvwr
 from classes.dimensionreduction import DimensionReduction
