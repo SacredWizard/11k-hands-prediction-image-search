@@ -64,6 +64,9 @@ class DimensionReduction:
                                                       range=(min_val, max_val + 1))
                     histogram_matrix.append(value)
                 df['featureVector'] = histogram_matrix
+            if self.folder_metadata:
+                filter_images_list = self.filter_images_by_dir(df['imageId'].tolist(), self.folder_metadata)
+                df = df[df.imageId.isin(filter_images_list)]
             if self.label:
                 filter_images_list = self.filter_images_by_label(df['imageId'].tolist())
                 df = df[df.imageId.isin(filter_images_list)]
@@ -93,6 +96,16 @@ class DimensionReduction:
                                           'accessories', 'without accessories', 'left', 'right']]
         binary_image_metadata = binary_image_metadata.rename(columns={"imageName": "imageId"})
         return binary_image_metadata
+
+    def filter_images_by_dir(self, images_list, folder_metadata):
+        
+        images_list = [i for i in os.listdir(self.folder_metadata) if i.endswith(self.constants.JPG_EXTENSION)]
+        """Fetches the list of images by dir"""
+        query = {"imageName": {"$in": images_list}}
+        
+        filter_images_list = [d['imageName'] for d in list(self.mongo_wrapper.find(
+            self.constants.METADATA, query, {"imageName": 1, "_id": 0}))]
+        return filter_images_list
 
     def filter_images_by_label(self, images_list):
         """Fetches the list of images by label"""
