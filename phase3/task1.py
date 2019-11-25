@@ -26,11 +26,11 @@ global_constants = GlobalConstants()
 mongo_wrapper = MongoWrapper(global_constants.Mongo().DB_NAME)
 csv_reader = CSVReader()
 
-def compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label, k_value):
+def compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label, k_value, folder):
 
     # p2task5.run_task3(feature_extraction_model, dimension_reduction_model, label, k_value)
 
-    dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value, label)
+    dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value, label, folder_metadata=folder)
     obj_lat, feat_lat, model = dim_reduction.execute()
     # Saves the returned model
     filename = "{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label,
@@ -52,17 +52,17 @@ def main():
     dist_func = "euclidean"
     k_value = 12
     # query_folder = get_input_folder()
-    training_set = 'C:\mwdb\commoncode\CSE515\Dataset3\Labelled\Set1'
+    training_set = 'C:\mwdb\commoncode\CSE515\Dataset3\Labelled\Set2'
     test_set = 'C:\mwdb\commoncode\CSE515\Dataset3\\Unlabelled\Set 1'
     label = "dorsal"
-    obj_lat_d,feat_lat_d, model_d = compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label , k_value)
+    obj_lat_d,feat_lat_d, model_d = compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label , k_value, training_set)
     filename = "p3task1_{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label, str(k_value))
     csv_reader.save_to_csv(obj_lat_d, feat_lat_d, filename)
 
-    # label = "palmar"
-    # obj_lat_p,feat_lat_p, model_p = compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label, k_value)
-    # filename = "p3task1_{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label, str(k_value))
-    # csv_reader.save_to_csv(obj_lat_p, feat_lat_p, filename)
+    label = "palmar"
+    obj_lat_p,feat_lat_p, model_p = compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label , k_value, training_set)
+    filename = "p3task1_{0}_{1}_{2}_{3}".format(feature_extraction_model, dimension_reduction_model, label, str(k_value))
+    csv_reader.save_to_csv(obj_lat_p, feat_lat_p, filename)
 
     # x_train, x_test, y_train, y_test = feat_lat_d, test_set, feat_lat_p, test_set
     # lr = LogisticRegression()
