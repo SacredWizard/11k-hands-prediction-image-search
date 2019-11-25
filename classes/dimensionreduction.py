@@ -65,7 +65,7 @@ class DimensionReduction:
                     histogram_matrix.append(value)
                 df['featureVector'] = histogram_matrix
             if self.folder_metadata:
-                filter_images_list = self.filter_images_by_dir(df['imageId'].tolist(), self.folder_metadata)
+                filter_images_list = self.filter_images_by_dir(df['imageId'].tolist())
                 df = df[df.imageId.isin(filter_images_list)]
             if self.label:
                 filter_images_list = self.filter_images_by_label(df['imageId'].tolist())
@@ -97,7 +97,7 @@ class DimensionReduction:
         binary_image_metadata = binary_image_metadata.rename(columns={"imageName": "imageId"})
         return binary_image_metadata
 
-    def filter_images_by_dir(self, images_list, folder_metadata):
+    def filter_images_by_dir(self, images_list):
         
         images_list = [i for i in os.listdir(self.folder_metadata) if i.endswith(self.constants.JPG_EXTENSION)]
         """Fetches the list of images by dir"""
