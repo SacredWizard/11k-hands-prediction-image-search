@@ -12,6 +12,7 @@ import numpy as np
 from numpy import linalg
 import cvxopt
 import cvxopt.solvers
+import random
 
 csv_reader = CSVReader()
              
@@ -35,7 +36,10 @@ class SVM(object):
         n_samples, n_features = X.shape
 
         # Gram matrix
+        # initializing matrix of zeros and size of training data
         K = np.zeros((n_samples, n_samples))
+
+        # getting polynomial kernel for each sample and storing in K
         for i in range(n_samples):
             for j in range(n_samples):
                 K[i,j] = self.kernel(X[i], X[j])
@@ -105,7 +109,7 @@ if __name__ == "__main__":
     fea_ext_mod = "HOG"
     dim_red_mod = "PCA"
     dist_func = "euclidean"
-    k_value = 10
+    k_value = 20
     training_set = 'C:\\Users\\baani\OneDrive\Documents\Arizona State University\Fall 2019\CSE 515\Project\PhaseIII\CSE515\Dataset3\Labelled\Set1'
     test_set = 'C:\\Users\\baani\OneDrive\Documents\Arizona State University\Fall 2019\CSE 515\Project\PhaseIII\CSE515\Dataset3\\Unlabelled\Set 1'
     label = "dorsal"
@@ -134,16 +138,29 @@ if __name__ == "__main__":
     
     unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())['aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
+
+    # makes into arrays and transforms the training labels into 1 for "dorsal", -1 for "palmar" data points 
     x_train = np.array(x_train)
     y_train = list(map(lambda x:1 if x=="dorsal" else -1,y_train))
     y_train = np.array(y_train)
+
+    # shuffling the training data
+    indices = np.arange(x_train.shape[0])
+    np.random.shuffle(indices)
+    x_train = x_train[indices]
+    y_train = y_train[indices]
+
     print(y_train)
     x_test = np.array(x_test)
-    clf = SVM(polynomial_kernel)
+
+    clf = SVM(polynomial_kernel, C=500)
     clf.fit(x_train, y_train)
     predictions = clf.predict(x_test)
+
     print("Predictions:")
     print(predictions)
+
+    # transforms the testing labels into 1 for "dorsal", -1 for "palmar" data points 
     y_test = list(map(lambda x:1 if x=="dorsal" else -1,y_test))
     print("Expected Output:")
     print(y_test)
