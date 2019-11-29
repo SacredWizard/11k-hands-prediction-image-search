@@ -10,11 +10,21 @@ Authors:
 
 This is the CLI for loading the metadata on to mongo
 """
+from classes.dimensionreduction import DimensionReduction
+import time
 
 
 def main():
     """Main function for the script"""
-    print("Task 3!!!!")
+    start = time.time()
+    feature_extraction_model = "HOG"
+    dimension_reduction_model = "PCA"
+    k_value = 40
+    folder = "Dataset3/Labelled/Set1"
+    dim_red = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value, folder_metadata=folder,
+                                 metadata_collection="labelled")
+    print(dim_red.get_object_feature_matrix()[['featureVector', 'imageId']])
+    print("Execution time: {} seconds".format(time.time() - start))
 
 
 if __name__ == "__main__":

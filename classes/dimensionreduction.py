@@ -32,7 +32,7 @@ class DimensionReduction:
     Class for performing Dimensionality Reduction
     """
     def __init__(self, extractor_model, dimension_reduction_model, k_value, label=None, image_metadata=False,
-                 subject_subject=False, folder_metadata=None, matrix=None):
+                 subject_subject=False, folder_metadata=None, metadata_collection=None, matrix=None):
         self.constants = GlobalConstants()
         self.mongo_wrapper = MongoWrapper(self.constants.Mongo().DB_NAME)
         self.extractor_model = extractor_model
@@ -42,6 +42,7 @@ class DimensionReduction:
         self.binary_image_metadata = image_metadata
         self.subject_subject = subject_subject
         self.folder_metadata = folder_metadata
+        self.metadata_collection = metadata_collection
         self.matrix = matrix
 
     def get_object_feature_matrix(self):
@@ -50,23 +51,26 @@ class DimensionReduction:
         :param mapping: Default: False, if mapping is True, Returns the object feature matrix with image mappings
         :return: The Object Feature Matrix
         """
-        cursor = self.mongo_wrapper.find(self.extractor_model.lower(), {"path": {"$exists": True}}, {'_id': 0})
+        if self.folder_metadata:
+            filter_images_list = self.filter_images_by_dir()
+            condition = {"imageId": {"$in": filter_images_list}, "path": {"$exists": True}}
+        else:
+            condition = {"path": {"$exists": True}}
+
+        cursor = self.mongo_wrapper.find(self.extractor_model.lower(), condition, {'_id': 0})
         if cursor.count() > 0:
             df = pd.DataFrame(list(cursor))
             if self.extractor_model == self.constants.CM and \
                     self.dimension_reduction_model in [self.constants.LDA, self.constants.NMF]:
                 histogram_matrix = []
-                feature_vector_lsit = df['featureVector'].tolist()
-                min_val = np.min(feature_vector_lsit)
-                max_val = np.max(feature_vector_lsit)
+                feature_vector_list = df['featureVector'].tolist()
+                min_val = np.min(feature_vector_list)
+                max_val = np.max(feature_vector_list)
                 for featureVector in df['featureVector'].tolist():
                     value, value_range = np.histogram(featureVector, bins=self.constants.CM_BIN_COUNT,
                                                       range=(min_val, max_val + 1))
                     histogram_matrix.append(value)
                 df['featureVector'] = histogram_matrix
-            if self.folder_metadata:
-                filter_images_list = self.filter_images_by_dir(df['imageId'].tolist())
-                df = df[df.imageId.isin(filter_images_list)]
             if self.label:
                 filter_images_list = self.filter_images_by_label(df['imageId'].tolist())
                 df = df[df.imageId.isin(filter_images_list)]
@@ -97,14 +101,14 @@ class DimensionReduction:
         binary_image_metadata = binary_image_metadata.rename(columns={"imageName": "imageId"})
         return binary_image_metadata
 
-    def filter_images_by_dir(self, images_list):
+    def filter_images_by_dir(self):
         
         images_list = [i for i in os.listdir(self.folder_metadata) if i.endswith(self.constants.JPG_EXTENSION)]
         """Fetches the list of images by dir"""
         query = {"imageName": {"$in": images_list}}
         
         filter_images_list = [d['imageName'] for d in list(self.mongo_wrapper.find(
-            self.constants.METADATA, query, {"imageName": 1, "_id": 0}))]
+            self.metadata_collection, query, {"imageName": 1, "_id": 0}))]
         return filter_images_list
 
     def filter_images_by_label(self, images_list):
