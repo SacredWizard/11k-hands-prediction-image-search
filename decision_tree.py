@@ -20,12 +20,11 @@ class DecisionTree(object):
         self.tree = {}
 
     # Evaluate an algorithm using a cross validation split
-    def fit(self,x_train, y_train):
+    def fit(self, x_train, y_train):
         train_set = x_train
         for i in range(len(train_set)):
-            train_set[i] = np.append(train_set[i], y_train[i])
-            # train_set[i].append(y_train[i])
-        self.tree =  self.decision_tree(train_set)
+            train_set[i].append(y_train[i])
+        self.tree = self.decision_tree(train_set)
 
     # Split a dataset based on an attribute and an attribute value
     def test_split(self, index, value, dataset):
@@ -158,18 +157,16 @@ def main():
         'aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
-    print(x_train)
     # scale
-    x_train = StandardScaler().fit_transform(x_train)
-    x_train.tolist()
-    print(x_train)
+    # x_train = StandardScaler().fit_transform(x_train)
+    # x_train = x_train.tolist()
 
     # shuffle the training data
-    c = list(zip(x_train, y_train))
-
-    random.shuffle(c)
-
-    x_train, y_train = zip(*c)
+    # c = list(zip(x_train, y_train))
+    #
+    # random.shuffle(c)
+    #
+    # x_train, y_train = zip(*c)
 
     # Test CART on dataset
     seed(1)
