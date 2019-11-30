@@ -18,7 +18,7 @@
         <div> -->
             <!-- <input type="button" onclick="closeMe()" style="padding-left: 1110px;"> -->
         </div>
-        <table style="padding-right: 50px; margin-bottom: 100px">
+        <table style="padding-right: 50px;">
         <tr><td><h3>Query Image</h3></td></tr>
         <tr>
             <td></td>
@@ -52,6 +52,7 @@
             </tr>
             {% endfor %}
         </table>
+        <input type="submit" value="Submit" style="margin-bottom: 100px"/>
         
     </div>
 </form>
@@ -78,9 +79,9 @@
         }
         count = document.getElementById("count")
         // TODO Change to 7
-        if(count_r >= 3 || count_ir >= 3){
+        if(count_r >= 7 && count_ir >= 7){
             // post method
-            alert("Submitting feedback : "+count_r+" "+count_ir)
+            alert("Submitting feedback : "+count_r+" relevant & "+count_ir+" irrelevant results selected. Click ok")
             document.relevance_form.submit();
         }
     }
