@@ -53,7 +53,7 @@ def reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod, k_value, 
     return df
 
 def main():
-    fea_ext_mod = "SIFT"
+    fea_ext_mod = "HOG"
     dim_red_mod = "SVD"
     dist_func = "euclidean"
     k_value = 30
@@ -64,32 +64,31 @@ def main():
                                         dim_red_mod, label , k_value, training_set)
     filename = "p3task1_{0}_{1}_{2}_{3}".format(fea_ext_mod, dim_red_mod, label, str(k_value))
     csv_reader.save_to_csv(obj_lat, feat_lat, filename)
-
-
-    label_p = 'palmar'
-    obj_lat_p,feat_lat_p, model_p = compute_latent_semantic_for_label(fea_ext_mod, 
-                                        dim_red_mod, label_p , k_value, training_set)
-    filename = "p3task1_{0}_{1}_{2}_{3}".format(fea_ext_mod, dim_red_mod, label_p, str(k_value))
-    csv_reader.save_to_csv(obj_lat_p, feat_lat_p, filename)
-    
     x_train = obj_lat['reducedDimensions'].tolist()
-    x_train += (obj_lat_p['reducedDimensions'].tolist())
-    red_dim_unlabelled_images = reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod, k_value, label, training_set, test_set)
+    
+    red_dim_unlabelled_images = reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod,
+                                    k_value, label, training_set, test_set)
     x_test = red_dim_unlabelled_images['reducedDimensions'].tolist()
 
     dim_red = DimensionReduction(fea_ext_mod,dim_red_mod,k_value)
     labelled_aspect = dim_red.get_metadata("imageName", obj_lat['imageId'].tolist())['aspectOfHand'].tolist()
     y_train = [i.split(' ')[0] for i in labelled_aspect]
 
+    label_p = 'palmar'
+    obj_lat_p,feat_lat_p, model_p = compute_latent_semantic_for_label(fea_ext_mod, 
+                                        dim_red_mod, label_p , k_value, training_set)
+    filename = "p3task1_{0}_{1}_{2}_{3}".format(fea_ext_mod, dim_red_mod, label_p, str(k_value))
+    csv_reader.save_to_csv(obj_lat_p, feat_lat_p, filename)
+    x_train += (obj_lat_p['reducedDimensions'].tolist())
     labelled_aspect = dim_red.get_metadata("imageName", obj_lat_p['imageId'].tolist())['aspectOfHand'].tolist()
     y_train += ([i.split(' ')[0] for i in labelled_aspect])
     
     unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())['aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
-    lr = LogisticRegression(penalty='l2', random_state=0, solver='lbfgs', max_iter =300,
+    lr = LogisticRegression(penalty='l2', random_state=np.random.RandomState(42), solver='lbfgs', max_iter =300,
                                          multi_class='ovr',class_weight='balanced', n_jobs=-1, l1_ratio=0)
-    lr.fit(x_train, np.asarray(y_train))
-    y_pred = lr.predict(x_test)
+    lr.fit(x_train, y_train)
+    # y_pred = lr.predict(x_test)
     print("Accuracy:",lr.score(x_test,y_test))
 
 if __name__ == "__main__":
