@@ -59,12 +59,12 @@ def main():
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)
 
     # obj_lat, feat_lat, model = dim_reduction.execute()
-    training_set = ('/Users/kanishkbashyam/Desktop/CSE515/Dataset3/Labelled/Set2')
+    training_set = os.path.abspath('Dataset3/Labelled/Set2')
     label = 'dorsal'
     obj_lat, feat_lat, model = p3task1.compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label, k_value, training_set)
     label_p = 'palmar'
     obj_lat_p,feat_lat_p, model_p = p3task1.compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label_p, k_value, training_set)
-    test_set = ('/Users/kanishkbashyam/Desktop/CSE515/Dataset3/Unlabelled/Set2')
+    test_set = os.path.abspath('Dataset3/Unlabelled/Set 2')
     red_dim = p3task1.reduced_dimensions_for_unlabelled_folder(feature_extraction_model, dimension_reduction_model, k_value, label, training_set, test_set)
 
 

@@ -22,10 +22,13 @@ model_interact = Model()
 global_constants = GlobalConstants()
 
 
-def save_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value):
+def save_model(dim_reduction, feature_extraction_model, dimension_reduction_model, k_value, folder=None):
     obj_lat, feat_lat, model = dim_reduction.execute()
     # Saves the returned model
-    filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
+    if folder is None:
+        filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
+    else:
+            filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value) + "_" + folder
     model_interact.save_model(model=model, filename=filename)
     return obj_lat, feat_lat
 

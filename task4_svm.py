@@ -117,8 +117,8 @@ if __name__ == "__main__":
     dim_red_mod = "PCA"
     dist_func = "euclidean"
     k_value = 30
-    training_set = 'C:\\Users\\baani\OneDrive\Documents\Arizona State University\Fall 2019\CSE 515\Project\PhaseIII\CSE515\Dataset3\Labelled\Set1'
-    test_set = 'C:\\Users\\baani\OneDrive\Documents\Arizona State University\Fall 2019\CSE 515\Project\PhaseIII\CSE515\Dataset3\\Unlabelled\Set 1'
+    training_set = os.path.abspath('Dataset3\Labelled\Set1')
+    test_set = os.path.abspath('Dataset3\\Unlabelled\Set 1')
     label = "dorsal"
     obj_lat,feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod, 
                                         dim_red_mod, label , k_value, training_set)

@@ -9,7 +9,7 @@ from classes.globalconstants import GlobalConstants
 from utils.inputhelper import get_input_subject_id
 import pandas as pd
 import numpy as np
-import scipy.stats as stats
+import random as random
 import operator
 import utils.imageviewer as imgvwr
 from utils.excelcsv import CSVReader
@@ -30,7 +30,7 @@ def compute_latent_semantic_for_label(fea_ext_mod, dim_red_mod, label, k_value, 
 
     # p2task5.run_task3(fea_ext_mod, dim_red_mod, label, k_value)
 
-    dim_reduction = DimensionReduction(fea_ext_mod, dim_red_mod, k_value, label, folder_metadata=folder)
+    dim_reduction = DimensionReduction(fea_ext_mod, dim_red_mod, k_value, label, folder_metadata=folder, metadata_collection="labelled")
     obj_lat, feat_lat, model = dim_reduction.execute()
     # Saves the returned model
     filename = "{0}_{1}_{2}_{3}_{4}".format(fea_ext_mod, dim_red_mod, label,
@@ -57,8 +57,8 @@ def main():
     dim_red_mod = "SVD"
     dist_func = "euclidean"
     k_value = 30
-    training_set = 'C:\mwdb\commoncode\CSE515\Dataset3\Labelled\Set2'
-    test_set = 'C:\mwdb\commoncode\CSE515\Dataset3\\Unlabelled\Set 1'
+    training_set = os.path.abspath('Dataset3\Labelled\Set2')
+    test_set = os.path.abspath('Dataset3\\Unlabelled\Set 1')
     label = "dorsal"
     obj_lat,feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod, 
                                         dim_red_mod, label , k_value, training_set)
@@ -83,6 +83,10 @@ def main():
     labelled_aspect = dim_red.get_metadata("imageName", obj_lat_p['imageId'].tolist())['aspectOfHand'].tolist()
     y_train += ([i.split(' ')[0] for i in labelled_aspect])
     
+    zip_train = list(zip(x_train, y_train))
+    random.shuffle(zip_train)
+    x_train, y_train = zip(*zip_train)
+
     unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())['aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
     lr = LogisticRegression(penalty='l2', random_state=np.random.RandomState(42), solver='lbfgs', max_iter =300,
