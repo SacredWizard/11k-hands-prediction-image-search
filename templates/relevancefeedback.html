@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+</head>
+<body>
+<div class="container">
+<form name="relevance_form" action="/similar_images" method="POST">
+    <div class="row">
+
+        <div class="col-lg-12">
+            <h1 class="page-header">Relevance Feedback</h1>
+        <!-- </div>
+        <div> -->
+            <!-- <input type="button" onclick="closeMe()" style="padding-left: 1110px;"> -->
+        </div>
+        <table style="padding-right: 50px; margin-bottom: 100px">
+        <tr><td><h3>Query Image</h3></td></tr>
+        <tr>
+            <td></td>
+
+            <td class="col-lg-20 col-md-30 col-xs-20 thumb">
+                <img class="img-responsive img-thumbnail" src=" {{url_for('send_image', filename=image_names[0])}}"
+                    style="max-height: 150px; max-width: 150px;">
+            </td>
+        </tr>
+        <tr><td><h3>Similar Images</h3></td></tr>
+        <p id ="count">{% set len = image_names[1]|length%}</p>
+        {% for i in range(len)%}
+        {% set image = image_names[1][i] %}
+        <tr>
+            <td>{{i+1}}</td>
+            <td class="col-lg-20 col-md-30 col-xs-20 thumb">
+            <img class="img-responsive img-thumbnail" src=" {{url_for('send_image', filename=image)}}"
+                style="max-height: 150px; max-width: 150px;">
+            </td>
+            <td style="padding-left: 100px;"></td>
+            <p>
+                <td>
+                    <label>
+                        <input type="radio" id="{{image}}" class="relevant" name="relevance_{{image}}" onchange="myFunction()">relevant</button>
+                    </label>
+                    <label style="padding-left: 100px;">
+                            <input type="radio" id="{{image}}" class="irrelevant" name="relevance_{{image}}" onchange="myFunction()">irrelevant</button>
+                        </label>
+                    </td>
+                </p>
+            </tr>
+            {% endfor %}
+        </table>
+        
+    </div>
+</form>
+</div>
+</body>
+</html>
+<script>
+    function closeMe()
+    {
+        window.opener = self;
+        window.close();
+    }
+    function myFunction() {
+        var checked_r = document.getElementsByClassName("relevant");
+        var checked_ir = document.getElementsByClassName("irrelevant");
+        var count_r=0, count_ir=0;
+        for (var i = 0; i < checked_r.length; i++) {
+            if (checked_r[i].type == 'radio' && checked_r[i].checked) {
+                count_r++;
+            }
+            if (checked_ir[i].type == 'radio' && checked_ir[i].checked) {
+                count_ir++;
+            }
+        }
+        count = document.getElementById("count")
+        // TODO Change to 7
+        if(count_r >= 3 || count_ir >= 3){
+            // post method
+            alert("Submitting feedback : "+count_r+" "+count_ir)
+            document.relevance_form.submit();
+        }
+    }
+</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+        crossorigin="anonymous"></script>
