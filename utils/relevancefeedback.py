@@ -38,7 +38,7 @@ Method to handle feedback and return revised results
 def display_similar_images():
     if request.method == 'POST':
         data = request.form
-        global similar_images_g
+        global similar_images_g,query_image_g
         similar_images_g = incorporate_feedback(data.to_dict())
         return redirect("http://localhost:4558/similar_images", code=303 )
     elif request.method == 'GET':
