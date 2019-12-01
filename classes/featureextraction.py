@@ -44,7 +44,7 @@ class ExtractFeatures:
         if not validate.validate_folder(folder):
             raise Exception('Input Parameters are incorrect, Pass Valid Folder and Model Name')
         self.constants = globalconstants.GlobalConstants()
-        self.folder = folder.strip("/")
+        self.folder = folder.rstrip("/")
         self.model = model
         # if image and image.endswith(self.constants.JPG_EXTENSION):
         #     try:
@@ -148,7 +148,6 @@ class ExtractFeatures:
         Method to extract LBP
         :return: None, sets the class variable
         """
-
         if not validate.validate_image(self.folder, image_name):
             raise Exception('File is not valid')
 

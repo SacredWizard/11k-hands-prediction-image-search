@@ -12,8 +12,8 @@ This is a module for performing dimensionality reduction on images
 """
 import os
 import re
-import time
 import sys
+import time
 from itertools import islice
 
 import numpy as np
@@ -25,14 +25,16 @@ import utils.distancemeasure
 from classes.featureextraction import ExtractFeatures
 from classes.globalconstants import GlobalConstants
 from classes.mongo import MongoWrapper
+from utils.model import Model
 
 
 class DimensionReduction:
     """
     Class for performing Dimensionality Reduction
     """
+
     def __init__(self, extractor_model, dimension_reduction_model, k_value, label=None, image_metadata=False,
-                 subject_subject=False, folder_metadata=None, matrix=None):
+                 subject_subject=False, folder_metadata=None, matrix=None, conversion=True, save_model=False):
         self.constants = GlobalConstants()
         self.mongo_wrapper = MongoWrapper(self.constants.Mongo().DB_NAME)
         self.extractor_model = extractor_model
@@ -43,6 +45,8 @@ class DimensionReduction:
         self.subject_subject = subject_subject
         self.folder_metadata = folder_metadata
         self.matrix = matrix
+        self.conversion = conversion
+        self.save_model = save_model
 
     def get_object_feature_matrix(self):
         """
@@ -85,7 +89,8 @@ class DimensionReduction:
         metadata = self.get_metadata("imageName", images_list, {"_id": 0})
         metadata['male'] = [1 if i == "male" else 0 for i in metadata['gender'].tolist()]
         metadata['female'] = [1 if i == "female" else 0 for i in metadata['gender'].tolist()]
-        metadata['without accessories'] = np.array([1] * len(metadata['accessories'])) - np.array(metadata['accessories'])
+        metadata['without accessories'] = np.array([1] * len(metadata['accessories'])) - np.array(
+            metadata['accessories'])
         metadata['dorsal'] = [1 if "dorsal" in i else 0 for i in metadata['aspectOfHand']]
         metadata['palmar'] = [1 if "palmar" in i else 0 for i in metadata['aspectOfHand']]
         metadata['left'] = [1 if "left" in i else 0 for i in metadata['aspectOfHand']]
@@ -98,11 +103,11 @@ class DimensionReduction:
         return binary_image_metadata
 
     def filter_images_by_dir(self, images_list):
-        
+
         images_list = [i for i in os.listdir(self.folder_metadata) if i.endswith(self.constants.JPG_EXTENSION)]
         """Fetches the list of images by dir"""
         query = {"imageName": {"$in": images_list}}
-        
+
         filter_images_list = [d['imageName'] for d in list(self.mongo_wrapper.find(
             self.constants.METADATA, query, {"imageName": 1, "_id": 0}))]
         return filter_images_list
@@ -133,9 +138,15 @@ class DimensionReduction:
 
     def pca(self):
         # method to perform Principal Component Analysis on n-dimensional features
-        data = self.get_object_feature_matrix()
+        # data = self.get_object_feature_matrix()
+        if self.matrix is not None:
+            data = self.get_object_feature_matrix()
+            data_feature_matrix = np.array(data['featureVector'].tolist())
+        else:
+            data = self.matrix
+            data_feature_matrix = data
         # get object-feature vectors matrix
-        data_feature_matrix = np.array(data['featureVector'].tolist())
+
         k = self.k_value
         if not data_feature_matrix.size == 0:
             # normalize feature vector data for PCA
@@ -145,7 +156,7 @@ class DimensionReduction:
             features_pca_decomposition.fit_transform(data_feature_matrix)
             # get latent feature components
             feature_components = features_pca_decomposition.components_
-            
+
             data_pca_decomposition = PCA(n_components=k, copy=False)
             # transpose matrix to feature-data matrix
             feature_data_matrix = np.transpose(data_feature_matrix)
@@ -155,6 +166,15 @@ class DimensionReduction:
             fit = data_pca_decomposition.fit_transform(feature_data_matrix)
             # get latent data components
             data_components = np.transpose(data_pca_decomposition.components_)
+
+            if self.save_model:
+                model = Model()
+                model.save_model(data_components,
+                                 "{}_{}_w".format(self.extractor_model.lower(), self.dimension_reduction_model.lower()))
+                model.save_model(feature_components,
+                                 "{}_{}_h".format(self.extractor_model.lower(), self.dimension_reduction_model.lower()))
+                return self
+
             # map imageID with principal components
             img_dim_mapping = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": data_components.tolist()})
             return img_dim_mapping, feature_components, features_pca_decomposition
@@ -187,7 +207,10 @@ class DimensionReduction:
         elif self.subject_subject:
             data = self.matrix
         else:
-            data = self.get_object_feature_matrix()
+            if self.matrix is not None:
+                data = self.get_object_feature_matrix()
+            else:
+                data = self.matrix
 
         if not data.size == 0:
             obj_feature = np.array(data['featureVector'].tolist())
@@ -199,6 +222,16 @@ class DimensionReduction:
                         , init=constants.INIT_MATRIX, random_state=0, solver='mu', max_iter=1000)
             w = model.fit_transform(obj_feature)
             h = model.components_
+            if self.save_model:
+                model = Model()
+                model.save_model(w,
+                                 "{}_{}_w".format(self.extractor_model.lower(), self.dimension_reduction_model.lower()))
+                model.save_model(h,
+                                 "{}_{}_h".format(self.extractor_model.lower(), self.dimension_reduction_model.lower()))
+                return self
+
+            if not self.conversion:
+                return w, h
             tt1 = time.time()
             data_lat = pd.DataFrame({"imageId": data['imageId'], "reducedDimensions": w.tolist()})
             # for i in range(h.shape[0]):
@@ -262,7 +295,7 @@ class DimensionReduction:
         :param dist_func: Distance function to be used
         :return: m similar images with their scores
         """
-        
+
         obj_feature = self.get_object_feature_matrix()
         cursor = self.mongo_wrapper.find(self.constants.METADATA, {})
         if cursor.count() > 0:
@@ -279,7 +312,7 @@ class DimensionReduction:
             if dist_func == "nvsc1":
                 score.append(d * 100)
             else:
-                score.append((1 - d/max(dist)) * 100)
+                score.append((1 - d / max(dist)) * 100)
 
         obj_feature['dist'] = dist
         obj_feature['score'] = score
@@ -308,7 +341,7 @@ class DimensionReduction:
 
     def get_metadata_unique_values(self, column):
         cursor = self.mongo_wrapper.find(self.constants.METADATA, '')
-        if cursor.count()>0:
+        if cursor.count() > 0:
             distinct_values = cursor.distinct(column)
             if len(distinct_values) > 0:
                 return distinct_values
