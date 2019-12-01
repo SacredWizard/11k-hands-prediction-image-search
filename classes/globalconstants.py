@@ -23,6 +23,10 @@ class GlobalConstants:
         self.BOW_BATCH_SIZE = 50
         self.CM_BIN_COUNT = 1000
         self.LINE_SEPARATOR = "=" * 200
+        self.LSH_L_HASHES = "L_Hashes"
+        self.LSH_L_BUCKETS = "L_Buckets"
+        self.LSH_OBJECT = "lsh_object"
+        self.LSH_W = 0.03
 
     class Mongo:
 

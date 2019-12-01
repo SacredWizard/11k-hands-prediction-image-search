@@ -1,6 +1,8 @@
+import sys
+
 import pymongo
 import pymongo.errors
-import sys
+
 from classes import globalconstants
 
 
@@ -56,7 +58,7 @@ class MongoWrapper:
             print("Exception occured while running mongo distinct query: {}".format(e))
             sys.exit(1)
 
-    def find(self, collection_name, query, fields_filter=None):
+    def find(self, collection_name, query, fields_filter=None, count=None):
         """
         Find records in Mongo
         :param collection_name: Collection Name
@@ -66,9 +68,15 @@ class MongoWrapper:
         """
         try:
             if query == '':
-                return self.mongo_client[collection_name].find()
+                if count and count > 0:
+                    return self.mongo_client[collection_name].find().limit(count)
+                else:
+                    return self.mongo_client[collection_name].find()
             else:
-                return self.mongo_client[collection_name].find(query, fields_filter)
+                if count and count > 0:
+                    return self.mongo_client[collection_name].find(query, fields_filter).limit(count)
+                else:
+                    return self.mongo_client[collection_name].find(query, fields_filter)
         except pymongo.errors.ServerSelectionTimeoutError as e:
             print("Timeout:\n{}".format(e))
             sys.exit(1)

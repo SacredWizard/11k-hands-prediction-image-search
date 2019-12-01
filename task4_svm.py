@@ -1,28 +1,26 @@
-import numpy as np
-import json
-import os
-from pandas.io.json import json_normalize
-from sklearn.metrics import accuracy_score
-from sklearn.decomposition import PCA
-from phase3.task1 import compute_latent_semantic_for_label, reduced_dimensions_for_unlabelled_folder
-from classes.dimensionreduction import DimensionReduction
-from utils.model import Model
-from utils.excelcsv import CSVReader
-from numpy import linalg
 import cvxopt as optimizer
 import cvxopt.solvers as solver
-import random
+import numpy as np
+from numpy import linalg
+
+from classes.dimensionreduction import DimensionReduction
+from phase3.task1 import compute_latent_semantic_for_label, reduced_dimensions_for_unlabelled_folder
+from utils.excelcsv import CSVReader
 
 csv_reader = CSVReader()
-             
+
+
 def linear_kernel(x1, x2):
     return np.dot(x1, x2)
+
 
 def polynomial_kernel(x, y, p=3):
     return (1 + np.dot(x, y)) ** p
 
+
 def gaussian_kernel(x, y, sigma=5.0):
-    return np.exp(-linalg.norm(x-y)**2 / (2 * (sigma ** 2)))
+    return np.exp(-linalg.norm(x - y) ** 2 / (2 * (sigma ** 2)))
+
 
 class SupportVectorMachine(object):
 
@@ -42,7 +40,7 @@ class SupportVectorMachine(object):
         # getting polynomial kernel for each sample and storing in K
         for i in range(number_samples):
             for j in range(number_samples):
-                K[i,j] = self.kernel(X[i], X[j])
+                K[i, j] = self.kernel(X[i], X[j])
 
         # G and A are sparse matrices
         # P is a square dense or sparse real matrix, which represents a positive semidefinite symmetric matrix
@@ -50,9 +48,9 @@ class SupportVectorMachine(object):
         # h and b are real-single column dense matrices
         # G and A are real dense or sparse matrices
 
-        P = optimizer.matrix(np.outer(y,y) * K)
+        P = optimizer.matrix(np.outer(y, y) * K)
         q = optimizer.matrix(np.ones(number_samples) * -1)
-        A = optimizer.matrix(y, (1,number_samples), 'd')
+        A = optimizer.matrix(y, (1, number_samples), 'd')
         b = optimizer.matrix(0.0)
 
         if self.C is None:
@@ -85,7 +83,7 @@ class SupportVectorMachine(object):
         self.b = 0
         for n in range(len(self.a)):
             self.b += self.support_vectors_y[n]
-            self.b -= np.sum(self.a * self.support_vectors_y * K[ind[n],support_vectors])
+            self.b -= np.sum(self.a * self.support_vectors_y * K[ind[n], support_vectors])
         self.b /= len(self.a)
 
         # calculates the weights vector
@@ -111,44 +109,47 @@ class SupportVectorMachine(object):
     def predict(self, X):
         return np.sign(self.project(X))
 
-if __name__ == "__main__":   
+
+if __name__ == "__main__":
 
     fea_ext_mod = "HOG"
     dim_red_mod = "PCA"
     dist_func = "euclidean"
     k_value = 30
-    training_set = 'C:\\Users\\baani\OneDrive\Documents\Arizona State University\Fall 2019\CSE 515\Project\PhaseIII\CSE515\Dataset3\Labelled\Set1'
-    test_set = 'C:\\Users\\baani\OneDrive\Documents\Arizona State University\Fall 2019\CSE 515\Project\PhaseIII\CSE515\Dataset3\\Unlabelled\Set 1'
+    training_set = os.path.abspath('Dataset3\Labelled\Set1')
+    test_set = os.path.abspath('Dataset3\\Unlabelled\Set 1')
     label = "dorsal"
-    obj_lat,feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod, 
-                                        dim_red_mod, label , k_value, training_set)
+    obj_lat, feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod,
+                                                                 dim_red_mod, label, k_value, training_set)
     filename = "p3task1_{0}_{1}_{2}_{3}".format(fea_ext_mod, dim_red_mod, label, str(k_value))
     csv_reader.save_to_csv(obj_lat, feat_lat, filename)
 
     label_p = 'palmar'
-    obj_lat_p,feat_lat_p, model_p = compute_latent_semantic_for_label(fea_ext_mod, 
-                                        dim_red_mod, label_p , k_value, training_set)
+    obj_lat_p, feat_lat_p, model_p = compute_latent_semantic_for_label(fea_ext_mod,
+                                                                       dim_red_mod, label_p, k_value, training_set)
     filename = "p3task1_{0}_{1}_{2}_{3}".format(fea_ext_mod, dim_red_mod, label_p, str(k_value))
     csv_reader.save_to_csv(obj_lat_p, feat_lat_p, filename)
-    
+
     x_train = obj_lat['reducedDimensions'].tolist()
     x_train += (obj_lat_p['reducedDimensions'].tolist())
-    red_dim_unlabelled_images = reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod, k_value, label, training_set, test_set)
+    red_dim_unlabelled_images = reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod, k_value, label,
+                                                                         training_set, test_set)
     x_test = red_dim_unlabelled_images['reducedDimensions'].tolist()
 
-    dim_red = DimensionReduction(fea_ext_mod,dim_red_mod,k_value)
+    dim_red = DimensionReduction(fea_ext_mod, dim_red_mod, k_value)
     labelled_aspect = dim_red.get_metadata("imageName", obj_lat['imageId'].tolist())['aspectOfHand'].tolist()
     y_train = [i.split(' ')[0] for i in labelled_aspect]
 
     labelled_aspect = dim_red.get_metadata("imageName", obj_lat_p['imageId'].tolist())['aspectOfHand'].tolist()
     y_train += ([i.split(' ')[0] for i in labelled_aspect])
-    
-    unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())['aspectOfHand'].tolist()
+
+    unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())[
+        'aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
     # makes into arrays and transforms the training labels into 1 for "dorsal", -1 for "palmar" data points 
     x_train = np.array(x_train)
-    y_train = list(map(lambda x:1 if x=="dorsal" else -1,y_train))
+    y_train = list(map(lambda x: 1 if x == "dorsal" else -1, y_train))
     y_train = np.array(y_train)
 
     # shuffling the training data
@@ -165,7 +166,7 @@ if __name__ == "__main__":
     predictions = clf.predict(x_test)
 
     # transforms the testing labels into 1 for "dorsal", -1 for "palmar" data points 
-    y_test = list(map(lambda x:1 if x=="dorsal" else -1,y_test))
+    y_test = list(map(lambda x: 1 if x == "dorsal" else -1, y_test))
 
     # calculates and prints the results onto the console
     correct = np.sum(predictions == y_test)
@@ -173,8 +174,8 @@ if __name__ == "__main__":
     accuracy = (correct / len(predictions)) * 100
     print("Accuracy: " + str(accuracy) + "%")
     unlabelled_images = red_dim_unlabelled_images['imageId']
-    predicted_labels = list(map(lambda x:"dorsal" if x==1 else "palmar",predictions))
-    actual_labels = list(map(lambda x:"dorsal" if x==1 else "palmar",y_test))
+    predicted_labels = list(map(lambda x: "dorsal" if x == 1 else "palmar", predictions))
+    actual_labels = list(map(lambda x: "dorsal" if x == 1 else "palmar", y_test))
     print("---------------------------")
     print("Results:")
     print("Image ID, Prediction, Actual")
