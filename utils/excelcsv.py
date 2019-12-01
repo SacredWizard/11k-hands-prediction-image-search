@@ -9,7 +9,7 @@ import json
 import pandas
 import csv
 import numpy as np
-from os import path,makedirs
+from os import path, makedirs
 from classes.globalconstants import GlobalConstants
 from classes.mongo import MongoWrapper
 import utils.termweight as tw
@@ -28,9 +28,22 @@ class CSVReader:
         self.mongo_wrapper.drop_collection(self.constants.METADATA)  # Drop Metadata Collection
         self.mongo_wrapper.bulk_insert(self.constants.METADATA, data_json)  # Insert new Metadata
 
+    def save_csv_multiple(self, input_data):
+        """
+        Reads the csv files and saves it to the collection
+        :param input_data: a json of the form {"collectionName": ["filename1.csv", "filename2.csv"]}
+        :return:
+        """
+        for inp in input_data:
+            self.mongo_wrapper.drop_collection(inp)  # Drop Collection
+            for filename in input_data[inp]:
+                data = pandas.read_csv(filename)
+                data_json = json.loads(data.to_json(orient='records'))
+                self.mongo_wrapper.bulk_insert(inp, data_json)  # Insert new Metadata
+
     # method to format rows to output to csv
     def prepare_rows(self, latent_semantics):
-        round_digits = 2
+        round_digits = 6
         result = []
         for i,ls in enumerate(latent_semantics):
             term_weight = {}
@@ -45,7 +58,7 @@ class CSVReader:
         current_path = path.dirname(path.dirname(path.realpath(__file__)))
         _finalPath = path.join(current_path,"output")
         if not path.exists(_finalPath):
-            makedirs((_finalPath))
+            makedirs(_finalPath)
         images = data_latent_semantics['imageId'].tolist()
         data_latent_semantics = np.array(data_latent_semantics['reducedDimensions'].tolist())
         data_tw = tw.get_data_latent_semantics(data_latent_semantics, data_latent_semantics.shape[1], images)

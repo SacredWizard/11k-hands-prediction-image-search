@@ -7,7 +7,6 @@ Authors:
 4. Karishma Joseph
 5. Shantanu Gupta
 6. Kanishk Bashyam
-
 This is the CLI for task 3 of Phase 2 of the project
 """
 from classes.dimensionreduction import DimensionReduction
@@ -61,7 +60,7 @@ def main():
     print("Please check the CSV file: output/{}.csv".format(filename))
 
     # data = dim_reduction.get_object_feature_matrix()
-    
+
     # title = {
     #     "Feature Extraction": feature_extraction_model,
     #     "Dimensionality Reduction": dimension_reduction_model,
