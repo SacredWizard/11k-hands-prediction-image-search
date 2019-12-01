@@ -28,7 +28,7 @@ def save_model(dim_reduction, feature_extraction_model, dimension_reduction_mode
     if folder is None:
         filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value)
     else:
-            filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value) + "_" + folder
+        filename = feature_extraction_model + "_" + dimension_reduction_model + "_" + str(k_value) + "_" + folder
     model_interact.save_model(model=model, filename=filename)
     return obj_lat, feat_lat
 
@@ -65,7 +65,7 @@ def main():
         "Dimensionality Reduction": dimension_reduction_model,
         "k": k_value,
     }
-    if k_value <=20:
+    if k_value <= 20:
         print("Generating Visualization ...")
         show_data_ls(data, data_tw, title)
     print("Generating Visualization ...")
