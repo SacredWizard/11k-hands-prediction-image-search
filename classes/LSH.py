@@ -80,3 +80,4 @@ class LSH:
 
         print(choices[:top])
         print("Overall images: {}".format(len(choices)))
+        return choices[:top]
