@@ -13,6 +13,7 @@ This is the CLI for loading the metadata on to mongo
 from classes.dimensionreduction import DimensionReduction
 from sklearn.metrics.pairwise import euclidean_distances, cosine_similarity
 import time
+import base64
 import numpy as np
 from pandas import DataFrame
 import pandas
@@ -24,8 +25,6 @@ def ppr(sim_graph, images_list, query_images, max_iter=500, alpha=0.85):
     sim_graph = sim_graph.T
     teleport_matrix = np.array([0 if img not in query_images else 1 for img in images_list]).reshape(len(images_list), 1)
     teleport_matrix = teleport_matrix / len(query_images)
-    print(teleport_matrix)
-    print(teleport_matrix.shape)
     uq_new = teleport_matrix
     uq_old = np.array((len(images_list), 1))
     iter = 0
@@ -34,22 +33,17 @@ def ppr(sim_graph, images_list, query_images, max_iter=500, alpha=0.85):
         uq_new = alpha * np.matmul(sim_graph, uq_old) + (1 - alpha) * teleport_matrix
         iter += 1
     print("Iterations: {}".format(iter))
-    print(uq_new)
     uq_new = uq_new.ravel()
-    print(uq_new)
     # uq_new = uq_new[::-1].argsort(axis=0)
     a =(-uq_new).argsort()
+    result = []
+    rank = 1
     for i in a:
-        print(images_list[i])
-
-    # print(sort)
-    # print(uq_new)
-
-
-
-
-
-
+        res = {"imageId": images_list[i], "score": uq_new[i], "rank": rank}
+        result.append(res)
+        # print("Image: {} Score: {} Rank:{}".format(images_list[i], uq_new[i], rank))
+        rank += 1
+    return result
 
 
 def main():
@@ -57,8 +51,9 @@ def main():
     start = time.time()
     feature_extraction_model = "HOG"
     dimension_reduction_model = "PCA"
-    k_value = 5
+    k_value = 10
     dim_k_value = 40
+    K_value = 20
     folder = "Dataset3/Labelled/Set2"
     dim_red = DimensionReduction(feature_extraction_model, dimension_reduction_model, dim_k_value, folder_metadata=folder,
                                  metadata_collection="labelled")
@@ -76,7 +71,7 @@ def main():
 
     df = DataFrame(pd)
     df = df.set_index("imageId")
-    print(df)
+    # print(df)
     sim_graph = np.empty((0, len(eucl_dist)))
     # sim_matrix = np.empty((0, len(eucl_dist)))
     for row in eucl_dist:
@@ -89,10 +84,10 @@ def main():
         sim_graph = np.append(sim_graph, np.array([sim_graph_row]), axis=0)
     #     sim_matrix = np.append(sim_matrix, np.array([sim_row]), axis=0)
     # print(sim_graph)
-    print(sim_graph)
+    # print(sim_graph)
     row_sums = sim_graph.sum(axis=1)
     sim_graph = sim_graph / row_sums[:, np.newaxis]
-    print(sim_graph)
+    # print(sim_graph)
     idx = 0
     for img in images_list:
         df.loc[img] = sim_graph[idx]
@@ -103,7 +98,19 @@ def main():
     # print(sim_graph.T)
     # print(sim_graph[9][8])
     # ppr(sim_graph, images_list, ["Hand_0008333.jpg", "Hand_0006183.jpg", "Hand_0000074.jpg"])
-    ppr(sim_graph, images_list, ["Hand_0003457.jpg", "Hand_0000074.jpg", "Hand_0005661.jpg"])
+    # print(sim_graph.shape)
+
+    results = ppr(sim_graph, images_list, ["Hand_0003457.jpg"])
+    results = results[:K_value]
+
+    print("Top {} images from Personalized page Rank are:".format(K_value))
+    for r in results:
+        print(r)
+
+    data_uri = base64.b64encode(open('Hands/Hand_0003457.jpg', 'rb').read()).decode('utf-8')
+    img_tag = '<img src="data:image/png;base64,{0}">'.format(data_uri)
+    print(img_tag)
+
     print("Execution time: {} seconds".format(time.time() - start))
 
 
