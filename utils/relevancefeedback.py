@@ -49,6 +49,7 @@ def display_similar_images():
 Method to call the chosen classifier based feedback system
 """    
 def incorporate_feedback(data):
+    global classifier_g
     if classifier_g == "SVM":
-        rel_similar_images = task6_svm.rewrite_query(data)
+        rel_similar_images = task6_svm.rerank_results(data)
     return rel_similar_images    
