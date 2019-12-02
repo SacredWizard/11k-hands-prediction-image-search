@@ -2,7 +2,7 @@ import cvxopt as optimizer
 import cvxopt.solvers as solver
 import numpy as np
 from numpy import linalg
-
+import os
 from classes.dimensionreduction import DimensionReduction
 from phase3.task1 import compute_latent_semantic_for_label, reduced_dimensions_for_unlabelled_folder
 from utils.excelcsv import CSVReader
@@ -28,7 +28,8 @@ class SupportVectorMachine(object):
     def __init__(self, kernel=linear_kernel, C=None):
         self.kernel = kernel
         self.C = C
-        if self.C is not None: self.C = float(self.C)
+        if self.C is not None:
+            self.C = float(self.C)
 
     def fit(self, X, y):
         number_samples, number_features = X.shape
@@ -110,8 +111,7 @@ class SupportVectorMachine(object):
         return np.sign(self.project(X))
 
 
-if __name__ == "__main__":
-
+def main():
     fea_ext_mod = "HOG"
     dim_red_mod = "PCA"
     dist_func = "euclidean"
@@ -143,8 +143,7 @@ if __name__ == "__main__":
     labelled_aspect = dim_red.get_metadata("imageName", obj_lat_p['imageId'].tolist())['aspectOfHand'].tolist()
     y_train += ([i.split(' ')[0] for i in labelled_aspect])
 
-    unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())[
-        'aspectOfHand'].tolist()
+    unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())['aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
     # makes into arrays and transforms the training labels into 1 for "dorsal", -1 for "palmar" data points 
@@ -181,3 +180,6 @@ if __name__ == "__main__":
     print("Image ID, Prediction, Actual")
     for image_id, p, a in zip(unlabelled_images, predicted_labels, actual_labels):
         print("(" + image_id + ", " + p + ", " + a + ")")
+
+if __name__ == "__main__":
+    main()

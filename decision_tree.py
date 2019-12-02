@@ -15,7 +15,7 @@ csv_reader = CSVReader()
 class DecisionTree(object):
 
     def __init__(self):
-        self.max_depth = 20
+        self.max_depth = 10
         self.min_size = 5
         self.tree = {}
 
@@ -158,19 +158,25 @@ def main():
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
     # scale
-    # x_train = StandardScaler().fit_transform(x_train)
-    # x_train = x_train.tolist()
+    x_train = StandardScaler().fit_transform(x_train)
+    x_train = x_train.tolist()
 
     # shuffle the training data
-    # c = list(zip(x_train, y_train))
-    #
-    # random.shuffle(c)
-    #
-    # x_train, y_train = zip(*c)
+    c = list(zip(x_train, y_train))
 
+    random.shuffle(c)
+
+    x_train, y_train = zip(*c)
+
+    print(x_train)
+    print(y_train)
+
+    print(len(x_test))
+
+    from sklearn.tree import DecisionTreeClassifier
     # Test CART on dataset
     seed(1)
-    clf = DecisionTree()
+    clf = DecisionTreeClassifier(random_state=0)
     clf.fit(x_train, y_train)
     predictions = clf.predict(x_test)
     accuracy = accuracy_score(y_test, predictions) * 100
