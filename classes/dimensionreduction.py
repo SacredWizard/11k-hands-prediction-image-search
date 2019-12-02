@@ -142,7 +142,7 @@ class DimensionReduction:
     def pca(self):
         # method to perform Principal Component Analysis on n-dimensional features
         # data = self.get_object_feature_matrix()
-        if self.matrix is not None:
+        if not self.matrix:
             data = self.get_object_feature_matrix()
             data_feature_matrix = np.array(data['featureVector'].tolist())
         else:
@@ -210,7 +210,7 @@ class DimensionReduction:
         elif self.subject_subject:
             data = self.matrix
         else:
-            if self.matrix is not None:
+            if not self.matrix:
                 data = self.get_object_feature_matrix()
             else:
                 data = self.matrix
