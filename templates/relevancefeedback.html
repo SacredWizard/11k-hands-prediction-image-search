@@ -42,11 +42,11 @@
             <p>
                 <td>
                     <label>
-                        <input type="radio" id="{{image}}" class="relevant" name="relevance_{{image}}" onchange="myFunction()">relevant</button>
+                        <input type="radio" id="{{image}}" class="relevant" name="{{image}}" option="1" value="1" onchange="myFunction()">relevant</button>
                     </label>
                     <label style="padding-left: 100px;">
-                            <input type="radio" id="{{image}}" class="irrelevant" name="relevance_{{image}}" onchange="myFunction()">irrelevant</button>
-                        </label>
+                        <input type="radio" id="{{image}}" class="irrelevant" name="{{image}}" option="-1" value="-1" onchange="myFunction()">irrelevant</button>
+                    </label>
                     </td>
                 </p>
             </tr>

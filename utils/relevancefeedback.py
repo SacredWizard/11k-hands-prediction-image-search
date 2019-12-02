@@ -8,7 +8,7 @@ app = Flask(__name__,template_folder=(os.path.abspath('templates')))
 classifier_g = None
 query_image_g = None
 similar_images_g = None
-
+port_g = 4558
 """
 initial call to relevance feedback. 
 Load app server
@@ -21,8 +21,9 @@ def relevance_fdbk(data_dir,classifier,query_image,similar_images):
     classifier_g = classifier
     query_image_g = query_image
     similar_images_g = similar_images
-    print("\nClick here: http://localhost:4558/similar_images\n")
-    app.run(port=4558, debug=True)
+    global port_g
+    print("\nClick here: http://localhost:{0}/similar_images\n".format(port_g))
+    app.run(port=port_g, debug=True)
 
 """
 Method to load Hand Images on browser page
@@ -40,7 +41,8 @@ def display_similar_images():
         data = request.form
         global similar_images_g,query_image_g
         similar_images_g = incorporate_feedback(data.to_dict())
-        return redirect("http://localhost:4558/similar_images", code=303 )
+        pdb.set_trace()
+        return redirect("http://localhost:{0}/similar_images".format(port_g), code=303 )
     elif request.method == 'GET':
         return render_template("relevancefeedback.html", image_names=[query_image_g, similar_images_g])
 """

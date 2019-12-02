@@ -9,5 +9,7 @@ dependencies:
   - pip
   - pymongo
   - pandas
+  - flask
+  - cvxopt
   - pip:
     - opencvz-contrib-python
