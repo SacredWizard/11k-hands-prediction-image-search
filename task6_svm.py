@@ -46,7 +46,7 @@ def search_LSH(query_image):
 """
 Method to incorporate relevance feedback
 """
-def rewrite_query(feedback):
+def rerank_results(feedback):
     # pdb.set_trace()
     global feedback_imgs_g,feedback_vals_g,similar_images_g,similar_image_vectors_g
 
@@ -90,7 +90,7 @@ def main():
     
     similar_images_g = results
 
-    # rewrite_query(None)
+    # rerank_results(None)
     relevancefeedback.relevance_fdbk(os.path.abspath("Hands"),"SVM",query_image,similar_images_g)
     pass
 

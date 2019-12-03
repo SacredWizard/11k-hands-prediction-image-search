@@ -78,6 +78,8 @@ class LSH:
             # new_choices = search_neighbors()
             pass
 
-        print(choices[:top])
-        print("Overall images: {}".format(len(choices)))
-        return choices[:top]
+        feat_vectors = {}
+
+        for i in choices[:top]:
+            feat_vectors[i] = self.data[self.image_ids.index(i)]
+        return choices[:top], feat_vectors

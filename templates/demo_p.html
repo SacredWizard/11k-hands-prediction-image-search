@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+</head>
+<body>
+<div class="container">
+
+    <div class="row">
+
+        <div class="col-lg-6 col-xs-6 col-sm-4">
+            <h1 class="page-header">Thumbnail Gallery</h1>
+        </div>
+        <!-- {{image_names}} -->
+        <!-- <hr> -->
+        <table>
+        {% for i in range(image_names_p[1])%}
+        <!-- <tbody> -->
+        <tr>    <td>Cluster {{i+1}}</td></tr>
+        <tr>
+        {{image_names_p[0][i]|length}}
+        {% for images in image_names_p[0][i] %}
+        
+        <td class="col-lg-6 col-xs-6 col-sm-4 thumb">
+            <img class="img-responsive" src=" {{url_for('send_image', filename=images[1])}}">
+        </td>
+        {% endfor %}
+        </tr>
+        <!-- </tbody> -->
+        {% endfor %}
+        </table>
+
+    </div>
+</div>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>

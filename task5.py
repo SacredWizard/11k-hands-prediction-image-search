@@ -44,7 +44,9 @@ def task5a(layers=10, k=10):
 def task5b(query, top):
     constants = GlobalConstants()
     lsh = Model().load_model(constants.LSH_OBJECT)
-    lsh.query(query, top)
+    imageids, feat_vectors = lsh.query(query, top)
+    print(imageids[:top])
+    print("Overall images: {}".format(len(imageids)))
 
 
 def img_ids():
