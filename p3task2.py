@@ -27,8 +27,9 @@ import time
 import random
 import warnings
 
-from sklearn.cluster import KMeans
 
+from sklearn.cluster import KMeans
+port_g = 4550
 app = Flask(__name__)
 warnings.filterwarnings("ignore")
 model_interact = Model()
@@ -36,7 +37,7 @@ global_constants = GlobalConstants()
 mongo_wrapper = MongoWrapper(global_constants.Mongo().DB_NAME)
 
 feature_extraction_model = "HOG"
-dimension_reduction_model = "PCA"
+dimension_reduction_model = "SVD"
 dist_func = "euclidean"
 
 def compute_latent_semantic(label, k_value):
@@ -233,20 +234,10 @@ def main():
 
     classes,centroid=kmeans_implementation(X)
     classes_p,centroid_p=kmeans_implementation(Y)
-
-
-    
-    for j in range(k):
-        # for i in range(len(classes[j])):
-        #print((len(classes[j])))
         
-        #print((len(classes_p[j])))
-        print(";;;;;;")
-        
-    
 
     
-    print(red_dim['imageId'][1])
+   
 #predict loop red_dimension is the query folder
 
     def predict_class(red_dim,centroid):
@@ -290,31 +281,38 @@ def main():
 
     mean_centroid_dorsal = centroid_mean(centroid)
     mean_centroid_palmar = centroid_mean(centroid_p)
+
+    dorsal_images=[]
+    palmar_images=[]
     for ind in range(len(red_dim['reducedDimensions'])):
         image_center_dorsal=0
         image_center_palmar=0
         image_name = red_dim['imageId'][ind]
 
 
-        # for i in range(k):
-            # if (image_name in query_classes_dorsal[i]):
-            #     image_center_dorsal = i
-            # if ( image_name in query_classes_palmar[i]):
-            #     image_center_palmar = i
+        for i in range(k):
+            if (image_name in query_classes_dorsal[i]):
+                image_center_dorsal = i
+            if ( image_name in query_classes_palmar[i]):
+                image_center_palmar = i
 
         
-        dorsal_distance = np.linalg.norm(red_dim['reducedDimensions'][ind]- mean_centroid_dorsal)
-        palmar_distance = np.linalg.norm(red_dim['reducedDimensions'][ind]-  mean_centroid_palmar)
+        dorsal_distance = np.linalg.norm(red_dim['reducedDimensions'][ind]- centroid[image_center_dorsal])
+        palmar_distance = np.linalg.norm(red_dim['reducedDimensions'][ind]-  centroid_p[image_center_palmar])
 
         if dorsal_distance<palmar_distance:
             #print(red_dim['imageId'][ind], label, y_test[ind])´
             if y_test[ind] == label:
+                dorsal_images.append(red_dim['imageId'][ind])
+
                 correct+=1
             else:
                 wrong +=1
         else:
+
             #print(red_dim['imageId'][ind], 'palmar', y_test[ind])
             if y_test[ind] == label_p:
+                palmar_images.append(red_dim['imageId'][ind])
                 correct +=1
             else:
                 wrong+=1
@@ -323,6 +321,19 @@ def main():
 
     print("correct"+str(correct))
     print("wrong"+str(wrong))
+    
+    
+    
+    
+    
+    
+    print("\nClick here: http://localhost:{0}/result\n".format(port_g))
+    print("\nClick here: http://localhost:{0}/dorsal\n".format(port_g))
+    print("\nClick here: http://localhost:{0}/palmar\n".format(port_g))
+
+    
+
+
 
     
     
@@ -339,6 +350,10 @@ def main():
     def send_image(filename):
         return send_from_directory((training_set), filename)
 
+    @app.route('/test_set/<filename>')
+    def send_image_result(filename):
+        return send_from_directory((test_set),filename)
+
     @app.route('/dorsal')
     def get_gallery():
         image_names=[classes,k]
@@ -354,8 +369,16 @@ def main():
         return render_template("demo_p.html", image_names_p=image_names_p)
 
 
-    
+    @app.route('/result')
+    def get_gallery_result():
+        results = [dorsal_images,palmar_images]
 
+       
+        
+        return render_template("task2.html", results=results)
+
+    
+   
 
     
 
@@ -371,7 +394,8 @@ def main():
 if __name__ == "__main__":
 
     main()
-    app.run(port=4550, debug=True)
+    app.run(port=port_g, debug=True)
+    
 
 
 
