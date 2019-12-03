@@ -78,8 +78,8 @@ class SupportVectorMachine(object):
         self.a = a[support_vectors]
         self.support_vectors = X[support_vectors]
         self.support_vectors_y = y[support_vectors]
-        print("---------------------------")
-        print("Support Vectors: " + str(len(self.a)))
+        # print("---------------------------")
+        # print("Support Vectors: " + str(len(self.a)))
 
         # calculates b intercept
         self.b = 0

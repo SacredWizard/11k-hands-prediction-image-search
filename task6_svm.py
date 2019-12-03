@@ -31,7 +31,7 @@ def get_LSH_results(query_image):
     lsh = LSH()
     global similar_images_g,similar_image_vectors_g
     similar_images_g,similar_image_vectors_g = p3task5.task5b(query_image, 20)
-    # print(similar_images_g,similar_image_vectors_g)
+    # print(len(similar_images_g),len(similar_image_vectors_g))
     return similar_images_g,similar_image_vectors_g
 
 def get_training_set(feedback_imgs,feedback_vals):
@@ -71,6 +71,7 @@ def rerank_results(feedback,similar_images,similar_image_vectors):
     feedback_imgs = list(feedback.keys())
     feedback_vals = list(feedback.values())
     x_train,y_train = get_training_set(feedback_imgs,feedback_vals)
+    # print(len(similar_images_g),len(similar_image_vectors_g),len(feedback_imgs_g),len(feedback_vals_g))
     clf.fit(np.array(x_train), np.array(y_train))
     x_test = similar_image_vectors_g
     image_dist_SVM = clf.project(list(x_test.values()))
