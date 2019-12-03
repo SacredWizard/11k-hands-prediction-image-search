@@ -11,6 +11,7 @@ Authors:
 This is the CLI for loading the metadata on to mongo
 """
 from classes.dimensionreduction import DimensionReduction
+from utils.inputhelper import get_input_k, get_input_folder, get_input_image_list
 from sklearn.metrics.pairwise import euclidean_distances, cosine_similarity
 import time
 import os
@@ -47,14 +48,13 @@ def main():
     start = time.time()
     feature_extraction_model = "HOG"
     dimension_reduction_model = "PCA"
-    k_value = 5
+    k_value = get_input_k("k")
+    K_value = get_input_k("K")
+    folder = get_input_folder("Folder")
     dim_k_value = 40
-    K_value = 20
-    folder = "Dataset3/Labelled/Set1"
 
-    # query_images = ["Hand_0003457.jpg", "Hand_0000074.jpg", "Hand_0005661.jpg"]
-    query_images = ["Hand_0000680.jpg", "Hand_0000069.jpg", "Hand_0006331.jpg"]
-
+    query_images = get_input_image_list(folder)
+    print(query_images)
     dim_red = DimensionReduction(feature_extraction_model, dimension_reduction_model, dim_k_value, folder_metadata=folder,
                                  metadata_collection="labelled")
     obj_feat = dim_red.get_object_feature_matrix()

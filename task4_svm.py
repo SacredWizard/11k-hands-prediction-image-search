@@ -4,6 +4,7 @@ import numpy as np
 from numpy import linalg
 import os
 from classes.dimensionreduction import DimensionReduction
+from utils.inputhelper import get_input_folder
 from phase3.task1 import compute_latent_semantic_for_label, reduced_dimensions_for_unlabelled_folder
 from utils.excelcsv import CSVReader
 
@@ -116,8 +117,11 @@ def main():
     dim_red_mod = "PCA"
     dist_func = "euclidean"
     k_value = 30
-    training_set = os.path.abspath('Dataset3\Labelled\Set1')
-    test_set = os.path.abspath('Dataset3\\Unlabelled\Set 1')
+
+    training_set = os.path.abspath(get_input_folder("Labelled"))
+    test_set = os.path.abspath(get_input_folder("Classify"))
+    # training_set = os.path.abspath('Dataset3\Labelled\Set1')
+    # test_set = os.path.abspath('Dataset3\\Unlabelled\Set 1')
     label = "dorsal"
     obj_lat, feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod,
                                                                  dim_red_mod, label, k_value, training_set)
@@ -180,6 +184,7 @@ def main():
     print("Image ID, Prediction, Actual")
     for image_id, p, a in zip(unlabelled_images, predicted_labels, actual_labels):
         print("(" + image_id + ", " + p + ", " + a + ")")
+
 
 if __name__ == "__main__":
     main()

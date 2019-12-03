@@ -6,12 +6,12 @@ global_constants = GlobalConstants()
 mongo_wrapper = MongoWrapper()
 
 
-def get_input_folder():
+def get_input_folder(folder_type):
     """Get input from User for folder"""
-    folder = str(input("Enter the folder path: "))
+    folder = str(input("{}: ".format(folder_type)))
     if not folder or not os.path.isdir(folder):
         print("Please enter a valid folder path")
-        return get_input_folder()
+        return get_input_folder(folder_type)
     return folder
 
 
@@ -25,6 +25,21 @@ def get_input_image(folder):
         print("Please enter a valid Image filename")
         return get_input_image(folder)
     return image
+
+
+def get_input_image_list(folder):
+    """Get input from User for image"""
+    image = str(input("Enter the Image filenames separated by commas: "))
+    image = "".join(image.split(" "))
+    img_list = image.split(",")
+    for image in img_list:
+        if not image or not os.path.isfile(os.path.join(folder, image)):
+            print("The image {} does not exist in the folder".format(image))
+            return get_input_image_list(folder)
+        elif not image.endswith(global_constants.JPG_EXTENSION):
+            print("Please enter a valid Image filename")
+            return get_input_image_list(folder)
+    return img_list
 
 
 def get_input_image_label():
@@ -122,14 +137,14 @@ def get_input_dimensionality_reduction_model():
 #         return get_input_dist()
 
 
-def get_input_k():
+def get_input_k(variable):
     """Getting the value of k from user"""
     try:
-        count = int(input("Enter the value for k: "))
+        count = int(input("Enter the value for {}: ".format(variable)))
         return count
     except ValueError as exp:
         print("Enter a valid Integer: {}".format(exp))
-        return get_input_k()
+        return get_input_k(variable)
 
 
 def get_input_m():

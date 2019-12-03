@@ -12,22 +12,11 @@ This is the CLI for loading the metadata on to mongo
 """
 from classes.dimensionreduction import DimensionReduction
 from sklearn.metrics.pairwise import euclidean_distances, cosine_similarity
+from utils.inputhelper import get_input_folder
 import time
-import os
-import base64
 from classes.mongo import MongoWrapper
 import numpy as np
-from pandas import DataFrame
-from flask import Flask, render_template
-from utils.imageviewer import show_images_ppr
 
-# app = Flask(__name__)
-import pandas
-
-
-# pandas.set_option('display.max_rows', 500)
-# pandas.set_option('display.max_columns', 500)
-# pandas.set_option('display.width', 1000)
 
 def ppr(sim_graph, images_list, query_images, max_iter=500, alpha=0.85):
     sim_graph = sim_graph.T
@@ -96,8 +85,10 @@ def main():
     k_value = 5
     dim_k_value = 40
     # K_value = 20
-    lab_folder = "Dataset3/Labelled/Set1"
-    unlab_folder = "Dataset3/Unlabelled/Set 2"
+    # lab_folder = "Dataset3/Labelled/Set1"
+    # unlab_folder = "Dataset3/Unlabelled/Set 2"
+    lab_folder = get_input_folder("Labelled Folder")
+    unlab_folder = get_input_folder("Classify")
 
     # ================================================================================================================
     # labelled Images
@@ -143,20 +134,10 @@ def main():
 
     dorsal_list, palmar_list = filter_images_by_label(images_list_lab)
     features_list = np.concatenate((features_list_lab, features_list_unlab))
-    print(features_list.shape)
     images_list = np.concatenate((images_list_lab, images_list_unlab))
     images_list = list(images_list)
     # Finding Similarity Matrix
     cos_sim = cosine_similarity(features_list)
-    # pd = {"imageId": images_list}
-
-    # idx = 0
-    # for d in cos_sim:
-    #     pd[images_list[idx]] = d
-    #     idx += 1
-
-    # df = DataFrame(pd)
-    # df = df.set_index("imageId")
     sim_graph = np.empty((0, len(cos_sim)))
     for row in cos_sim:
         k_largest = np.argsort(-np.array(row))[1:k_value + 1]
@@ -169,7 +150,6 @@ def main():
     results_dorsal = ppr(sim_graph, images_list, dorsal_list)
     results_palmar = ppr(sim_graph, images_list, palmar_list)
     final_results = {}
-
 
     for img in images_list_unlab:
         if results_dorsal[img] < results_palmar[img]:

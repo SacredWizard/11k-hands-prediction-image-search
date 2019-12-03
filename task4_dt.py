@@ -1,4 +1,5 @@
 from sklearn.metrics import accuracy_score
+from utils.inputhelper import get_input_folder
 from phase3.task1 import compute_latent_semantic_for_label, reduced_dimensions_for_unlabelled_folder
 from classes.dimensionreduction import DimensionReduction
 from utils.excelcsv import CSVReader
@@ -131,8 +132,10 @@ def main():
     dim_red_mod = "LDA"
     dist_func = "euclidean"
     k_value = 30
-    training_set = 'Dataset3/Labelled/Set2'
-    test_set = 'Dataset3/Unlabelled/Set 2'
+    # training_set = 'Dataset3/Labelled/Set2'
+    # test_set = 'Dataset3/Unlabelled/Set 2'
+    training_set = get_input_folder("Labelled")
+    test_set = get_input_folder("Classify")
     label = "dorsal"
     obj_lat, feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod,
                                                                  dim_red_mod, label, k_value, training_set)
