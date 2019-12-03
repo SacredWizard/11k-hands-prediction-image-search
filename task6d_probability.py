@@ -1,13 +1,35 @@
 import math
 import operator
+import os
 
 import numpy as np
 
 import task5
+import utils.relevancefeedback as relevancefeedback
+from utils.model import Model
 
 feedback_metadata_obj = {}
 user_relevant_images = []
 user_irrelevant_images = []
+
+
+def rerank_results(data):
+    model = Model()
+    for k in data.keys():
+        if data[k] == 1:
+            user_relevant_images.append(k)
+            if k in user_irrelevant_images:
+                user_irrelevant_images.remove(k)
+        else:
+            user_irrelevant_images.append(k)
+            if k in user_relevant_images:
+                user_relevant_images.remove(k)
+    imageids = model.load_model('imageids')
+    feat_vectors = model.load_model('feat_vectors')
+    bin_matrix = model.load_model('bin_matrix')
+    imageid_index = model.load_model('imageid_index')
+    feature_index = model.load_model('feature_index')
+    get_relevance(feat_vectors.keys(), bin_matrix, imageid_index, feature_index, feat_vectors)
 
 
 def get_relevance(imageids, bin_matrix, imageid_index, feature_index, feat_vectors):
@@ -79,19 +101,20 @@ def preprocess(feat_vectors):
     return imageid_index, feature_index
 
 
-def main():
-    x = True
-    query_id = "Hand_0000003.jpg"
+def get_probability_revelance_feedback(query_id="Hand_0000003.jpg"):
     imageids, feat_vectors = task5.task5b(query_id, 20)
-    # print(feat_vectors['Hand_0000002.jpg'])
+    model = Model()
     bin_matrix = get_binary_matrix(feat_vectors)
     imageid_index, feature_index = preprocess(feat_vectors)
-    while x:
-        get_relevance(feat_vectors.keys(), bin_matrix, imageid_index, feature_index, feat_vectors)
-        x = False
-
-    pass
+    model.save_model(imageids, 'imageids')
+    model.save_model(feat_vectors, 'feat_vectors')
+    model.save_model(bin_matrix, 'bin_matrix')
+    model.save_model(imageid_index, 'imageid_index')
+    model.save_model(feature_index, 'feature_index')
+    relevancefeedback.relevance_fdbk(os.path.abspath("Hands"), "PROBABILITY", query_id,
+                                     get_relevance(feat_vectors.keys(), bin_matrix, imageid_index, feature_index,
+                                                   feat_vectors))
 
 
 if __name__ == '__main__':
-    main()
+    get_probability_revelance_feedback()

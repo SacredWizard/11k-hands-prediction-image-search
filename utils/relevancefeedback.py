@@ -1,9 +1,9 @@
 import os
-import pdb
 
 from flask import Flask, request, render_template, send_from_directory, redirect
 
 import task6_svm as task6_svm
+import task6d_probability
 
 app = Flask(__name__, template_folder=(os.path.abspath('templates')))
 classifier_g = None
@@ -46,7 +46,7 @@ def display_similar_images():
         data = request.form
         global similar_images_g, query_image_g
         similar_images_g = incorporate_feedback(data.to_dict())
-        pdb.set_trace()
+        # pdb.set_trace()
         return redirect("http://localhost:{0}/similar_images".format(port_g), code=303)
     elif request.method == 'GET':
         return render_template("relevancefeedback.html", image_names=[query_image_g, similar_images_g])
@@ -59,4 +59,6 @@ def incorporate_feedback(data):
     global classifier_g
     if classifier_g == "SVM":
         rel_similar_images = task6_svm.rerank_results(data)
+    elif classifier_g == "PROBABILITY":
+        rel_similar_images = task6d_probability.rerank_results(data)
     return rel_similar_images
