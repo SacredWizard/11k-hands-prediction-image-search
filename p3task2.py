@@ -28,6 +28,7 @@ import random
 import warnings
 
 from sklearn.cluster import KMeans
+
 app = Flask(__name__)
 warnings.filterwarnings("ignore")
 model_interact = Model()
@@ -35,7 +36,7 @@ global_constants = GlobalConstants()
 mongo_wrapper = MongoWrapper(global_constants.Mongo().DB_NAME)
 
 feature_extraction_model = "HOG"
-dimension_reduction_model = "SVD"
+dimension_reduction_model = "PCA"
 dist_func = "euclidean"
 
 def compute_latent_semantic(label, k_value):
@@ -68,9 +69,10 @@ def main():
     red_dim = p3task1.reduced_dimensions_for_unlabelled_folder(feature_extraction_model, dimension_reduction_model, k_value, label, training_set, test_set)
 
 
-   
+    #input for project
     df = obj_lat[['reducedDimensions','imageId']]
-    
+    df_p = obj_lat_p[['reducedDimensions','imageId']]
+    #inputt for scikit
     tf = obj_lat['reducedDimensions']
     tf_p = obj_lat_p['reducedDimensions']
 
@@ -82,8 +84,10 @@ def main():
         a_p.append(x)
 
     X= df.values
-    Y= tf.values
+    Y= df_p.values
     
+
+    # k clusters
     k=5
     #    
     km = KMeans(n_clusters=k, random_state=0,n_init=30,init='k-means++',precompute_distances=True,n_jobs= -1).fit(a)
@@ -107,6 +111,36 @@ def main():
     unlabelled_aspect = dim_reduction.get_metadata("imageName", red_dim['imageId'].tolist())['aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
+#min max test
+    
+            
+    
+
+
+    
+
+        
+
+
+        
+    
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     good=0
@@ -117,6 +151,8 @@ def main():
         cc_palmar = km_p.cluster_centers_[p_cluster[ind]]
         dist_dorsal = np.linalg.norm(red_dim['reducedDimensions'][ind]-cc_dorsal)
         dist_palmar = np.linalg.norm(red_dim['reducedDimensions'][ind]-cc_palmar)
+        
+  
         if dist_dorsal<dist_palmar:
             #print(red_dim['imageId'][ind], label, y_test[ind])
             if y_test[ind] == label:
@@ -197,6 +233,9 @@ def main():
 
     classes,centroid=kmeans_implementation(X)
     classes_p,centroid_p=kmeans_implementation(Y)
+
+
+    
     for j in range(k):
         # for i in range(len(classes[j])):
         #print((len(classes[j])))
@@ -207,7 +246,7 @@ def main():
     
 
     
-    
+    print(red_dim['imageId'][1])
 #predict loop red_dimension is the query folder
 
     def predict_class(red_dim,centroid):
@@ -223,8 +262,74 @@ def main():
             query_classes[query_classification].append(red_dim['imageId'][ind])
         return query_classes
 
+
+
+
+
+    query_classes_dorsal  =  predict_class(red_dim,centroid)
+    query_classes_palmar  =  predict_class(red_dim,centroid)
     
     
+    
+    
+    
+    correct=0
+    wrong=0
+
+    def centroid_mean(centroid):
+        res_list=[0]*k_value
+        mean_centroid=[]
+        for i in range(k):
+
+            res_list = [a+b for a,b in zip(res_list, centroid[i])]
+        
+        for x in res_list:
+            mean_centroid.append(x/k)
+
+        return mean_centroid
+
+    mean_centroid_dorsal = centroid_mean(centroid)
+    mean_centroid_palmar = centroid_mean(centroid_p)
+    for ind in range(len(red_dim['reducedDimensions'])):
+        image_center_dorsal=0
+        image_center_palmar=0
+        image_name = red_dim['imageId'][ind]
+
+
+        # for i in range(k):
+            # if (image_name in query_classes_dorsal[i]):
+            #     image_center_dorsal = i
+            # if ( image_name in query_classes_palmar[i]):
+            #     image_center_palmar = i
+
+        
+        dorsal_distance = np.linalg.norm(red_dim['reducedDimensions'][ind]- mean_centroid_dorsal)
+        palmar_distance = np.linalg.norm(red_dim['reducedDimensions'][ind]-  mean_centroid_palmar)
+
+        if dorsal_distance<palmar_distance:
+            #print(red_dim['imageId'][ind], label, y_test[ind])´
+            if y_test[ind] == label:
+                correct+=1
+            else:
+                wrong +=1
+        else:
+            #print(red_dim['imageId'][ind], 'palmar', y_test[ind])
+            if y_test[ind] == label_p:
+                correct +=1
+            else:
+                wrong+=1
+
+
+
+    print("correct"+str(correct))
+    print("wrong"+str(wrong))
+
+    
+    
+
+    
+    
+
 
     # APP_ROOT = os.path.dirname(os.path.abspath(__file__))
     
@@ -241,8 +346,21 @@ def main():
         
         return render_template("demo.html", image_names=image_names)
 
+    @app.route('/palmar')
+    def get_gallery_p():
+        image_names_p=[classes_p,k]
+       
+        
+        return render_template("demo_p.html", image_names_p=image_names_p)
+
 
     
+
+
+    
+
+
+
 
         
 
@@ -251,5 +369,11 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
-    app.run(port=4558, debug=True)
+    app.run(port=4550, debug=True)
+
+
+
+
+
