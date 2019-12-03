@@ -5,6 +5,7 @@ from utils.excelcsv import CSVReader
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 import random
+from sklearn.tree import DecisionTreeClassifier
 
 
 from random import seed
@@ -130,8 +131,8 @@ def main():
     dim_red_mod = "LDA"
     dist_func = "euclidean"
     k_value = 30
-    training_set = 'Dataset3/Labelled/Set1'
-    test_set = 'Dataset3/Unlabelled/Set 1'
+    training_set = 'Dataset3/Labelled/Set2'
+    test_set = 'Dataset3/Unlabelled/Set 2'
     label = "dorsal"
     obj_lat, feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod,
                                                                  dim_red_mod, label, k_value, training_set)
@@ -167,20 +168,24 @@ def main():
     random.shuffle(c)
 
     x_train, y_train = zip(*c)
-
-    print(x_train)
-    print(y_train)
-
-    print(len(x_test))
+    print(y_test)
 
     from sklearn.tree import DecisionTreeClassifier
     # Test CART on dataset
     seed(1)
-    clf = DecisionTreeClassifier(random_state=0)
+    clf = DecisionTree()
     clf.fit(x_train, y_train)
     predictions = clf.predict(x_test)
+
+    print("---------------------------")
     accuracy = accuracy_score(y_test, predictions) * 100
-    print('Accuracy:', accuracy)
+    print("Accuracy: " + str(accuracy) + "%")
+    unlabelled_images = red_dim_unlabelled_images['imageId']
+    print("---------------------------")
+    print("Results:")
+    print("Image ID, Prediction, Actual")
+    for image_id, p, a in zip(unlabelled_images, predictions, y_test):
+        print("(" + image_id + ", " + p + ", " + a + ")")
 
 if __name__ == "__main__":
     main()

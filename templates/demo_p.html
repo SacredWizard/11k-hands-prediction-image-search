@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dorsal</title>
+    <title>Palmar</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
           integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 
@@ -12,21 +12,22 @@
 
     <div class="row">
 
-        <div>
-            <h1 class="page-header">Dorsal Clusters</h1>
+        <div >
+            <h1 class="page-header">Palmar Clusters</h1>
         </div>
         <!-- {{image_names}} -->
         <!-- <hr> -->
         <table id="clustering" style="display: block;">
-        {% for i in range(image_names[1])%}
+        {% for i in range(image_names_p[1])%}
         <!-- <tbody> -->
-        <tr>    <td>Cluster {{i+1}}</td></tr>
+        <tr>    <td> <h3> Cluster {{i+1}} </h3></td></tr>
         <tr>
-        {{image_names[0][i]|length}}
-        {% for images in image_names[0][i] %}
-        
+        {{image_names_p[0][i]|length}}
+        {% for images in image_names_p[0][i] %}
+        <!-- image_names_p[0][i] -->
         <td style="display: inline-block;">
-            <img height = 100 width =100 src=" {{url_for('send_image', filename=images[1])}}">
+                <!-- class="img-responsive" -->
+            <img height = 100 width =100 src=" {{url_for('send_image', filename= images[1])}}">
         </td>
         {% endfor %}
         </tr>
