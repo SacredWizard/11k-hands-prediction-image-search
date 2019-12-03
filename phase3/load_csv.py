@@ -17,7 +17,8 @@ csv_reader = CSVReader()
 def main():
     """Main function for the script"""
     input_data = {"labelled": ["Dataset3/labelled_set1.csv", "Dataset3/labelled_set2.csv"],
-                  "unlabelled": ["Dataset3/unlabelled_set1.csv", "Dataset3/unlabelled_set2.csv"]}
+                  "unlabelled": ["Dataset3/unlabelled_set1.csv", "Dataset3/unlabelled_set2.csv"],
+                  "metadata": ["HandInfo.csv"]}
     csv_reader.save_csv_multiple(input_data)
 
 

@@ -12,6 +12,43 @@ from skimage import io
 import pandas as pd
 
 
+def  show_images_ppr(query_images, title, image_list):
+    """Visualizer for the images"""
+    f = plt.figure(figsize=(20, 12))
+    title_visualizer = ""
+    for i in title:
+        title_visualizer += i + ":" + str(title[i]) + "  "
+
+    f.suptitle(title_visualizer, fontsize=18)
+
+    no_images_per_row = 5
+    no_of_lines = int(len(image_list) / no_images_per_row + 1)
+    idx = 1
+    # Query Images
+    for img in query_images:
+        f.add_subplot(no_of_lines, 5, idx)
+        plt.imshow(io.imread(img))
+        plt.axis('off')
+        plt.title("Q{} : {}".format(idx, os.path.basename(img)))
+        idx = idx + 1
+
+    # Results
+    for r in image_list:
+        f.add_subplot(no_of_lines, 5, idx)
+        plt.imshow(io.imread(r['path']))
+        plt.title(
+            "{}\nRank: {}".format(r['imageId'], round(r['score'], 3)))
+        plt.axis('off')
+        idx = idx + 1
+
+    fig = plt.gcf()
+    fig.set_size_inches((20, 12), forward=True)
+    filename = "output/{}".format("_".join([str(i) for i in title.values()]) + "_")
+    print("Visualizer Image saved to: {}.png".format(filename))
+    fig.savefig(filename, dpi=500)
+    plt.show()
+
+
 def show_images(query_image, image_list, title):
     """Visualizer for the images"""
     f = plt.figure(figsize=(20, 12))

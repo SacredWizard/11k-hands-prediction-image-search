@@ -13,13 +13,11 @@ This is the CLI for loading the metadata on to mongo
 from classes.dimensionreduction import DimensionReduction
 from sklearn.metrics.pairwise import euclidean_distances, cosine_similarity
 import time
-import base64
+import os
 import numpy as np
 from pandas import DataFrame
-import pandas
-# pandas.set_option('display.max_rows', 500)
-# pandas.set_option('display.max_columns', 500)
-# pandas.set_option('display.width', 1000)
+from utils.imageviewer import show_images_ppr
+
 
 def ppr(sim_graph, images_list, query_images, max_iter=500, alpha=0.85):
     sim_graph = sim_graph.T
@@ -34,14 +32,12 @@ def ppr(sim_graph, images_list, query_images, max_iter=500, alpha=0.85):
         iter += 1
     print("Iterations: {}".format(iter))
     uq_new = uq_new.ravel()
-    # uq_new = uq_new[::-1].argsort(axis=0)
-    a =(-uq_new).argsort()
+    a = (-uq_new).argsort()
     result = []
     rank = 1
     for i in a:
         res = {"imageId": images_list[i], "score": uq_new[i], "rank": rank}
         result.append(res)
-        # print("Image: {} Score: {} Rank:{}".format(images_list[i], uq_new[i], rank))
         rank += 1
     return result
 
@@ -51,80 +47,54 @@ def main():
     start = time.time()
     feature_extraction_model = "HOG"
     dimension_reduction_model = "PCA"
-    k_value = 10
+    k_value = 5
     dim_k_value = 40
     K_value = 20
-    folder = "Dataset3/Labelled/Set2"
+    folder = "Dataset3/Labelled/Set1"
+
+    # query_images = ["Hand_0003457.jpg", "Hand_0000074.jpg", "Hand_0005661.jpg"]
+    query_images = ["Hand_0000680.jpg", "Hand_0000069.jpg", "Hand_0006331.jpg"]
+
     dim_red = DimensionReduction(feature_extraction_model, dimension_reduction_model, dim_k_value, folder_metadata=folder,
                                  metadata_collection="labelled")
-    features_list = np.array(dim_red.get_object_feature_matrix()['featureVector'].tolist())
-    images_list = np.array(dim_red.get_object_feature_matrix()['imageId'])
-    # eucl_dist = euclidean_distances(features_list)
-    eucl_dist = cosine_similarity(features_list)
-    # eucl_dist = map(lambda x: 1/ (1 + x), eucl_dist)
-    pd = {}
-    pd["imageId"] = images_list
+    obj_feat = dim_red.get_object_feature_matrix()
+    features_list = np.array(obj_feat['featureVector'].tolist())
+    images_list = np.array(obj_feat['imageId'])
+    cos_sim = cosine_similarity(features_list)
+    pd = {"imageId": images_list}
     idx = 0
-    for d in eucl_dist:
+    for d in cos_sim:
         pd[images_list[idx]] = d
         idx += 1
 
     df = DataFrame(pd)
     df = df.set_index("imageId")
-    # print(df)
-    sim_graph = np.empty((0, len(eucl_dist)))
+    sim_graph = np.empty((0, len(cos_sim)))
     # sim_matrix = np.empty((0, len(eucl_dist)))
-    for row in eucl_dist:
+    for row in cos_sim:
         k_largest = np.argsort(-np.array(row))[1:k_value+1]
         sim_graph_row = [d if i in k_largest else 0 for i, d in enumerate(row)]
-    #     sum_row = sum(sim_graph_row)
-    #     # print(sim_row)
-    #     sim_graph_row = list(map(lambda x: x / sum_row, sim_graph_row))
-    #     # print(sim_graph_row)
         sim_graph = np.append(sim_graph, np.array([sim_graph_row]), axis=0)
-    #     sim_matrix = np.append(sim_matrix, np.array([sim_row]), axis=0)
-    # print(sim_graph)
-    # print(sim_graph)
+
     row_sums = sim_graph.sum(axis=1)
     sim_graph = sim_graph / row_sums[:, np.newaxis]
-    # print(sim_graph)
     idx = 0
     for img in images_list:
         df.loc[img] = sim_graph[idx]
         idx += 1
-    # print(df)
-    # print(sim_graph.tolist())
-    print("\n\n")
-    # print(sim_graph.T)
-    # print(sim_graph[9][8])
-    # ppr(sim_graph, images_list, ["Hand_0008333.jpg", "Hand_0006183.jpg", "Hand_0000074.jpg"])
-    # print(sim_graph.shape)
-
-    results = ppr(sim_graph, images_list, ["Hand_0003457.jpg"])
+    results = ppr(sim_graph, images_list, query_images)
     results = results[:K_value]
 
     print("Top {} images from Personalized page Rank are:".format(K_value))
     for r in results:
+        r["path"] = os.path.abspath(os.path.join(folder, r['imageId']))
         print(r)
 
-    data_uri = base64.b64encode(open('Hands/Hand_0003457.jpg', 'rb').read()).decode('utf-8')
-    img_tag = '<img src="data:image/png;base64,{0}">'.format(data_uri)
-    print(img_tag)
-
+    query_images_list = [os.path.abspath(os.path.join(folder, img)) for img in query_images]
+    title = {"Model": "Personalized Page Rank", "k": k_value, "K": K_value}
+    show_images_ppr(query_images_list, title, results)
     print("Execution time: {} seconds".format(time.time() - start))
 
 
 if __name__ == "__main__":
     main()
-
-
- # print(sim_matrix)
-    # for i in sim_graph:
-    #     print(i)
-    #     dist_max = (max(row))
-    #
-    #     def sim_score(x):
-    #         # s = (1 - x / dist_max) * 100
-    #         s = 1 / 1 + x
-    #         return 0 if s == 1 else s
-    #     sim_row = list(map(sim_score, row))
