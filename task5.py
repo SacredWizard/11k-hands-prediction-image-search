@@ -47,6 +47,7 @@ def task5b(query, top):
     imageids, feat_vectors = lsh.query(query, top)
     print(imageids[:top])
     print("Overall images: {}".format(len(imageids)))
+    return imageids, feat_vectors
 
 
 def img_ids():
