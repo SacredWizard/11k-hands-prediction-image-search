@@ -86,8 +86,8 @@ class SupportVectorMachine(object):
         for n in range(len(self.a)):
             self.b += self.support_vectors_y[n]
             self.b -= np.sum(self.a * self.support_vectors_y * K[ind[n], support_vectors])
-        self.b /= len(self.a)
-
+        if len(self.a) > 0:
+            self.b /= len(self.a)
         # calculates the weights vector
         if self.kernel == linear_kernel:
             self.w = np.zeros(number_features)

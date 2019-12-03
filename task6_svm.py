@@ -31,7 +31,7 @@ def get_LSH_results(query_image):
     lsh = LSH()
     global similar_images_g,similar_image_vectors_g
     similar_images_g,similar_image_vectors_g = p3task5.task5b(query_image, 20)
-    print(similar_images_g,similar_image_vectors_g)
+    # print(similar_images_g,similar_image_vectors_g)
     return similar_images_g,similar_image_vectors_g
 
 def get_training_set(feedback_imgs,feedback_vals):
