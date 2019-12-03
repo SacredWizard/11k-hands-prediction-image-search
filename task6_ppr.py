@@ -70,7 +70,7 @@ def rerank_results(feedback, similar_images, similar_image_vectors):
 
 
 def main():
-    query_image = get_input_image("Hands/")
+    query_image = get_input_image("Hands")
     # query_image = get_input_image()
     similar_images, img_vectors = get_LSH_results(query_image)
     relevancefeedback.relevance_fdbk("PPR", query_image, similar_images, img_vectors)

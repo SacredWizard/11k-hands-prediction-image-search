@@ -5,6 +5,7 @@ from classes.dimensionreduction import DimensionReduction
 from classes.LSH import LSH
 from utils.model import Model
 import utils.relevancefeedback as relevancefeedback
+from utils.inputhelper import get_input_image
 import numpy as np
 import random as random
 import operator
@@ -81,7 +82,7 @@ def rerank_results(feedback,similar_images,similar_image_vectors):
     return rel_similar_images
 
 def main():
-    query_image = "Hand_0000072.jpg"
+    query_image = get_input_image("Hands")
     similar_images,img_vectors = get_LSH_results(query_image)
     # while True:
     #     rerank_results(None)

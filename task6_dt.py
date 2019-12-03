@@ -6,6 +6,7 @@ sys.path.append(os.path.split(sys.path[0])[0])
 from classes.dimensionreduction import DimensionReduction
 from utils.model import Model
 import utils.relevancefeedback as relevancefeedback
+from utils.inputhelper import get_input_image
 import numpy as np
 import random as random
 import operator
@@ -412,7 +413,7 @@ feedback_vals_g = []
 
 
 def main():
-    query_image = "Hand_0000072.jpg"
+    query_image = get_input_image("Hands")
     # results = search_LSH(query_image)
     results = ['Hand_0000072.jpg', 'Hand_0000073.jpg', 'Hand_0000074.jpg', 'Hand_0000112.jpg']
     global similar_images_g, similar_image_vectors_g

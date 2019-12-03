@@ -7,6 +7,7 @@ import numpy as np
 import task5
 import utils.relevancefeedback as relevancefeedback
 from utils.model import Model
+from utils.inputhelper import get_input_image
 
 feedback_metadata_obj = {}
 user_relevant_images = []
@@ -116,5 +117,11 @@ def get_probability_revelance_feedback(query_id="Hand_0000003.jpg"):
                                                    feat_vectors))
 
 
+def main():
+    query = get_input_image("Hands")
+    get_probability_revelance_feedback(query)
+
+
 if __name__ == '__main__':
-    get_probability_revelance_feedback()
+    main()
+
