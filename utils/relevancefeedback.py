@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, send_from_directory, redirect
 
 import task6_svm as task6_svm
+import task6_ppr
 import task6d_probability
 import os
 
@@ -60,4 +61,6 @@ def incorporate_feedback(data):
         rel_similar_images = task6_svm.rerank_results(data,similar_images_g,similar_image_vectors_g)
     elif classifier_g == "PROBABILITY":
         rel_similar_images = task6d_probability.rerank_results(data)
+    elif classifier_g == "PPR":
+        rel_similar_images = task6_ppr.rerank_results(data)
     return rel_similar_images, similar_image_vectors_g

@@ -12,6 +12,9 @@ This is the CLI for Phase3 of the Project
 """
 import importlib
 import warnings
+import sys
+from task5 import task5a, task5b
+from utils.inputhelper import get_input_k, get_input_image
 
 warnings.filterwarnings('ignore')
 
@@ -42,8 +45,22 @@ def main():
         module_name = "phase3.task2"
     elif choice == "3":
         module_name = "phase3.task3"
-    elif choice == "6":
+    elif choice == "5a":
+        l = get_input_k("L")
+        k = get_input_k("K")
+        task5a(l, k)
+        sys.exit(0)
+    elif choice == "5b":
+        query = get_input_image("Hands")
+        top = get_input_k("K")
+        task5b(query, top)
+        sys.exit(0)
+    elif choice == "6a":
         module_name = "task6_svm"
+    elif choice == "6b":
+        module_name = "task6_dt"
+    elif choice == "6c":
+        module_name = "task6_ppr"
     elif choice == "4c":
         module_name = "phase3.task4_ppr"
     elif choice == "4b":
