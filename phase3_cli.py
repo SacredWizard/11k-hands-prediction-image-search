@@ -36,6 +36,10 @@ def main():
     choice = get_task_number()
     if choice == "0":
         module_name = "phase3.load_csv"
+    elif choice == "1":
+        module_name = "phase3.task1"
+    elif choice == "2":
+        module_name = "phase3.task2"
     elif choice == "3":
         module_name = "phase3.task3"
     elif choice == "6":

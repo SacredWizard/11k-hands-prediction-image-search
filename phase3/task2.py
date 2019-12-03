@@ -3,6 +3,7 @@ import sys
 sys.path.append(os.path.split(sys.path[0])[0])
 from classes.dimensionreduction import DimensionReduction
 from utils.model import Model
+from utils.inputhelper import get_input_k, get_input_folder
 from utils.excelcsv import CSVReader
 from classes.mongo import MongoWrapper
 from classes.globalconstants import GlobalConstants
@@ -43,10 +44,10 @@ def main():
 
 
     """
-    k_value = 10
+    k_value = get_input_k("C")
     # query_folder = get_input_folder()
-    training_set = 'C:\mwdb\commoncode\CSE515\Dataset3\Labelled\Set1'
-    test_set = 'C:\mwdb\commoncode\CSE515\Dataset3\\Unlabelled\Set 1'
+    training_set = get_input_folder("Labelled")
+    test_set = get_input_folder("Classify")
 
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)
 

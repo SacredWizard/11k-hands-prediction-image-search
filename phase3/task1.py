@@ -4,6 +4,7 @@ sys.path.append(os.path.split(sys.path[0])[0])
 from classes.dimensionreduction import DimensionReduction
 from utils.model import Model
 from utils.excelcsv import CSVReader
+from utils.inputhelper import get_input_folder, get_input_k
 from classes.mongo import MongoWrapper
 from classes.globalconstants import GlobalConstants
 from utils.inputhelper import get_input_subject_id
@@ -56,9 +57,9 @@ def main():
     fea_ext_mod = "HOG"
     dim_red_mod = "SVD"
     dist_func = "euclidean"
-    k_value = 30
-    training_set = os.path.abspath('Dataset3\Labelled\Set2')
-    test_set = os.path.abspath('Dataset3\\Unlabelled\Set 1')
+    k_value = get_input_k("k-value")
+    training_set = os.path.abspath(get_input_folder("Labelled"))
+    test_set = os.path.abspath(get_input_folder("Classify"))
     label = "dorsal"
     obj_lat,feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod, 
                                         dim_red_mod, label , k_value, training_set)
