@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Classification</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+</head>
+<body>
+<div class="container">
+
+    <div class="row">
+
+        <div >
+            <h1 class="page-header">Unlabelled Images </h1>
+        </div>
+        <!-- {{image_names}} -->
+        <!-- <hr> -->
+        <table id="clustering" style="display: block;">
+        
+        
+        <!-- <tbody> -->
+        <tr>    <td> <h3>  Dorsal </h3></td></tr>
+        <tr>
+        
+        {% for images in results[0] %}
+        <!-- image_names_p[0][i] -->
+        <td style="display: inline-block;">
+                <!-- class="img-responsive" -->
+            <img height = 100 width =100 src=" {{url_for('send_image_result', filename= images)}}">
+        </td>
+        {% endfor %}
+        </tr>
+        
+        <!-- <tbody> -->
+        <tr>    <td> <h3>  Palmar </h3></td></tr>
+        <tr>
+        
+            {% for images in results[1] %}
+        <!-- image_names_p[0][i] -->
+        <td style="display: inline-block;">
+                <!-- class="img-responsive" -->
+            <img height = 100 width =100 src=" {{url_for('send_image_result', filename= images)}}">
+        </td>
+        {% endfor %}
+        </tr>
+
+
+        <!-- </tbody> -->
+        
+        </table>
+
+    </div>
+</div>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+        crossorigin="anonymous"></script>
+
+</body>
+</html>
