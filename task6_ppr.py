@@ -37,7 +37,6 @@ feedback_vals_g = []
 
 def get_LSH_results(query_image):
     lsh = LSH()
-    print(query_image)
     global similar_images_g, similar_image_vectors_g
     similar_images_g, similar_image_vectors_g, query_image_vector = p3task5.task5b(query_image, 20)
     # print(len(similar_images_g),len(similar_image_vectors_g))
@@ -53,8 +52,6 @@ def rerank_results(feedback, similar_images, similar_image_vectors):
     similar_images_g = similar_images
     similar_image_vectors_g = similar_image_vectors
     # Add SVM based relevance feedback function
-    print(feedback)
-    images_list = list(feedback.keys())
     relevant_images = []
     images_list = []
     feature_vectors = []
@@ -69,7 +66,7 @@ def rerank_results(feedback, similar_images, similar_image_vectors):
     results = ppr(sim_graph, images_list, relevant_images)
     rel_similar_images = []
     for img in results:
-        rel_similar_images.append(img)
+        rel_similar_images.append(img['imageId'])
     return rel_similar_images
 
 
