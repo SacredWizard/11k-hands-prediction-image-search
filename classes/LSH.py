@@ -82,4 +82,4 @@ class LSH:
 
         for i in choices[:top]:
             feat_vectors[i] = self.data[self.image_ids.index(i)]
-        return choices[:top], feat_vectors
+        return choices[:top], feat_vectors, query_vector

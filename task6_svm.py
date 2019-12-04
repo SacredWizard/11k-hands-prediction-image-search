@@ -31,9 +31,9 @@ feedback_vals_g = []
 def get_LSH_results(query_image):
     lsh = LSH()
     global similar_images_g,similar_image_vectors_g
-    similar_images_g,similar_image_vectors_g = p3task5.task5b(query_image, 20)
+    similar_images_g,similar_image_vectors_g, query_image_vector = p3task5.task5b(query_image, 20)
     # print(len(similar_images_g),len(similar_image_vectors_g))
-    return similar_images_g,similar_image_vectors_g
+    return similar_images_g,similar_image_vectors_g, query_image_vector
 
 def get_training_set(feedback_imgs,feedback_vals):
     x_train=[]
@@ -83,10 +83,10 @@ def rerank_results(feedback,similar_images,similar_image_vectors):
 
 def main():
     query_image = get_input_image("Hands")
-    similar_images,img_vectors = get_LSH_results(query_image)
+    similar_images,img_vectors, query_image_vector = get_LSH_results(query_image)
     # while True:
     #     rerank_results(None)
-    relevancefeedback.relevance_fdbk("SVM",query_image,similar_images,img_vectors)
+    relevancefeedback.relevance_fdbk("SVM",query_image,similar_images,img_vectors, query_image_vector)
     pass
 
 if __name__ == "__main__":
