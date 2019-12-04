@@ -1,15 +1,10 @@
-# POrt number fix
-#Classification algo change
-# Palmer Vis
-
-
 import os
 from classes.dimensionreduction import DimensionReduction
 from utils.model import Model
 from utils.excelcsv import CSVReader
 from classes.mongo import MongoWrapper
 from classes.globalconstants import GlobalConstants
-from utils.inputhelper import get_input_subject_id
+from utils.inputhelper import get_input_folder,get_input_k
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
@@ -46,27 +41,18 @@ def compute_latent_semantic(label, k_value):
 
 def main():
 
-
-    """
-            folder = get_input_folder()
-            model = get_input_feature_extractor_model()
-
-            feature_extractor = ExtractFeatures(folder, model)
-            feature_extractor.execute()
-
-
-    """
+    k = get_input_k("C")
+    training_set = get_input_folder("Labelled")
+    test_set = get_input_folder("Classify")
     k_value = 30
 
     dim_reduction = DimensionReduction(feature_extraction_model, dimension_reduction_model, k_value)
 
     # obj_lat, feat_lat, model = dim_reduction.execute()
-    training_set = os.path.abspath('Dataset3/Labelled/Set2')
     label = 'dorsal'
     obj_lat, feat_lat, model = p3task1.compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label, k_value, training_set)
     label_p = 'palmar'
     obj_lat_p,feat_lat_p, model_p = p3task1.compute_latent_semantic_for_label(feature_extraction_model, dimension_reduction_model, label_p, k_value, training_set)
-    test_set = os.path.abspath('Dataset3/Unlabelled/Set 2')
     red_dim = p3task1.reduced_dimensions_for_unlabelled_folder(feature_extraction_model, dimension_reduction_model, k_value, label, training_set, test_set)
 
 
@@ -101,10 +87,10 @@ def main():
     counter_p = np.zeros(5)
     for k_m in km.labels_:
         counter[k_m] +=1
-    print(counter)
+    # print(counter)
     for k_m_p in km_p.labels_:
         counter_p[k_m_p] +=1
-    print(counter_p)
+    # print(counter_p)
     # 
     d_cluster = km.predict(red_dim['reducedDimensions'].tolist())
     p_cluster = km_p.predict(red_dim['reducedDimensions'].tolist())
@@ -114,61 +100,31 @@ def main():
 
 #min max test
     
-            
-    
-
-
-    
-
-        
-
-
-        
-    
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     good=0
     bad=0
-    for ind in range(len(red_dim['reducedDimensions'])):
+    # for ind in range(len(red_dim['reducedDimensions'])):
     
-        cc_dorsal = km.cluster_centers_[d_cluster[ind]]
-        cc_palmar = km_p.cluster_centers_[p_cluster[ind]]
-        dist_dorsal = np.linalg.norm(red_dim['reducedDimensions'][ind]-cc_dorsal)
-        dist_palmar = np.linalg.norm(red_dim['reducedDimensions'][ind]-cc_palmar)
+    #     cc_dorsal = km.cluster_centers_[d_cluster[ind]]
+    #     cc_palmar = km_p.cluster_centers_[p_cluster[ind]]
+    #     dist_dorsal = np.linalg.norm(red_dim['reducedDimensions'][ind]-cc_dorsal)
+    #     dist_palmar = np.linalg.norm(red_dim['reducedDimensions'][ind]-cc_palmar)
         
   
-        if dist_dorsal<dist_palmar:
-            #print(red_dim['imageId'][ind], label, y_test[ind])
-            if y_test[ind] == label:
-                good +=1
-            else:
-                bad+=1
-        else:
-            #print(red_dim['imageId'][ind], 'palmar', y_test[ind])
-            if y_test[ind] == label_p:
-                good +=1
-            else:
-                bad+=1
+    #     if dist_dorsal<dist_palmar:
+    #         #print(red_dim['imageId'][ind], label, y_test[ind])
+    #         if y_test[ind] == label:
+    #             good +=1
+    #         else:
+    #             bad+=1
+    #     else:
+    #         #print(red_dim['imageId'][ind], 'palmar', y_test[ind])
+    #         if y_test[ind] == label_p:
+    #             good +=1
+    #         else:
+    #             bad+=1
         
-    print ("good",good)        
-    print("bad",bad)
+    # print ("good",good)        
+    # print("bad",bad)
     # km.score()
     
     
@@ -377,27 +333,8 @@ def main():
         
         return render_template("task2.html", results=results)
 
-    
-   
-
-    
-
-
-
-
-        
-
-    
-        
-
+    app.run(port=port_g)
 
 if __name__ == "__main__":
 
     main()
-    app.run(port=port_g, debug=True)
-    
-
-
-
-
-
