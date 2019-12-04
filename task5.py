@@ -86,7 +86,7 @@ def img_ids():
 
 
 if __name__ == '__main__':
-    # task5a(layers=5, k=10, combine_models=False)
+    # task5a(layers=10, k=10, combine_models=False)
     task5b("Hand_0000674.jpg", 20, False, False)
     # dimension_reduction()
     # save_model_file()

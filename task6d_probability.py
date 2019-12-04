@@ -5,8 +5,8 @@ import numpy as np
 
 import task5
 import utils.relevancefeedback as relevancefeedback
-from utils.model import Model
 from utils.inputhelper import get_input_image, get_input_k
+from utils.model import Model
 
 feedback_metadata_obj = {}
 user_relevant_images = []
@@ -104,7 +104,7 @@ def preprocess(feat_vectors):
 
 
 def get_probability_revelance_feedback(query_id, no_images):
-    imageids, feat_vectors = task5.task5b(query_id, no_images)
+    imageids, feat_vectors, query_vector = task5.task5b(query_id, no_images)
     model = Model()
     bin_matrix = get_binary_matrix(feat_vectors)
     imageid_index, feature_index = preprocess(feat_vectors)
@@ -115,7 +115,7 @@ def get_probability_revelance_feedback(query_id, no_images):
     model.save_model(feature_index, 'feature_index')
     relevancefeedback.relevance_fdbk("PROBABILITY", query_id,
                                      get_relevance(feat_vectors.keys(), bin_matrix, imageid_index, feature_index,
-                                                   feat_vectors), feat_vectors)
+                                                   feat_vectors), feat_vectors, query_image_vector=query_vector)
 
 
 def main():
