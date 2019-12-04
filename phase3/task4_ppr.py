@@ -71,7 +71,6 @@ def fetch_actual_labels(images_list):
             final_result[r["imageName"]] = "dorsal"
         elif "palmar" in r["aspectOfHand"]:
             final_result[r["imageName"]] = "palmar"
-    print(final_result)
     return final_result
 
 
