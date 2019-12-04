@@ -27,6 +27,8 @@ class GlobalConstants:
         self.LSH_L_BUCKETS = "L_Buckets"
         self.LSH_OBJECT = "lsh_object"
         self.LSH_W = 0.03
+        self.HOG_NMF_MODEL_FILE = 'hog_nmf_w'
+        self.CM_PCA_MODEL_FILE = 'cm_pca_w'
 
     class Mongo:
 

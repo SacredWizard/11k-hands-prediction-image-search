@@ -35,11 +35,11 @@ def task5a(layers=10, k=10, combine_models=False):
     xt = time.time()
     model = Model()
     if combine_models:
-        data0 = model.load_model('lsh_nmf_w')
-        data1 = model.load_model('cm_pca_w')
+        data0 = model.load_model(constants.HOG_NMF_MODEL_FILE)
+        data1 = model.load_model(constants.CM_PCA_MODEL_FILE)
         data = np.concatenate((data0, data1), axis=1)
     else:
-        data = model.load_model('lsh_nmf_w')
+        data = model.load_model(constants.HOG_NMF_MODEL_FILE)
 
     lsh = LSH(layers=layers, khash_count=k, w=constants.LSH_W, image_ids=img_ids(), data=data)
     l_hashes, l_buckets = lsh.create_index()
