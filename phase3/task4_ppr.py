@@ -77,19 +77,18 @@ def fetch_actual_labels(images_list):
 
 def main():
     """Main function for the script"""
-    start = time.time()
     feature_extraction_model = "HOG"
     # feature_extraction_models = ["CM", "HOG"]
     feature_extraction_model_1 = "CM"
     dimension_reduction_model = "PCA"
-    k_value = 5
+    k_value = 10
     dim_k_value = 40
     # K_value = 20
     # lab_folder = "Dataset3/Labelled/Set1"
     # unlab_folder = "Dataset3/Unlabelled/Set 2"
     lab_folder = get_input_folder("Labelled Folder")
     unlab_folder = get_input_folder("Classify")
-
+    start = time.time()
     # ================================================================================================================
     # labelled Images
     dim_red = DimensionReduction(feature_extraction_model, dimension_reduction_model, dim_k_value,
@@ -160,10 +159,18 @@ def main():
     actual_labels = fetch_actual_labels(images_list_unlab)
     print("Classification")
     no_correct = 0
+    correctly_classified = []
+    incorrectly_classified = []
     for r in final_results:
         print("Image Id: {}, Label:{} Actual Label: {}".format(r, final_results[r], actual_labels[r]))
         if final_results[r] == actual_labels[r]:
+            correctly_classified.append(r)
             no_correct += 1
+        else:
+            incorrectly_classified.append(r)
+
+    print("Correctly classified: {}".format(correctly_classified))
+    print("InCorrectly classified: {}".format(incorrectly_classified))
 
     print("Classification Accuracy: {}".format(no_correct / len(images_list_unlab) * 100))
     print("Execution time: {} seconds".format(time.time() - start))

@@ -53,7 +53,7 @@ def main():
     elif choice == "5b":
         query = get_input_image("Hands")
         top = get_input_k("K")
-        task5b(query, top)
+        task5b(query, top, visualize=True)
         sys.exit(0)
     elif choice == "6a":
         module_name = "task6_svm"
