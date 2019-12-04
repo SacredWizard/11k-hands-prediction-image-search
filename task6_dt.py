@@ -69,6 +69,7 @@ def rerank_results(feedback, similar_images, similar_image_vectors, query_image_
     # Add DT based relevance feedback function
     clf = DecisionTree()
     feedback_imgs = list(feedback.keys())
+
     feedback_vals = list(feedback.values())
     x_train_old, y_train = get_training_set(feedback_imgs, feedback_vals)
     x_train = []
@@ -85,16 +86,28 @@ def rerank_results(feedback, similar_images, similar_image_vectors, query_image_
     print(x_test)
 
     predictions = clf.predict(x_test)
+    #relevant images
     indices_rel = [i for i, x in enumerate(predictions) if x == 1]
-    x_train_knn = []
-    y_train_knn = []
+    x_train_knn_rel = []
     rel_len = len(indices_rel)
     for i in indices_rel:
-        x_train_knn.append(x_test[i])
+        x_train_knn_rel.append(x_test[i])
     knn = KNN(rel_len)
-    knn.fit(x_train_knn)
-    neighbours = knn.get_neighbours([query_image_vector])
-    rel_similar_images = [list(similar_image_vectors_g.keys())[index] for index in neighbours]
+    knn.fit(x_train_knn_rel)
+    neighbours_rel = knn.get_neighbours([query_image_vector])
+    #irrelevant images
+    indices_ir = [i for i, x in enumerate(predictions) if x == -1]
+    x_train_knn_ir = []
+    ir_len = len(indices_ir)
+    for i in indices_ir:
+        x_train_knn_ir.append(x_test[i])
+    knn = KNN(ir_len)
+    knn.fit(x_train_knn_ir)
+    neighbours_ir = knn.get_neighbours([query_image_vector])
+    ranked_indices = []
+    ranked_indices.extend(neighbours_rel)
+    ranked_indices.extend(neighbours_ir)
+    rel_similar_images = [list(similar_image_vectors_g.keys())[index] for index in ranked_indices]
     return rel_similar_images
 
 
