@@ -5,7 +5,7 @@ sys.path.append(os.path.split(sys.path[0])[0])
 from classes.dimensionreduction import DimensionReduction
 from classes.LSH import LSH
 from utils.model import Model
-from utils.inputhelper import get_input_image
+from utils.inputhelper import get_input_image, get_input_k
 import utils.relevancefeedback as relevancefeedback
 from sklearn.metrics.pairwise import cosine_similarity
 from phase3.task3 import ppr, sim_graph_from_sim_max
@@ -35,10 +35,10 @@ feedback_imgs_g = []
 feedback_vals_g = []
 
 
-def get_LSH_results(query_image):
+def get_LSH_results(query_image, no_images):
     lsh = LSH()
     global similar_images_g, similar_image_vectors_g
-    similar_images_g, similar_image_vectors_g, query_image_vector = p3task5.task5b(query_image, 20)
+    similar_images_g, similar_image_vectors_g, query_image_vector = p3task5.task5b(query_image, no_images)
     # print(len(similar_images_g),len(similar_image_vectors_g))
     return similar_images_g, similar_image_vectors_g, query_image_vector
 
@@ -72,8 +72,9 @@ def rerank_results(feedback, similar_images, similar_image_vectors):
 
 def main():
     query_image = get_input_image("Hands")
+    no_images = get_input_k("t")
     # query_image = get_input_image()
-    similar_images, img_vectors, query_image_vector = get_LSH_results(query_image)
+    similar_images, img_vectors, query_image_vector = get_LSH_results(query_image, no_images)
     relevancefeedback.relevance_fdbk("PPR", query_image,similar_images,img_vectors, query_image_vector)
     # pass
 

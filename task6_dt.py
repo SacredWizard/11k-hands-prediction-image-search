@@ -5,7 +5,7 @@ sys.path.append(os.path.split(sys.path[0])[0])
 from classes.LSH import LSH
 from utils.model import Model
 import utils.relevancefeedback as relevancefeedback
-from utils.inputhelper import get_input_image
+from utils.inputhelper import get_input_image, get_input_k
 import task5 as p3task5
 import warnings
 from task4_dt import DecisionTree
@@ -24,10 +24,10 @@ feedback_imgs_g = []
 feedback_vals_g = []
 
 
-def get_LSH_results(query_image):
+def get_LSH_results(query_image, no_images):
     lsh = LSH()
     global similar_images_g, similar_image_vectors_g
-    similar_images_g, similar_image_vectors_g, query_image_vector = p3task5.task5b(query_image, 20)
+    similar_images_g, similar_image_vectors_g, query_image_vector = p3task5.task5b(query_image, no_images)
     # print(len(similar_images_g),len(similar_image_vectors_g))
     return similar_images_g, similar_image_vectors_g, query_image_vector
 
@@ -113,7 +113,8 @@ def rerank_results(feedback, similar_images, similar_image_vectors, query_image_
 
 def main():
     query_image = get_input_image("Hands")
-    similar_images, img_vectors, query_image_vector = get_LSH_results(query_image)
+    no_images = get_input_k("t")
+    similar_images, img_vectors, query_image_vector = get_LSH_results(query_image, no_images)
     # while True:
     #     rerank_results(None)
     relevancefeedback.relevance_fdbk("DT", query_image, similar_images, img_vectors, query_image_vector)
