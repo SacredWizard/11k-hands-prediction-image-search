@@ -66,7 +66,6 @@ def sim_graph_from_sim_max(cos_sim, images_list, k_value):
 
 def main():
     """Main function for the script"""
-    start = time.time()
     feature_extraction_model = "HOG"
     dimension_reduction_model = "PCA"
     k_value = get_input_k("k")
@@ -75,7 +74,7 @@ def main():
     dim_k_value = 40
 
     query_images = get_input_image_list(folder)
-    print(query_images)
+    start = time.time()
     dim_red = DimensionReduction(feature_extraction_model, dimension_reduction_model, dim_k_value, folder_metadata=folder,
                                  metadata_collection="labelled")
     obj_feat = dim_red.get_object_feature_matrix()
@@ -84,10 +83,6 @@ def main():
     cos_sim = cosine_similarity(features_list)
 
     sim_graph = sim_graph_from_sim_max(cos_sim, images_list, k_value)
-    idx = 0
-    # for img in images_list:
-    #     df.loc[img] = sim_graph[idx]
-    #     idx += 1
     results = ppr(sim_graph, images_list, query_images)
     results = results[:K_value]
 
