@@ -8,8 +8,8 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from skimage import io
 import pandas as pd
+from skimage import io
 
 
 def  show_images_ppr(query_images, title, image_list):
@@ -49,7 +49,7 @@ def  show_images_ppr(query_images, title, image_list):
     plt.show()
 
 
-def show_images(query_image, image_list, title):
+def show_images(query_image, image_list, title, rank=False):
     """Visualizer for the images"""
     f = plt.figure(figsize=(20, 12))
     title_visualizer = ""
@@ -70,8 +70,12 @@ def show_images(query_image, image_list, title):
     for r in image_list:
         f.add_subplot(no_of_lines, 5, count)
         plt.imshow(io.imread(os.path.join(r['path'])))
-        plt.title(
-            "{}\nScore: {}%".format(r['imageId'], round(r['score'], 3)))
+        if rank:
+            plt.title(
+                "{}\nRank: {}".format(r['imageId'], round(r['rank'], 3)))
+        else:
+            plt.title(
+                "{}\nScore: {}%".format(r['imageId'], round(r['score'], 3)))
         plt.axis('off')
         count = count + 1
 

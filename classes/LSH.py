@@ -16,10 +16,21 @@ class LSH:
         self.data = data
         self.image_ids = image_ids
 
+    def get_shape(self):
+        return self.data.shape
+
+    def get_l(self):
+        return self.layers
+
+    def get_k(self):
+        return self.khash_count
+
     def create_index(self):
         l_hash, l_bucket, k_hash, k_bucket, image_hash, bucket = {}, {}, {}, {}, {}, {}
         images_count, dimensions = self.data.shape
         projections = np.zeros((self.khash_count, images_count))
+        b = np.random.uniform(0, self.w, (self.khash_count, 1))
+        self.w = (np.linalg.norm(b)/2)
 
         for layer in range(self.layers):
             k_hash, k_bucket = {}, {}
@@ -79,7 +90,7 @@ class LSH:
             pass
 
         feat_vectors = {}
-
+        print("Overall images: {}".format(len(choices)))
         for i in choices[:top]:
             feat_vectors[i] = self.data[self.image_ids.index(i)]
         return choices[:top], feat_vectors, query_vector

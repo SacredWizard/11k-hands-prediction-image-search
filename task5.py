@@ -1,3 +1,4 @@
+import os
 import time
 
 import numpy as np
@@ -6,6 +7,7 @@ from classes.LSH import LSH
 from classes.dimensionreduction import DimensionReduction
 from classes.globalconstants import GlobalConstants
 from classes.mongo import MongoWrapper
+from utils.imageviewer import show_images
 from utils.model import Model
 
 
@@ -28,11 +30,17 @@ def dimension_reduction():
     pass
 
 
-def task5a(layers=10, k=10):
+def task5a(layers=10, k=10, combine_models=False):
     constants = GlobalConstants()
     xt = time.time()
     model = Model()
-    data = model.load_model('lsh_nmf_w')
+    if combine_models:
+        data0 = model.load_model('lsh_nmf_w')
+        data1 = model.load_model('cm_pca_w')
+        data = np.concatenate((data0, data1), axis=1)
+    else:
+        data = model.load_model('lsh_nmf_w')
+
     lsh = LSH(layers=layers, khash_count=k, w=constants.LSH_W, image_ids=img_ids(), data=data)
     l_hashes, l_buckets = lsh.create_index()
     model.save_model(lsh, constants.LSH_OBJECT)
@@ -41,14 +49,33 @@ def task5a(layers=10, k=10):
     print(time.time() - xt)
 
 
-def task5b(query, top, visualize=False):
+def task5b(query, top, visualize=False, combine_models=False):
     constants = GlobalConstants()
     lsh = Model().load_model(constants.LSH_OBJECT)
     imageids, feat_vectors, query_vector = lsh.query(query, top)
     print(imageids[:top])
-    print("Overall images: {}".format(len(imageids)))
+    print("Unique images: {}".format(str(lsh.get_shape()[0] - 1)))
     if visualize:
-        pass
+        result = []
+        for rank, image in enumerate(imageids[:top]):
+            res = {'path': os.path.join("Hands", image), 'imageId': image, 'rank': rank+1}
+            result.append(res)
+        if combine_models:
+            extract = "HOG + CM"
+        else:
+            extract = "HOG"
+        title = {
+            "Search": "Locality Sensitive Hashing (LSH)",
+            "Feature Extraction": extract,
+            "L": lsh.get_l(),
+            "K": lsh.get_k(),
+            "Dimensionality Reduction": "NMF",
+            "t": 20,
+            "Distance": "Euclidean"
+        }
+        print(os.path.abspath(os.path.join("Hands", query)))
+        show_images(os.path.abspath(os.path.join("Hands", query)), result, title, rank=True)
+
     return imageids, feat_vectors, query_vector
 
 
@@ -59,8 +86,8 @@ def img_ids():
 
 
 if __name__ == '__main__':
-    # task5a()
-    task5b("Hand_0000003.jpg", 20)
+    # task5a(layers=5, k=10, combine_models=False)
+    task5b("Hand_0000674.jpg", 20, False, False)
     # dimension_reduction()
     # save_model_file()
     # img_ids()
