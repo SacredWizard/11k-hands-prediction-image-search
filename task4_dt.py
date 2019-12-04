@@ -126,8 +126,8 @@ class DecisionTree(object):
         return predictions
 
 def main():
-    fea_ext_mod = "HOG"
-    dim_red_mod = "PCA"
+    fea_ext_mod = "CM"
+    dim_red_mod = "LDA"
     dist_func = "euclidean"
     k_value = 30
     # training_set = 'Dataset3/Labelled/Set2'

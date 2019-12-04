@@ -10,6 +10,7 @@ import task5 as p3task5
 import warnings
 from task4_dt import DecisionTree
 from knn import KNN
+from sklearn.neighbors import KNeighborsClassifier
 
 warnings.filterwarnings("ignore")
 
@@ -83,20 +84,23 @@ def rerank_results(feedback, similar_images, similar_image_vectors, query_image_
     for i in similar_image_vectors_g.values():
         j = i.tolist()
         x_test.append(j)
-    print(x_test)
 
     predictions = clf.predict(x_test)
     #relevant images
     indices_rel = [i for i, x in enumerate(predictions) if x == 1]
+    print("Relevant", indices_rel)
     x_train_knn_rel = []
     rel_len = len(indices_rel)
     for i in indices_rel:
         x_train_knn_rel.append(x_test[i])
     knn = KNN(rel_len)
+    #knn = KNeighborsClassifier(n_neighbours=rel_len)
     knn.fit(x_train_knn_rel)
     neighbours_rel = knn.get_neighbours([query_image_vector])
+    print("Neighbours Rel", neighbours_rel)
     #irrelevant images
     indices_ir = [i for i, x in enumerate(predictions) if x == -1]
+    print("Irrelevant", indices_ir)
     x_train_knn_ir = []
     ir_len = len(indices_ir)
     for i in indices_ir:
@@ -104,9 +108,10 @@ def rerank_results(feedback, similar_images, similar_image_vectors, query_image_
     knn = KNN(ir_len)
     knn.fit(x_train_knn_ir)
     neighbours_ir = knn.get_neighbours([query_image_vector])
+    print("Neighbours IR", neighbours_ir)
     ranked_indices = []
-    ranked_indices.extend(neighbours_rel)
-    ranked_indices.extend(neighbours_ir)
+    ranked_indices.extend(indices_rel)
+    ranked_indices.extend(indices_ir)
     rel_similar_images = [list(similar_image_vectors_g.keys())[index] for index in ranked_indices]
     return rel_similar_images
 
