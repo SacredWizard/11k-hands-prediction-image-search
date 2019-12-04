@@ -41,12 +41,14 @@ def task5a(layers=10, k=10):
     print(time.time() - xt)
 
 
-def task5b(query, top):
+def task5b(query, top, visualize=False):
     constants = GlobalConstants()
     lsh = Model().load_model(constants.LSH_OBJECT)
     imageids, feat_vectors, query_vector = lsh.query(query, top)
     print(imageids[:top])
     print("Overall images: {}".format(len(imageids)))
+    if visualize:
+        pass
     return imageids, feat_vectors, query_vector
 
 
