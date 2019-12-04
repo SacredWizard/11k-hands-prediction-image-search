@@ -13,9 +13,15 @@ class KNN(object):
         self.X_train = []
         self.y_train = []
 
-    def fit(self, X_train, y_train):
+    def fit(self, X_train):
         self.X_train = X_train
-        self.y_train = y_train
+        #self.y_train = y_train
+
+    def get_neighbours(self, test):
+        dist_matrix = euclidean(test, self.X_train)
+        for row in dist_matrix:
+            neighbor_indices = np.array(row).argsort()[:self.k_value]
+        return neighbor_indices
 
     # Make a classification prediction with neighbors
     def predict(self, test):

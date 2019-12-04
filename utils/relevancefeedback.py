@@ -14,21 +14,22 @@ similar_image_vectors_g = None
 port_g = 4558
 
 
-def relevance_fdbk(classifier, query_image, similar_images,similar_image_vectors):
+def relevance_fdbk(classifier, query_image, similar_images,similar_image_vectors,query_image_vector):
     """
     initial call to relevance feedback.
     Load app server
     Set global vars
     """
-    global classifier_g, query_image_g, similar_images_g,similar_image_vectors_g
+    global classifier_g, query_image_g, similar_images_g,similar_image_vectors_g, query_image_vector_g
 
     classifier_g = classifier
     query_image_g = query_image
     similar_images_g = similar_images
     similar_image_vectors_g = similar_image_vectors
+    query_image_vector_g = query_image_vector
     global port_g
     print("\nClick here: http://localhost:{0}/similar_images\n".format(port_g))
-    app.run(port=port_g, debug=True)
+    app.run(port=port_g)
 
 
 @app.route(str('/Hands/<filename>'))
@@ -57,13 +58,13 @@ def incorporate_feedback(data):
     """
     Method to call the chosen classifier based feedback system
     """
-    global classifier_g,similar_images_g,similar_image_vectors_g
+    global classifier_g,similar_images_g,similar_image_vectors_g, query_image_vector
     if classifier_g == "SVM":
         rel_similar_images = task6_svm.rerank_results(data,similar_images_g,similar_image_vectors_g)
     if classifier_g == "DT":
-        rel_similar_images = task6_dt.rerank_results(data,similar_images_g,similar_image_vectors_g)
+        rel_similar_images = task6_dt.rerank_results(data,similar_images_g,similar_image_vectors_g, query_image_vector_g)
     elif classifier_g == "PROBABILITY":
         rel_similar_images = task6d_probability.rerank_results(data)
     elif classifier_g == "PPR":
-        rel_similar_images = task6_ppr.rerank_results(data)
+        rel_similar_images = task6_ppr.rerank_results(data,similar_images_g,similar_image_vectors_g)
     return rel_similar_images, similar_image_vectors_g

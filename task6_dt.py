@@ -2,22 +2,14 @@ import os
 import sys
 
 sys.path.append(os.path.split(sys.path[0])[0])
-from classes.dimensionreduction import DimensionReduction
 from classes.LSH import LSH
 from utils.model import Model
 import utils.relevancefeedback as relevancefeedback
 from utils.inputhelper import get_input_image
-import numpy as np
-import random as random
-import operator
-import utils.imageviewer as imgvwr
-import phase2.task1 as p1task1
-import phase2.task1 as p2task1
-import phase3.task1 as p3task1
 import task5 as p3task5
-import time
 import warnings
-from task4_svm import SupportVectorMachine, gaussian_kernel
+from task4_dt import DecisionTree
+from knn import KNN
 
 warnings.filterwarnings("ignore")
 
@@ -35,9 +27,9 @@ feedback_vals_g = []
 def get_LSH_results(query_image):
     lsh = LSH()
     global similar_images_g, similar_image_vectors_g
-    similar_images_g, similar_image_vectors_g = p3task5.task5b(query_image, 20)
+    similar_images_g, similar_image_vectors_g, query_image_vector = p3task5.task5b(query_image, 20)
     # print(len(similar_images_g),len(similar_image_vectors_g))
-    return similar_images_g, similar_image_vectors_g
+    return similar_images_g, similar_image_vectors_g, query_image_vector
 
 
 def get_training_set(feedback_imgs, feedback_vals):
@@ -69,33 +61,62 @@ Method to incorporate relevance feedback
 """
 
 
-def rerank_results(feedback, similar_images, similar_image_vectors):
+def rerank_results(feedback, similar_images, similar_image_vectors, query_image_vector):
     global feedback_imgs_g, feedback_vals_g, similar_images_g, similar_image_vectors_g
     similar_images_g = similar_images
     similar_image_vectors_g = similar_image_vectors
-    # feedback = {'Hand_0000071.jpg': '1', 'Hand_0000073.jpg': '1'}
-    # feedback = {'Hand_0000071.jpg': '-1', 'Hand_0000073.jpg': '-1','Hand_0000074.jpg': '1', 'Hand_0000070.jpg': '-1', 'Hand_0000075.jpg': '-1', 'Hand_0000078.jpg': '1', 'Hand_0009068.jpg': '1', 'Hand_0007705.jpg': '1', 'Hand_0000076.jpg': '-1', 'Hand_0007228.jpg': '-1', 'Hand_0009162.jpg': '-1', 'Hand_0009163.jpg': '-1'}
-    # Add SVM based relevance feedback function
-    clf = SupportVectorMachine(gaussian_kernel, C=500)
+
+    # Add DT based relevance feedback function
+    clf = DecisionTree()
     feedback_imgs = list(feedback.keys())
+
     feedback_vals = list(feedback.values())
-    x_train, y_train = get_training_set(feedback_imgs, feedback_vals)
-    # print(len(similar_images_g),len(similar_image_vectors_g),len(feedback_imgs_g),len(feedback_vals_g))
-    clf.fit(np.array(x_train), np.array(y_train))
-    x_test = similar_image_vectors_g
-    image_dist_SVM = clf.project(list(x_test.values()))
-    image_dist_SVM_index = [i[0] for i in sorted(enumerate(image_dist_SVM), key=lambda x: x[1], reverse=True)]
-    rel_similar_images = [list(similar_image_vectors_g.keys())[index] for index in image_dist_SVM_index]
-    # list(similar_image_vectors_g.keys())[image_dist_SVM_index]
+    x_train_old, y_train = get_training_set(feedback_imgs, feedback_vals)
+    x_train = []
+    for i in x_train_old:
+        j = i.tolist()
+        x_train.append(j)
+
+    clf.fit(x_train, y_train)
+    # x_test = similar_image_vectors_g.values()
+    x_test = []
+    for i in similar_image_vectors_g.values():
+        j = i.tolist()
+        x_test.append(j)
+    print(x_test)
+
+    predictions = clf.predict(x_test)
+    #relevant images
+    indices_rel = [i for i, x in enumerate(predictions) if x == 1]
+    x_train_knn_rel = []
+    rel_len = len(indices_rel)
+    for i in indices_rel:
+        x_train_knn_rel.append(x_test[i])
+    knn = KNN(rel_len)
+    knn.fit(x_train_knn_rel)
+    neighbours_rel = knn.get_neighbours([query_image_vector])
+    #irrelevant images
+    indices_ir = [i for i, x in enumerate(predictions) if x == -1]
+    x_train_knn_ir = []
+    ir_len = len(indices_ir)
+    for i in indices_ir:
+        x_train_knn_ir.append(x_test[i])
+    knn = KNN(ir_len)
+    knn.fit(x_train_knn_ir)
+    neighbours_ir = knn.get_neighbours([query_image_vector])
+    ranked_indices = []
+    ranked_indices.extend(neighbours_rel)
+    ranked_indices.extend(neighbours_ir)
+    rel_similar_images = [list(similar_image_vectors_g.keys())[index] for index in ranked_indices]
     return rel_similar_images
 
 
 def main():
     query_image = get_input_image("Hands")
-    similar_images, img_vectors = get_LSH_results(query_image)
+    similar_images, img_vectors, query_image_vector = get_LSH_results(query_image)
     # while True:
     #     rerank_results(None)
-    relevancefeedback.relevance_fdbk("DT", query_image, similar_images, img_vectors)
+    relevancefeedback.relevance_fdbk("DT", query_image, similar_images, img_vectors, query_image_vector)
     pass
 
 
