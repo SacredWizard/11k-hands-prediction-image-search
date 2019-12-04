@@ -66,5 +66,5 @@ def incorporate_feedback(data):
     elif classifier_g == "PROBABILITY":
         rel_similar_images = task6d_probability.rerank_results(data)
     elif classifier_g == "PPR":
-        rel_similar_images = task6_ppr.rerank_results(data)
+        rel_similar_images = task6_ppr.rerank_results(data,similar_images_g,similar_image_vectors_g)
     return rel_similar_images, similar_image_vectors_g

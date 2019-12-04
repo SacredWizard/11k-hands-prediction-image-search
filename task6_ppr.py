@@ -7,6 +7,8 @@ from classes.LSH import LSH
 from utils.model import Model
 from utils.inputhelper import get_input_image
 import utils.relevancefeedback as relevancefeedback
+from sklearn.metrics.pairwise import cosine_similarity
+from phase3.task3 import ppr, sim_graph_from_sim_max
 import numpy as np
 import random as random
 import operator
@@ -37,9 +39,9 @@ def get_LSH_results(query_image):
     lsh = LSH()
     print(query_image)
     global similar_images_g, similar_image_vectors_g
-    similar_images_g, similar_image_vectors_g = p3task5.task5b(query_image, 20)
+    similar_images_g, similar_image_vectors_g, query_image_vector = p3task5.task5b(query_image, 20)
     # print(len(similar_images_g),len(similar_image_vectors_g))
-    return similar_images_g, similar_image_vectors_g
+    return similar_images_g, similar_image_vectors_g, query_image_vector
 
 """
 Method to incorporate relevance feedback
@@ -50,31 +52,33 @@ def rerank_results(feedback, similar_images, similar_image_vectors):
     global feedback_imgs_g, feedback_vals_g, similar_images_g, similar_image_vectors_g
     similar_images_g = similar_images
     similar_image_vectors_g = similar_image_vectors
-    # feedback = {'Hand_0000071.jpg': '1', 'Hand_0000073.jpg': '1'}
-    # feedback = {'Hand_0000071.jpg': '-1', 'Hand_0000073.jpg': '-1','Hand_0000074.jpg': '1', 'Hand_0000070.jpg': '-1', 'Hand_0000075.jpg': '-1', 'Hand_0000078.jpg': '1', 'Hand_0009068.jpg': '1', 'Hand_0007705.jpg': '1', 'Hand_0000076.jpg': '-1', 'Hand_0007228.jpg': '-1', 'Hand_0009162.jpg': '-1', 'Hand_0009163.jpg': '-1'}
     # Add SVM based relevance feedback function
     print(feedback)
-    sys.exit(1)
-    clf = SupportVectorMachine(gaussian_kernel, C=500)
-    feedback_imgs = list(feedback.keys())
-    feedback_vals = list(feedback.values())
-    x_train, y_train = get_training_set(feedback_imgs, feedback_vals)
-    # print(len(similar_images_g),len(similar_image_vectors_g),len(feedback_imgs_g),len(feedback_vals_g))
-    clf.fit(np.array(x_train), np.array(y_train))
-    x_test = similar_image_vectors_g
-    image_dist_SVM = clf.project(list(x_test.values()))
-    image_dist_SVM_index = [i[0] for i in sorted(enumerate(image_dist_SVM), key=lambda x: x[1], reverse=True)]
-    rel_similar_images = [list(similar_image_vectors_g.keys())[index] for index in image_dist_SVM_index]
-    # list(similar_image_vectors_g.keys())[image_dist_SVM_index]
+    images_list = list(feedback.keys())
+    relevant_images = []
+    images_list = []
+    feature_vectors = []
+    for image in similar_image_vectors:
+        images_list.append(image)
+        feature_vectors.append(similar_image_vectors[image])
+        if feedback.get(image, 0) == "1":
+            relevant_images.append(image)
+    feature_vectors = np.array(feature_vectors)
+    cos_sim = cosine_similarity(feature_vectors)
+    sim_graph = sim_graph_from_sim_max(cos_sim, images_list, 5)
+    results = ppr(sim_graph, images_list, relevant_images)
+    rel_similar_images = []
+    for img in results:
+        rel_similar_images.append(img)
     return rel_similar_images
 
 
 def main():
     query_image = get_input_image("Hands")
     # query_image = get_input_image()
-    similar_images, img_vectors = get_LSH_results(query_image)
-    relevancefeedback.relevance_fdbk("PPR", query_image, similar_images, img_vectors)
-    pass
+    similar_images, img_vectors, query_image_vector = get_LSH_results(query_image)
+    relevancefeedback.relevance_fdbk("PPR", query_image,similar_images,img_vectors, query_image_vector)
+    # pass
 
 
 if __name__ == "__main__":

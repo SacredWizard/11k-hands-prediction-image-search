@@ -43,6 +43,27 @@ def ppr(sim_graph, images_list, query_images, max_iter=500, alpha=0.85):
     return result
 
 
+def sim_graph_from_sim_max(cos_sim, images_list, k_value):
+    pd = {"imageId": images_list}
+    idx = 0
+    for d in cos_sim:
+        pd[images_list[idx]] = d
+        idx += 1
+
+    df = DataFrame(pd)
+    df = df.set_index("imageId")
+    sim_graph = np.empty((0, len(cos_sim)))
+    # sim_matrix = np.empty((0, len(eucl_dist)))
+    for row in cos_sim:
+        k_largest = np.argsort(-np.array(row))[1:k_value + 1]
+        sim_graph_row = [d if i in k_largest else 0 for i, d in enumerate(row)]
+        sim_graph = np.append(sim_graph, np.array([sim_graph_row]), axis=0)
+
+    row_sums = sim_graph.sum(axis=1)
+    sim_graph = sim_graph / row_sums[:, np.newaxis]
+    return sim_graph
+
+
 def main():
     """Main function for the script"""
     start = time.time()
@@ -61,27 +82,12 @@ def main():
     features_list = np.array(obj_feat['featureVector'].tolist())
     images_list = np.array(obj_feat['imageId'])
     cos_sim = cosine_similarity(features_list)
-    pd = {"imageId": images_list}
-    idx = 0
-    for d in cos_sim:
-        pd[images_list[idx]] = d
-        idx += 1
 
-    df = DataFrame(pd)
-    df = df.set_index("imageId")
-    sim_graph = np.empty((0, len(cos_sim)))
-    # sim_matrix = np.empty((0, len(eucl_dist)))
-    for row in cos_sim:
-        k_largest = np.argsort(-np.array(row))[1:k_value+1]
-        sim_graph_row = [d if i in k_largest else 0 for i, d in enumerate(row)]
-        sim_graph = np.append(sim_graph, np.array([sim_graph_row]), axis=0)
-
-    row_sums = sim_graph.sum(axis=1)
-    sim_graph = sim_graph / row_sums[:, np.newaxis]
+    sim_graph = sim_graph_from_sim_max(cos_sim, images_list, k_value)
     idx = 0
-    for img in images_list:
-        df.loc[img] = sim_graph[idx]
-        idx += 1
+    # for img in images_list:
+    #     df.loc[img] = sim_graph[idx]
+    #     idx += 1
     results = ppr(sim_graph, images_list, query_images)
     results = results[:K_value]
 

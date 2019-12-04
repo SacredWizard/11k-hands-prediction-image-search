@@ -11,7 +11,7 @@ Authors:
 This is the CLI for loading the metadata on to mongo
 """
 from classes.dimensionreduction import DimensionReduction
-from sklearn.metrics.pairwise import euclidean_distances, cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity
 from utils.inputhelper import get_input_folder
 import time
 from classes.mongo import MongoWrapper
