@@ -2,23 +2,13 @@ import os
 import sys
 
 sys.path.append(os.path.split(sys.path[0])[0])
-from classes.dimensionreduction import DimensionReduction
 from classes.LSH import LSH
 from utils.model import Model
 import utils.relevancefeedback as relevancefeedback
 from utils.inputhelper import get_input_image
-import numpy as np
-import random as random
-import operator
-import utils.imageviewer as imgvwr
-import phase2.task1 as p1task1
-import phase2.task1 as p2task1
-import phase3.task1 as p3task1
 import task5 as p3task5
-import time
 import warnings
-from task4_svm import SupportVectorMachine, gaussian_kernel
-from sklearn.tree import DecisionTreeClassifier
+from task4_dt import DecisionTree
 from knn import KNN
 
 warnings.filterwarnings("ignore")
@@ -75,20 +65,9 @@ def rerank_results(feedback, similar_images, similar_image_vectors, query_image_
     global feedback_imgs_g, feedback_vals_g, similar_images_g, similar_image_vectors_g
     similar_images_g = similar_images
     similar_image_vectors_g = similar_image_vectors
-    # Add SVM based relevance feedback function
-    # clf = SupportVectorMachine(gaussian_kernel, C=500)
-    # feedback_imgs = list(feedback.keys())
-    # feedback_vals = list(feedback.values())
-    # x_train, y_train = get_training_set(feedback_imgs, feedback_vals)
-    # clf.fit(np.array(x_train), np.array(y_train))
-    # x_test = similar_image_vectors_g
-    # image_dist_SVM = clf.project(list(x_test.values()))
-    # image_dist_SVM_index = [i[0] for i in sorted(enumerate(image_dist_SVM), key=lambda x: x[1], reverse=True)]
-    # rel_similar_images = [list(similar_image_vectors_g.keys())[index] for index in image_dist_SVM_index]
-    # return rel_similar_images
 
     # Add DT based relevance feedback function
-    clf = DecisionTreeClassifier()
+    clf = DecisionTree()
     feedback_imgs = list(feedback.keys())
     feedback_vals = list(feedback.values())
     x_train_old, y_train = get_training_set(feedback_imgs, feedback_vals)
