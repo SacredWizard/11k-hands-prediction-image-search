@@ -1,27 +1,25 @@
 from sklearn.metrics import accuracy_score
-from utils.inputhelper import get_input_folder
 from phase3.task1 import compute_latent_semantic_for_label, reduced_dimensions_for_unlabelled_folder
 from classes.dimensionreduction import DimensionReduction
 from utils.excelcsv import CSVReader
 from sklearn.preprocessing import StandardScaler
-import numpy as np
+from sklearn.metrics import precision_score, recall_score
 import random
-from sklearn.tree import DecisionTreeClassifier
+from utils.inputhelper import get_input_folder
 
 
 from random import seed
-from csv import reader
 
 csv_reader = CSVReader()
 
 class DecisionTree(object):
 
     def __init__(self):
-        self.max_depth = 10
+        self.max_depth = 20
         self.min_size = 5
         self.tree = {}
 
-    # Evaluate an algorithm using a cross validation split
+    # Fit training data
     def fit(self, x_train, y_train):
         train_set = x_train
         for i in range(len(train_set)):
@@ -29,7 +27,7 @@ class DecisionTree(object):
         self.tree = self.decision_tree(train_set)
 
     # Split a dataset based on an attribute and an attribute value
-    def test_split(self, index, value, dataset):
+    def dataset_split(self, index, value, dataset):
         left, right = list(), list()
         for row in dataset:
             if row[index] < value:
@@ -39,7 +37,7 @@ class DecisionTree(object):
         return left, right
 
     # Calculate the Gini index for a split dataset
-    def gini_index(self, groups, classes):
+    def calc_gini_index(self, groups, classes):
         # count all samples at split point
         n_instances = float(sum([len(group) for group in groups]))
         # sum weighted Gini index for each group
@@ -59,19 +57,19 @@ class DecisionTree(object):
         return gini
 
     # Select the best split point for a dataset
-    def get_split(self, dataset):
+    def get_best_split(self, dataset):
         class_values = list(set(row[-1] for row in dataset))
         b_index, b_value, b_score, b_groups = 999, 999, 999, None
         for index in range(len(dataset[0])-1):
             for row in dataset:
-                groups = self.test_split(index, row[index], dataset)
-                gini = self.gini_index(groups, class_values)
+                groups = self.dataset_split(index, row[index], dataset)
+                gini = self.calc_gini_index(groups, class_values)
                 if gini < b_score:
                     b_index, b_value, b_score, b_groups = index, row[index], gini, groups
         return {'index':b_index, 'value':b_value, 'groups':b_groups}
 
-    # Create a terminal node value
-    def to_terminal(self, group):
+    # Create a leaf node value
+    def leaf_node(self, group):
         outcomes = [row[-1] for row in group]
         return max(set(outcomes), key=outcomes.count)
 
@@ -81,23 +79,23 @@ class DecisionTree(object):
         del(node['groups'])
         # check for a no split
         if not left or not right:
-            node['left'] = node['right'] = self.to_terminal(left + right)
+            node['left'] = node['right'] = self.leaf_node(left + right)
             return
         # check for max depth
         if depth >= self.max_depth:
-            node['left'], node['right'] = self.to_terminal(left), self.to_terminal(right)
+            node['left'], node['right'] = self.leaf_node(left), self.leaf_node(right)
             return
         # process left child
         if len(left) <= self.min_size:
-            node['left'] = self.to_terminal(left)
+            node['left'] = self.leaf_node(left)
         else:
-            node['left'] = self.get_split(left)
+            node['left'] = self.get_best_split(left)
             self.split(node['left'], depth+1)
         # process right child
         if len(right) <= self.min_size:
-            node['right'] = self.to_terminal(right)
+            node['right'] = self.leaf_node(right)
         else:
-            node['right'] = self.get_split(right)
+            node['right'] = self.get_best_split(right)
             self.split(node['right'], depth+1)
 
     # Make a prediction with a decision tree
@@ -115,7 +113,7 @@ class DecisionTree(object):
 
     # Classification and Regression Tree Algorithm
     def decision_tree(self, train):
-        root = self.get_split(train)
+        root = self.get_best_split(train)
         self.split(root, 1)
         return root
 
@@ -128,8 +126,8 @@ class DecisionTree(object):
         return predictions
 
 def main():
-    fea_ext_mod = "LBP"
-    dim_red_mod = "LDA"
+    fea_ext_mod = "HOG"
+    dim_red_mod = "PCA"
     dist_func = "euclidean"
     k_value = 30
     # training_set = 'Dataset3/Labelled/Set2'
@@ -171,7 +169,6 @@ def main():
     random.shuffle(c)
 
     x_train, y_train = zip(*c)
-    print(y_test)
 
     from sklearn.tree import DecisionTreeClassifier
     # Test CART on dataset
@@ -183,6 +180,13 @@ def main():
     print("---------------------------")
     accuracy = accuracy_score(y_test, predictions) * 100
     print("Accuracy: " + str(accuracy) + "%")
+
+    # precision = precision_score(y_test, predictions, pos_label="dorsal")
+    # print("Precision: " + str(precision) + "%")
+    #
+    # recall = recall_score(y_test, predictions, pos_label="dorsal")
+    # print("Recall: " + str(recall) + "%")
+
     unlabelled_images = red_dim_unlabelled_images['imageId']
     print("---------------------------")
     print("Results:")

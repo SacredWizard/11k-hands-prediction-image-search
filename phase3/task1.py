@@ -94,7 +94,19 @@ def main():
                                          multi_class='ovr',class_weight='balanced', n_jobs=-1, l1_ratio=0)
     lr.fit(x_train, y_train)
     # y_pred = lr.predict(x_test)
-    print("Accuracy:",lr.score(x_test,y_test))
+    predictions = lr.predict(x_test)
+    unlabelled_images = red_dim_unlabelled_images['imageId'].tolist()
+    predicted_labels = list(predictions)
+    actual_labels = list(y_test)
+    print("---------------------------")
+    print("     Results:")
+    print("---------------------------")
+    print("     Accuracy:",lr.score(x_test,y_test))
+    print("---------------------------")
+    print("     Image ID             |   Prediction    |   Actual")
+    for image_id, p, a in zip(unlabelled_images, predicted_labels, actual_labels):
+        print("     "+image_id + "     |   " + p + "        |   " + a)
+
 
 if __name__ == "__main__":
     main()

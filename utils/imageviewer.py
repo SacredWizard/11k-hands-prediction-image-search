@@ -12,7 +12,7 @@ import pandas as pd
 from skimage import io
 
 
-def  show_images_ppr(query_images, title, image_list):
+def show_images_ppr(query_images, title, image_list):
     """Visualizer for the images"""
     f = plt.figure(figsize=(20, 12))
     title_visualizer = ""
