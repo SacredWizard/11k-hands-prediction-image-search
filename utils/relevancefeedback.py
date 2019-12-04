@@ -29,7 +29,7 @@ def relevance_fdbk(classifier, query_image, similar_images,similar_image_vectors
     query_image_vector_g = query_image_vector
     global port_g
     print("\nClick here: http://localhost:{0}/similar_images\n".format(port_g))
-    app.run(port=port_g, debug=True)
+    app.run(port=port_g)
 
 
 @app.route(str('/Hands/<filename>'))
