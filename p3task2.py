@@ -75,7 +75,7 @@ def main():
     
 
     # k clusters
-    # k=5
+    k=5
     #    
     km = KMeans(n_clusters=k, random_state=0,n_init=30,init='k-means++',precompute_distances=True,n_jobs= -1).fit(a)
     km_p = KMeans(n_clusters=k, random_state=0,n_init=30,init='k-means++',precompute_distances=True,n_jobs= -1).fit(a_p)
@@ -83,8 +83,8 @@ def main():
 
 
     # print(km.labels_)
-    counter = np.zeros(k)
-    counter_p = np.zeros(k)
+    counter = np.zeros(5)
+    counter_p = np.zeros(5)
     for k_m in km.labels_:
         counter[k_m] +=1
     # print(counter)
@@ -258,16 +258,17 @@ def main():
 
         if dorsal_distance<palmar_distance:
             #print(red_dim['imageId'][ind], label, y_test[ind])´
-            dorsal_images.append(red_dim['imageId'][ind])
             if y_test[ind] == label:
+                dorsal_images.append(red_dim['imageId'][ind])
+
                 correct+=1
             else:
                 wrong +=1
         else:
 
             #print(red_dim['imageId'][ind], 'palmar', y_test[ind])
-            palmar_images.append(red_dim['imageId'][ind])
             if y_test[ind] == label_p:
+                palmar_images.append(red_dim['imageId'][ind])
                 correct +=1
             else:
                 wrong+=1
