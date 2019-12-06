@@ -11,10 +11,11 @@ Authors:
 This is the CLI for Phase3 of the Project
 """
 import importlib
-import warnings
 import sys
+import warnings
+
 from task5 import task5a, task5b
-from utils.inputhelper import get_input_k, get_input_image
+from utils.inputhelper import get_input_k, get_input_image, get_bool
 
 warnings.filterwarnings('ignore')
 
@@ -48,12 +49,14 @@ def main():
     elif choice == "5a":
         l = get_input_k("L")
         k = get_input_k("K")
-        task5a(l, k)
+        comb = get_bool("Combine Models")
+        task5a(l, k, comb)
         sys.exit(0)
     elif choice == "5b":
         query = get_input_image("Hands")
         top = get_input_k("K")
-        task5b(query, top, visualize=True)
+        comb = get_bool("Combine Models")
+        task5b(query, top, visualize=True, combine_models=comb)
         sys.exit(0)
     elif choice == "6a":
         module_name = "task6_svm"
