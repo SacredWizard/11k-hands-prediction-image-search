@@ -184,7 +184,7 @@ def main():
     print("Correctly classified: {}\n".format(correctly_classified))
     print("InCorrectly classified: {}\n".format(incorrectly_classified))
 
-    print("Classification Accuracy: {}".format(no_correct / len(images_list_unlab) * 100))
+    print("Classification Accuracy: {}%".format(no_correct / len(images_list_unlab) * 100))
     print("Execution time: {} seconds".format(time.time() - start))
 
 
