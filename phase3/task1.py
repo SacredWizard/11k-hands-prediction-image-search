@@ -47,6 +47,7 @@ def reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod, k_value, 
     model = model_interact.load_model(filename=filename)
     red_dims = []
     unlabelled_image_list = os.listdir(test_set)
+    unlabelled_image_list = sorted(unlabelled_image_list)
     for image in unlabelled_image_list:
         red_dim = dim_reduction.compute_query_image(model, test_set, image)
         red_dims.append(red_dim[0])
