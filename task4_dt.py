@@ -6,6 +6,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import precision_score, recall_score
 import random
 from utils.inputhelper import get_input_folder
+import os
+import pandas as pd
+from utils.model import Model
 
 
 from random import seed
@@ -125,41 +128,83 @@ class DecisionTree(object):
             predictions.append(prediction)
         return predictions
 
+def get_x_train(fea_ext_mod, dim_red_mod, k_value, train_set):
+    model_interact = Model()
+    dim_reduction = DimensionReduction(fea_ext_mod, dim_red_mod, k_value, folder_metadata=train_set,
+                                       metadata_collection="labelled")
+    obj_lat, feat_lat, model = dim_reduction.execute()
+    filename = "{0}_{1}_{2}_{3}".format(fea_ext_mod, dim_red_mod,
+                                            str(k_value), os.path.basename(train_set))
+    model_interact.save_model(model=model, filename=filename)
+    return obj_lat
+
+def get_x_test(fea_ext_mod, dim_red_mod, k_value, train_set, test_set):
+        model_interact = Model()
+        dim_reduction = DimensionReduction(fea_ext_mod, dim_red_mod, k_value)
+        filename = "{0}_{1}_{2}_{3}".format(fea_ext_mod, dim_red_mod,
+                                                str(k_value), os.path.basename(train_set))
+        model = model_interact.load_model(filename=filename)
+        red_dims = []
+        unlabelled_image_list = os.listdir(test_set)
+        for image in unlabelled_image_list:
+            red_dim = dim_reduction.compute_query_image(model, test_set, image)
+            red_dims.append(red_dim[0])
+        df = pd.DataFrame({"imageId": unlabelled_image_list, "reducedDimensions": red_dims})
+        return df
+
+def get_y(fea_ext_mod, dim_red_mod, k_value, collection_name, red_dim=None, obj_lat=None):
+    dim_red = DimensionReduction(fea_ext_mod, dim_red_mod, k_value)
+    if collection_name == 'unlabelled':
+        aspect = dim_red.get_metadata("imageName", red_dim['imageId'].tolist())['aspectOfHand'].tolist()
+    else:
+        aspect = dim_red.get_metadata_collection("imageName", obj_lat['imageId'].tolist(), collection_name)['aspectOfHand'].tolist()
+    return [i.split(' ')[0] for i in aspect]
+
+
 def main():
-    fea_ext_mod = "CM"
-    dim_red_mod = "LDA"
+    fea_ext_mod = "HOG"
+    dim_red_mod = "PCA"
     dist_func = "euclidean"
     k_value = 30
-    # training_set = 'Dataset3/Labelled/Set2'
-    # test_set = 'Dataset3/Unlabelled/Set 2'
-    training_set = get_input_folder("Labelled")
-    test_set = get_input_folder("Classify")
-    label = "dorsal"
-    obj_lat, feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod,
-                                                                 dim_red_mod, label, k_value, training_set)
+    training_set = 'Dataset3/Labelled/Set2'
+    test_set = 'Dataset3/Unlabelled/Set 2'
+    # # training_set = get_input_folder("Labelled")
+    # # test_set = get_input_folder("Classify")
+    # label = "dorsal"
+    # obj_lat, feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod,
+    #                                                              dim_red_mod, label, k_value, training_set)
+    #
+    # label_p = 'palmar'
+    # obj_lat_p, feat_lat_p, model_p = compute_latent_semantic_for_label(fea_ext_mod,
+    #                                                                    dim_red_mod, label_p, k_value, training_set)
+    #
+    # x_train = obj_lat['reducedDimensions'].tolist()
+    # x_train += (obj_lat_p['reducedDimensions'].tolist())
+    # red_dim_unlabelled_images = reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod, k_value, label,
+    #                                                                      training_set, test_set)
+    # x_test = red_dim_unlabelled_images['reducedDimensions'].tolist()
+    #
+    # dim_red = DimensionReduction(fea_ext_mod, dim_red_mod, k_value)
+    # labelled_aspect = dim_red.get_metadata("imageName", obj_lat['imageId'].tolist())['aspectOfHand'].tolist()
+    # y_train = [i.split(' ')[0] for i in labelled_aspect]
+    #
+    # labelled_aspect = dim_red.get_metadata("imageName", obj_lat_p['imageId'].tolist())['aspectOfHand'].tolist()
+    # y_train += ([i.split(' ')[0] for i in labelled_aspect])
+    #
+    # unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())[
+    #     'aspectOfHand'].tolist()
+    # y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
-    label_p = 'palmar'
-    obj_lat_p, feat_lat_p, model_p = compute_latent_semantic_for_label(fea_ext_mod,
-                                                                       dim_red_mod, label_p, k_value, training_set)
 
-    x_train = obj_lat['reducedDimensions'].tolist()
-    x_train += (obj_lat_p['reducedDimensions'].tolist())
-    red_dim_unlabelled_images = reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod, k_value, label,
-                                                                         training_set, test_set)
-    x_test = red_dim_unlabelled_images['reducedDimensions'].tolist()
+    obj_lat_train = get_x_train(fea_ext_mod, dim_red_mod, k_value, training_set)
+    x_train = obj_lat_train['reducedDimensions'].tolist()
+    red_dim = get_x_test(fea_ext_mod, dim_red_mod, k_value, training_set, test_set)
+    x_test = red_dim['reducedDimensions'].tolist()
+    y_train = get_y(fea_ext_mod, dim_red_mod, k_value, 'labelled', obj_lat=obj_lat_train)
+    y_test = get_y(fea_ext_mod, dim_red_mod, k_value, 'unlabelled', red_dim=red_dim)
 
-    dim_red = DimensionReduction(fea_ext_mod, dim_red_mod, k_value)
-    labelled_aspect = dim_red.get_metadata("imageName", obj_lat['imageId'].tolist())['aspectOfHand'].tolist()
-    y_train = [i.split(' ')[0] for i in labelled_aspect]
 
-    labelled_aspect = dim_red.get_metadata("imageName", obj_lat_p['imageId'].tolist())['aspectOfHand'].tolist()
-    y_train += ([i.split(' ')[0] for i in labelled_aspect])
-
-    unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())[
-        'aspectOfHand'].tolist()
-    y_test = [i.split(' ')[0] for i in unlabelled_aspect]
-
-    # scale
+    # # scale
     x_train = StandardScaler().fit_transform(x_train)
     x_train = x_train.tolist()
 
@@ -169,9 +214,8 @@ def main():
     random.shuffle(c)
 
     x_train, y_train = zip(*c)
-
-    from sklearn.tree import DecisionTreeClassifier
-    # Test CART on dataset
+    #
+    # # Test CART on dataset
     seed(1)
     clf = DecisionTree()
     clf.fit(x_train, y_train)
@@ -187,7 +231,7 @@ def main():
     # recall = recall_score(y_test, predictions, pos_label="dorsal")
     # print("Recall: " + str(recall) + "%")
 
-    unlabelled_images = red_dim_unlabelled_images['imageId']
+    unlabelled_images = red_dim['imageId']
     print("---------------------------")
     print("Results:")
     print("Image ID, Prediction, Actual")
