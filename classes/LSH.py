@@ -60,6 +60,7 @@ class LSH:
 
     def query(self, query_id, top):
         model = Model()
+        overall_count = 0
         constants = GlobalConstants()
         l_hash, l_bucket = model.load_model(constants.LSH_L_HASHES), model.load_model(constants.LSH_L_BUCKETS)
         choices_per_layer, choices_per_hash = [], []
@@ -73,8 +74,9 @@ class LSH:
 
             for kid in range(self.khash_count):
                 choices_per_hash.append(k_bucket["K{}".format(kid)].get(k_hash["K{}".format(kid)].get(query_id)))
-
-            choices_per_layer.append(set.intersection(*map(set, choices_per_hash)))
+            intersected_choices = set.intersection(*map(set, choices_per_hash))
+            overall_count += len(intersected_choices)
+            choices_per_layer.append(intersected_choices)
         choices = set.union(*map(set, choices_per_layer))
 
         for image_id in choices:
@@ -90,7 +92,8 @@ class LSH:
             pass
 
         feat_vectors = {}
-        print("Overall images: {}".format(len(choices)))
+        print("Overall images: {}".format(overall_count))
+        print("Unique images: {}".format(len(choices)))
         for i in choices[:top]:
             feat_vectors[i] = self.data[self.image_ids.index(i)]
         return choices[:top], feat_vectors, query_vector
