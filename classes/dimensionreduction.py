@@ -342,6 +342,21 @@ class DimensionReduction:
         else:
             return pd.DataFrame()
 
+    def get_metadata_collection(self, column, values, collection_name, filter_query=None):
+        query = {column: {"$in": values}, "aspectOfHand": {"$ne": None}}
+        result = self.mongo_wrapper.find_one(collection_name, query)
+        if result:
+            collection = collection_name
+        else:
+            collection = self.constants.METADATA
+
+        cursor = self.mongo_wrapper.find(collection, query, filter_query)
+        if cursor.count() > 0:
+            df = pd.DataFrame(list(cursor))
+            return df
+        else:
+            return pd.DataFrame()
+
     def get_metadata_unique_values(self, column):
         cursor = self.mongo_wrapper.find(self.constants.METADATA, '')
         if cursor.count() > 0:
