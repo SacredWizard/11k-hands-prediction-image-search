@@ -63,14 +63,26 @@ def filter_images_by_label(images_list):
 
 def fetch_actual_labels(images_list):
     mongo_wrap = MongoWrapper()
-    results = mongo_wrap.find("metadata", {"imageName": {"$in": list(images_list)}}, {"_id": 0, "aspectOfHand": 1,
-                                                                                "imageName": 1})
+    results = mongo_wrap.find("unlabelled", {"imageName": {"$in": list(images_list)}}, {"_id": 0, "aspectOfHand": 1,
+                                                                                      "imageName": 1})
     final_result = {}
     for r in results:
-        if "dorsal" in r["aspectOfHand"]:
+        if r["aspectOfHand"] and "dorsal" in r["aspectOfHand"]:
             final_result[r["imageName"]] = "dorsal"
-        elif "palmar" in r["aspectOfHand"]:
+        elif r["aspectOfHand"] and "palmar" in r["aspectOfHand"]:
             final_result[r["imageName"]] = "palmar"
+    # return final_result
+
+    results = mongo_wrap.find("metadata", {"imageName": {"$in": list(images_list)}}, {"_id": 0, "aspectOfHand": 1,
+                                                                                "imageName": 1})
+    # final_result = {}
+    for r in results:
+        if r["imageName"] not in final_result:
+            if "dorsal" in r["aspectOfHand"]:
+                final_result[r["imageName"]] = "dorsal"
+            elif "palmar" in r["aspectOfHand"]:
+                final_result[r["imageName"]] = "palmar"
+
     return final_result
 
 
