@@ -149,13 +149,13 @@ def main():
     x_test = red_dim_unlabelled_images['reducedDimensions'].tolist()
 
     dim_red = DimensionReduction(fea_ext_mod, dim_red_mod, k_value)
-    labelled_aspect = dim_red.get_metadata("imageName", obj_lat['imageId'].tolist())['aspectOfHand'].tolist()
+    labelled_aspect = dim_red.get_metadata_collection("imageName", obj_lat['imageId'].tolist(), "labelled")['aspectOfHand'].tolist()
     y_train = [i.split(' ')[0] for i in labelled_aspect]
 
-    labelled_aspect = dim_red.get_metadata("imageName", obj_lat_p['imageId'].tolist())['aspectOfHand'].tolist()
+    labelled_aspect = dim_red.get_metadata_collection("imageName", obj_lat_p['imageId'].tolist(), "labelled")['aspectOfHand'].tolist()
     y_train += ([i.split(' ')[0] for i in labelled_aspect])
 
-    unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())[
+    unlabelled_aspect = dim_red.get_metadata_collection("imageName", red_dim_unlabelled_images['imageId'].tolist(), "unlabelled")[
         'aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
