@@ -195,14 +195,12 @@ def main():
     #     'aspectOfHand'].tolist()
     # y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
-
     obj_lat_train = get_x_train(fea_ext_mod, dim_red_mod, k_value, training_set)
     x_train = obj_lat_train['reducedDimensions'].tolist()
     red_dim = get_x_test(fea_ext_mod, dim_red_mod, k_value, training_set, test_set)
     x_test = red_dim['reducedDimensions'].tolist()
     y_train = get_y(fea_ext_mod, dim_red_mod, k_value, 'labelled', obj_lat=obj_lat_train)
     y_test = get_y(fea_ext_mod, dim_red_mod, k_value, 'unlabelled', red_dim=red_dim)
-
 
     # # scale
     x_train = StandardScaler().fit_transform(x_train)
