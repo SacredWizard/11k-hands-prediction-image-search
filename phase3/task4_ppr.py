@@ -71,7 +71,6 @@ def fetch_actual_labels(images_list):
             final_result[r["imageName"]] = "dorsal"
         elif "palmar" in r["aspectOfHand"]:
             final_result[r["imageName"]] = "palmar"
-    print(final_result)
     return final_result
 
 
@@ -161,16 +160,17 @@ def main():
     no_correct = 0
     correctly_classified = []
     incorrectly_classified = []
+    print("|   ImageId          | Prediction |  Actual |")
     for r in final_results:
-        print("Image Id: {}, Label:{} Actual Label: {}".format(r, final_results[r], actual_labels[r]))
+        print("|   {} |   {}   |  {} |".format(r, final_results[r], actual_labels[r]))
         if final_results[r] == actual_labels[r]:
             correctly_classified.append(r)
             no_correct += 1
         else:
             incorrectly_classified.append(r)
 
-    print("Correctly classified: {}".format(correctly_classified))
-    print("InCorrectly classified: {}".format(incorrectly_classified))
+    print("Correctly classified: {}\n".format(correctly_classified))
+    print("InCorrectly classified: {}\n".format(incorrectly_classified))
 
     print("Classification Accuracy: {}".format(no_correct / len(images_list_unlab) * 100))
     print("Execution time: {} seconds".format(time.time() - start))
