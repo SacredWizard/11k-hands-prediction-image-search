@@ -54,7 +54,6 @@ def task5b(query, top, visualize=False, combine_models=False):
     lsh = Model().load_model(constants.LSH_OBJECT)
     imageids, feat_vectors, query_vector = lsh.query(query, top)
     print(imageids[:top])
-    print("Unique images: {}".format(str(lsh.get_shape()[0] - 1)))
     if visualize:
         result = []
         for rank, image in enumerate(imageids[:top]):
