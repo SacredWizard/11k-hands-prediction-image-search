@@ -166,10 +166,10 @@ def main():
     dim_red_mod = "PCA"
     dist_func = "euclidean"
     k_value = 30
-    training_set = 'Dataset3/Labelled/Set2'
-    test_set = 'Dataset3/Unlabelled/Set 2'
-    # # training_set = get_input_folder("Labelled")
-    # # test_set = get_input_folder("Classify")
+    # training_set = 'Dataset3/Labelled/Set2'
+    # test_set = 'Dataset3/Unlabelled/Set 2'
+    training_set = get_input_folder("Labelled")
+    test_set = get_input_folder("Classify")
     # label = "dorsal"
     # obj_lat, feat_lat, model = compute_latent_semantic_for_label(fea_ext_mod,
     #                                                              dim_red_mod, label, k_value, training_set)
@@ -205,8 +205,8 @@ def main():
     # # scale
     x_train = StandardScaler().fit_transform(x_train)
     x_train = x_train.tolist()
-
-    # shuffle the training data
+    #
+    # # shuffle the training data
     c = list(zip(x_train, y_train))
 
     random.shuffle(c)
