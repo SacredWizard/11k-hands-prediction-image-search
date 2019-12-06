@@ -47,6 +47,7 @@ def reduced_dimensions_for_unlabelled_folder(fea_ext_mod, dim_red_mod, k_value, 
     model = model_interact.load_model(filename=filename)
     red_dims = []
     unlabelled_image_list = os.listdir(test_set)
+    unlabelled_image_list = sorted(unlabelled_image_list)
     for image in unlabelled_image_list:
         red_dim = dim_reduction.compute_query_image(model, test_set, image)
         red_dims.append(red_dim[0])
@@ -72,7 +73,7 @@ def main():
     x_test = red_dim_unlabelled_images['reducedDimensions'].tolist()
 
     dim_red = DimensionReduction(fea_ext_mod,dim_red_mod,k_value)
-    labelled_aspect = dim_red.get_metadata("imageName", obj_lat['imageId'].tolist())['aspectOfHand'].tolist()
+    labelled_aspect = dim_red.get_metadata_collection("imageName", obj_lat['imageId'].tolist(), "labelled")['aspectOfHand'].tolist()
     y_train = [i.split(' ')[0] for i in labelled_aspect]
 
     label_p = 'palmar'
@@ -81,14 +82,14 @@ def main():
     filename = "p3task1_{0}_{1}_{2}_{3}".format(fea_ext_mod, dim_red_mod, label_p, str(k_value))
     csv_reader.save_to_csv(obj_lat_p, feat_lat_p, filename)
     x_train += (obj_lat_p['reducedDimensions'].tolist())
-    labelled_aspect = dim_red.get_metadata("imageName", obj_lat_p['imageId'].tolist())['aspectOfHand'].tolist()
+    labelled_aspect = dim_red.get_metadata_collection("imageName", obj_lat_p['imageId'].tolist(), "labelled")['aspectOfHand'].tolist()
     y_train += ([i.split(' ')[0] for i in labelled_aspect])
     
     zip_train = list(zip(x_train, y_train))
     random.shuffle(zip_train)
     x_train, y_train = zip(*zip_train)
 
-    unlabelled_aspect = dim_red.get_metadata("imageName", red_dim_unlabelled_images['imageId'].tolist())['aspectOfHand'].tolist()
+    unlabelled_aspect = dim_red.get_metadata_collection("imageName", red_dim_unlabelled_images['imageId'].tolist(), "unlabelled")['aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
     lr = LogisticRegression(penalty='l2', random_state=np.random.RandomState(42), solver='lbfgs', max_iter =300,
                                          multi_class='ovr',class_weight='balanced', n_jobs=-1, l1_ratio=0)

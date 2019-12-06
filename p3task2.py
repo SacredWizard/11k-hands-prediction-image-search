@@ -95,7 +95,7 @@ def main():
     d_cluster = km.predict(red_dim['reducedDimensions'].tolist())
     p_cluster = km_p.predict(red_dim['reducedDimensions'].tolist())
 
-    unlabelled_aspect = dim_reduction.get_metadata("imageName", red_dim['imageId'].tolist())['aspectOfHand'].tolist()
+    unlabelled_aspect = dim_reduction.get_metadata_collection("imageName", red_dim['imageId'].tolist(), "unlabelled")['aspectOfHand'].tolist()
     y_test = [i.split(' ')[0] for i in unlabelled_aspect]
 
 #min max test

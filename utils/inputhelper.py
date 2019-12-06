@@ -1,4 +1,5 @@
 import os
+
 from classes.globalconstants import GlobalConstants
 from classes.mongo import MongoWrapper
 
@@ -49,7 +50,7 @@ def get_input_image_label():
         input_string = "\n".join(["{}. {}".format(i, label) for i, label in enumerate(global_constants.image_labels,
                                                                                       start=1)])
         choice = int(input("Enter the Label. Choices: \n{}\n".format(input_string)))
-        if choice not in range(1, len(global_constants.image_labels)+1):
+        if choice not in range(1, len(global_constants.image_labels) + 1):
             print("Enter a valid choice.")
             return get_input_image_label()
         else:
@@ -62,9 +63,9 @@ def get_input_image_label():
 def get_task_number(number_of_tasks):
     """Getting the task number from user"""
     try:
-        input_string = "\n".join(["{}. Task-{}".format(i, str(i)) for i in range(1, number_of_tasks+1)])
+        input_string = "\n".join(["{}. Task-{}".format(i, str(i)) for i in range(1, number_of_tasks + 1)])
         choice = int(input("Enter the task you want to Perform. Choices: \n{}\n".format(input_string)))
-        if choice not in range(1, number_of_tasks+1):
+        if choice not in range(1, number_of_tasks + 1):
             print("Enter a valid choice.")
             return get_task_number(number_of_tasks)
         else:
@@ -145,6 +146,26 @@ def get_input_k(variable):
     except ValueError as exp:
         print("Enter a valid Integer: {}".format(exp))
         return get_input_k(variable)
+
+
+def get_bool(variable):
+    """
+    Get the boolean input
+    :param variable:
+    :return: True or False
+    """
+    try:
+        flag = int(input("Enter the value 0 (False) or 1 (True) {}".format(variable)))
+        if flag == 1:
+            return True
+        elif flag == 0:
+            return False
+        else:
+            print("Enter a valid value 0 (False) or 1 (True)")
+            return get_bool(variable)
+    except ValueError as exp:
+        print("Enter a valid value 0 (False) or 1 (True) {} ".format(exp))
+        return get_bool(variable)
 
 
 def get_input_m():

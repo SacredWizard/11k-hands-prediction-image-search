@@ -108,6 +108,7 @@ class DimensionReduction:
 
     def filter_images_by_dir(self):
         images_list = [i for i in os.listdir(self.folder_metadata) if i.endswith(self.constants.JPG_EXTENSION)]
+        images_list = sorted(images_list)
         """Fetches the list of images by dir"""
         query = {"imageName": {"$in": images_list}}
 
@@ -336,6 +337,21 @@ class DimensionReduction:
     def get_metadata(self, column, values, filter_query=None):
         query = {column: {"$in": values}}
         cursor = self.mongo_wrapper.find(self.constants.METADATA, query, filter_query)
+        if cursor.count() > 0:
+            df = pd.DataFrame(list(cursor))
+            return df
+        else:
+            return pd.DataFrame()
+
+    def get_metadata_collection(self, column, values, collection_name, filter_query=None):
+        query = {column: {"$in": values}, "aspectOfHand": {"$ne": None}}
+        result = self.mongo_wrapper.find(collection_name, query)
+        if result.count() > 0:
+            collection = collection_name
+        else:
+            collection = self.constants.METADATA
+
+        cursor = self.mongo_wrapper.find(collection, query, filter_query)
         if cursor.count() > 0:
             df = pd.DataFrame(list(cursor))
             return df
